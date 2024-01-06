@@ -10,15 +10,7 @@
  */
 #include "Application.h"
 
-/* Public variables-----------------------------------------------------------*/
-// Application_t Application =
-// {
-//     Application_main,
-//     Application_Error_Handler,
-//     Application_Assert_Failed
-// };
-
-/* Private function prototypes------------------------------------------------*/
+System_Config sys_config;
 
 /**
  *@brief 系统运行
@@ -32,6 +24,8 @@ void Application_main()
         HAL_Delay(1000);
     }
 }
+
+
 
 /**
  *@brief 错误处理

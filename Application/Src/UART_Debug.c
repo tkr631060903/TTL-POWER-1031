@@ -14,7 +14,7 @@ extern UART_HandleTypeDef huart2;
 
 /**
  *@brief printf重定义
- * 
+ * 需要在keil5勾选使用微库(Use MicroLIB)，否则STM32正常上电不启动
  * @param ch 
  * @param f 
  * @return int 

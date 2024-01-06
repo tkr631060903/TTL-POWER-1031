@@ -58,3 +58,26 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart)
         HAL_UART_Receive_IT(&huart2, &Uart2_ReceiveBuff, 1);
     }
 }
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+    switch (GPIO_Pin)
+    {
+    case KEY1_Pin:
+        printf("KEY1\r\n");
+        break;
+    case KEY2_Pin:
+        printf("KEY2\r\n");
+        __set_FAULTMASK(1); //关闭所有中断
+        NVIC_SystemReset(); //进行软件复位
+        break;
+    case KEY3_Pin:
+        printf("KEY3\r\n");
+        break;
+    case KEY4_Pin:
+        printf("KEY4\r\n");
+        break;
+    default:
+        break;
+    }
+}
