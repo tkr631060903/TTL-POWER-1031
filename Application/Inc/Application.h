@@ -18,6 +18,7 @@
 #include "UART_Debug.h"
 #include "SC8815.h"
 #include "Application_SC8815.h"
+#include "CH224K.h"
 
 void Application_main(void);
 void Application_Error_Handler(void);

@@ -72,6 +72,10 @@ void Error_Handler(void);
 #define KEY1_Pin GPIO_PIN_6
 #define KEY1_GPIO_Port GPIOA
 #define KEY1_EXTI_IRQn EXTI9_5_IRQn
+#define VDD_OUT_Pin GPIO_PIN_7
+#define VDD_OUT_GPIO_Port GPIOA
+#define VDD_IN_Pin GPIO_PIN_0
+#define VDD_IN_GPIO_Port GPIOB
 #define SC8815_I2C_SCL_Pin GPIO_PIN_10
 #define SC8815_I2C_SCL_GPIO_Port GPIOB
 #define SC8815_I2C_SDL_Pin GPIO_PIN_11
