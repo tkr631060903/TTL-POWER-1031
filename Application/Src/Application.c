@@ -24,9 +24,9 @@ void Application_main()
     while (1)
     {
         HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
-        printf("VDD_OUT:%f\r\n", (float)AD_Value[0] * (3.3 / 4096));
+        printf("VDD_OUT:%.2fV\r\n", ((float)AD_Value[0] * (3.3 / 4096)) / 0.0476);
         HAL_Delay(1000);
-        printf("VDD_IN:%f\r\n", (float)AD_Value[1] * (3.3 / 4096));
+        printf("VDD_IN:%.2fV\r\n", ((float)AD_Value[1] * (3.3 / 4096)) / 0.0476);
         HAL_Delay(1000);
     }
 }

@@ -33,7 +33,6 @@ void Application_Init(void)
     HAL_UART_Receive_IT(&huart2, &Uart2_ReceiveBuff, 1);
     extern ADC_HandleTypeDef hadc1;
     HAL_ADCEx_Calibration_Start(&hadc1);    // 校准ADC
-    CH224K_9V();
     SC8815_Test();
     printf("Init Success\r\n");
 }
