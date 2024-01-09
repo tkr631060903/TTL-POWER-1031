@@ -98,6 +98,8 @@ void Error_Handler(void);
 #define CH224K_CFG2_GPIO_Port GPIOB
 #define CH224K_CFG3_Pin GPIO_PIN_7
 #define CH224K_CFG3_GPIO_Port GPIOB
+#define POWER_RELEASE_Pin GPIO_PIN_8
+#define POWER_RELEASE_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 #define KEY4_Pin GPIO_PIN_10

@@ -34,8 +34,8 @@ extern void SoftwareDelay(uint8_t ms);                                          
 #define SCHW_BATT_RSHUNT        10          //电池电流路径上的感测电阻值
 
 //设置 FB 引脚上的分压电阻器值, 使用的 VBUS 反馈模式为外部反馈时, 库通过这些值计算对应输出电压 (单位:Ohm)
-#define SCHW_FB_RUP             120000      //RUP 为从 FB 连接到 VBUS 之间的电阻值
-#define SCHW_FB_RDOWM           6800        //RDOWM 为从 FB 连接到 GND 之间的电阻值
+#define SCHW_FB_RUP             100000      //RUP 为从 FB 连接到 VBUS 之间的电阻值
+#define SCHW_FB_RDOWM           24000        //RDOWM 为从 FB 连接到 GND 之间的电阻值
 
 
 //功能状态定义

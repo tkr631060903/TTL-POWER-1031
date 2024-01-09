@@ -73,6 +73,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
         break;
     case KEY3_Pin:
         printf("KEY3\r\n");
+        SC8815_SetOutputVoltage(12000);
         break;
     case KEY4_Pin:
         printf("KEY4\r\n");

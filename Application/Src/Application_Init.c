@@ -28,11 +28,13 @@ void KEY4_INT_Init(void)
  */
 void Application_Init(void)
 {
+    // CH224K_5V();
     KEY4_INT_Init();
     // 初始化串口中断输入
     HAL_UART_Receive_IT(&huart2, &Uart2_ReceiveBuff, 1);
     extern ADC_HandleTypeDef hadc1;
     HAL_ADCEx_Calibration_Start(&hadc1);    // 校准ADC
-    SC8815_Test();
+    Application_SC8815_Init();
+    // SC8815_Test();
     printf("Init Success\r\n");
 }
