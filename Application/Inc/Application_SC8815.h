@@ -3,7 +3,9 @@
 
 #include "Application.h"
 
-void SC8815_Test(void);
 void Application_SC8815_Init(void);
+void Application_SC8815_Shutdown(void);
+void Application_SC8815_Standby(void);
+void Application_SC8815_Run(void);
 
 #endif

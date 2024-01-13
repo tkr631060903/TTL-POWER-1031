@@ -82,8 +82,10 @@ void Error_Handler(void);
 #define SC8815_I2C_SDL_GPIO_Port GPIOB
 #define Rotar_L_Pin GPIO_PIN_8
 #define Rotar_L_GPIO_Port GPIOA
+#define Rotar_L_EXTI_IRQn EXTI9_5_IRQn
 #define Rotar_R_Pin GPIO_PIN_9
 #define Rotar_R_GPIO_Port GPIOA
+#define Rotar_R_EXTI_IRQn EXTI9_5_IRQn
 #define KEY4_Pin GPIO_PIN_10
 #define KEY4_GPIO_Port GPIOA
 #define SC8815_INT_Pin GPIO_PIN_15

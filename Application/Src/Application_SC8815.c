@@ -1,4 +1,5 @@
 #include "Application_SC8815.h"
+#include "Application.h"
 
 void SoftwareDelay(uint8_t ms)
 {
@@ -26,6 +27,17 @@ uint8_t I2C_ReadRegByte(uint8_t SlaveAddress, uint8_t RegAddress)
 	return ReceiveData;
 }
 
+/**
+ *@brief SC8815带载启动
+ *
+ */
+void Application_SC8815_loadStart(void)
+{
+	SC8815_SFB_Disable();
+	HAL_Delay(500);
+	SC8815_SFB_Enable();
+}
+
 void Application_SC8815_Init(void)
 {
 	extern SC8815_BatteryConfigTypeDef SC8815_BatteryConfigStruct;
@@ -37,12 +49,12 @@ void Application_SC8815_Init(void)
 	SoftwareDelay(50);   //必要的启动延时
 
 	//配置 SC8815 电池参数选项
-	SC8815_BatteryConfigStruct.IRCOMP = SCBAT_IRCOMP_20mR;
+	SC8815_BatteryConfigStruct.IRCOMP = SCBAT_IRCOMP_0mR;
 	// SCBAT_VBAT_SEL_Internal 内部反馈
 	// SCBAT_VBAT_SEL_External 外部反馈
 	SC8815_BatteryConfigStruct.VBAT_SEL = SCBAT_VBAT_SEL_Internal;
-	SC8815_BatteryConfigStruct.CSEL = SCBAT_CSEL_3S;
-	SC8815_BatteryConfigStruct.VCELL = SCBAT_VCELL_4v10;
+	SC8815_BatteryConfigStruct.CSEL = SCBAT_CSEL_4S;
+	SC8815_BatteryConfigStruct.VCELL = SCBAT_VCELL_4v50;
 	SC8815_BatteryConfig(&SC8815_BatteryConfigStruct);
 
 	//配置 SC8815 硬件参数选项
@@ -51,7 +63,7 @@ void Application_SC8815_Init(void)
 	SC8815_HardwareInitStruct.VBAT_RATIO = SCHWI_VBAT_RATIO_12_5x;
 	SC8815_HardwareInitStruct.VBUS_RATIO = SCHWI_VBUS_RATIO_12_5x;
 	SC8815_HardwareInitStruct.VINREG_Ratio = SCHWI_VINREG_RATIO_100x;
-	SC8815_HardwareInitStruct.SW_FREQ = SCHWI_FREQ_300KHz_2;
+	SC8815_HardwareInitStruct.SW_FREQ = SCHWI_FREQ_450KHz;
 	SC8815_HardwareInitStruct.DeadTime = SCHWI_DT_40ns;
 	SC8815_HardwareInitStruct.ICHAR = SCHWI_ICHAR_IBAT;
 	SC8815_HardwareInitStruct.TRICKLE = SCHWI_TRICKLE_Disable;
@@ -99,12 +111,16 @@ void Application_SC8815_Init(void)
 
 
 	/*** 示例2, 设置为反向放电模式,电池和 VBUS 限流 3A, 输出电压 设置为 12V ****/
-//    SC8815_SetBatteryCurrLimit(5000);
-//    SC8815_SetBusCurrentLimit(3000);
-// 	SC8815_SetOutputVoltage(12000);
-	SC8815_SetBatteryCurrLimit(5000);
-	SC8815_SetBusCurrentLimit(5000);
-	SC8815_SetOutputVoltage(5000);
+	// SC8815_SetBatteryCurrLimit(5000);
+	// SC8815_SetBusCurrentLimit(3000);
+	// SC8815_SetOutputVoltage(12000);
+	extern Application_Config APP_config;
+	APP_config.SC8815_Battery_Current_Limit = 5000;
+	APP_config.SC8815_VBUS_Current_Limit = 1000;
+	APP_config.Set_OutVoltage = 5000;
+	SC8815_SetBatteryCurrLimit(APP_config.SC8815_Battery_Current_Limit);
+	SC8815_SetBusCurrentLimit(APP_config.SC8815_VBUS_Current_Limit);
+	SC8815_SetOutputVoltage(APP_config.Set_OutVoltage);
 	SC8815_OTG_Enable();
 
 	/*** 示例3, 读取 SC8815 ADC 数据 ****/
@@ -124,19 +140,37 @@ void Application_SC8815_Init(void)
 //	{
 //			// EOC 中断处理代码
 //	}
-	// HAL_GPIO_WritePin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin, GPIO_PIN_RESET);
+	HAL_Delay(1000);
+	Application_SC8815_loadStart();
 	printf("SC8815 Init.\n");
 }
 
-void SC8815_Test(void)
+/**
+ *@brief 设置SC8815进入Shutdown Mode
+ *
+ */
+void Application_SC8815_Shutdown(void)
 {
-	printf("SC8815_Test\r\n");
-	printf("VBUSREF_I_SET:%d\r\n", I2C_ReadRegByte(SC8815_ADDR, 0x01));
-	printf("VBUSREF_I_SET2:%x\r\n", I2C_ReadRegByte(SC8815_ADDR, 0x02));
-	// GPIO_PinState stoppin = HAL_GPIO_ReadPin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin);
-	// printf("stoppin = %d\r\n", stoppin);
-	// GPIO_PinState cepin = HAL_GPIO_ReadPin(SC8815_CE_GPIO_Port, SC8815_CE_Pin);
-	// printf("cepin = %d\r\n", cepin);
-	// SC8815_SetOutputVoltage(5000);
-	// printf("test read:%x\r\n", SC8815_GetMaxOutputVoltage());
+	HAL_GPIO_WritePin(SC8815_CE_GPIO_Port, SC8815_CE_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin, GPIO_PIN_SET);
+}
+
+/**
+ *@brief 设置SC8815进入Standby Mode
+ *
+ */
+void Application_SC8815_Standby(void)
+{
+	HAL_GPIO_WritePin(SC8815_CE_GPIO_Port, SC8815_CE_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin, GPIO_PIN_SET);
+}
+
+/**
+ *@brief 设置SC8815进入正常工作模式
+ *
+ */
+void Application_SC8815_Run(void)
+{
+	HAL_GPIO_WritePin(SC8815_CE_GPIO_Port, SC8815_CE_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin, GPIO_PIN_RESET);
 }

@@ -78,6 +78,12 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
     case KEY4_Pin:
         printf("KEY4\r\n");
         break;
+    case Rotar_L_Pin:
+        printf("Rotar_L\r\n");
+        break;
+    case Rotar_R_Pin:
+        printf("Rotar_R\r\n");
+        break;
     default:
         break;
     }

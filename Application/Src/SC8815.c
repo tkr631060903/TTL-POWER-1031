@@ -115,7 +115,7 @@ void SC8815_Init(void)
 //			// EOC 中断处理代码
 //	}
 
-	printf("SC8815 Init.\n");
+	// printf("SC8815 Init.\n");
 }
 
 /****************************************
@@ -230,7 +230,8 @@ uint16_t SC8815_Read_VBUS_Voltage(void)
 	tmp2 = I2C_ReadRegByte(SC8815_ADDR, SCREG_VBUS_FB_VALUE2) >> 6;     //读取 ADC 值寄存器2
 
 	//返回 VBUS 电压值
-	return (uint16_t)((4 * tmp1 + tmp2 + 1) * RATIO_Value) * 2 * sys_config.volt_correct;
+	// return (uint16_t)((4 * tmp1 + tmp2 + 1) * RATIO_Value) * 2 * sys_config.volt_correct;
+	return (uint16_t)((4 * tmp1 + tmp2 + 1) * RATIO_Value) * 2;
 }
 /****************************************
 * @brief    读取 SC8815 内置 ADC 对 VBUS 电流的测量结果
@@ -315,7 +316,7 @@ void SC8815_SetOutputVoltage(uint16_t NewVolt)
 	{
 		RATIO_Value = (double)SCHW_FB_RUP / SCHW_FB_RDOWM + 1.0;    //计算输出电压比率
 		tmp1 = (NewVolt / RATIO_Value) / 2;                         //计算对应的参考电压
-		printf("RATIO_Value = %f.\n", RATIO_Value);
+		// printf("RATIO_Value = %f.\n", RATIO_Value);
 		//得到 VBUSREF 寄存器 2 的值
 		for (tmp2 = 0; tmp2 < 3; tmp2++)
 		{
@@ -327,7 +328,7 @@ void SC8815_SetOutputVoltage(uint16_t NewVolt)
 
 		//得到 VBUSREF 寄存器 1 的值
 		tmp1 = (tmp1 - tmp2 - 1) / 4;
-		printf("tmp1 = %d, tmp2 = %d.\n", (uint8_t)tmp1, (uint8_t)tmp2 << 6);
+		// printf("tmp1 = %d, tmp2 = %d.\n", (uint8_t)tmp1, (uint8_t)tmp2 << 6);
 		//写入到 SC8815 VBUSREF_E_SET 寄存器
 		I2C_WriteRegByte(SC8815_ADDR, SCREG_VBUSREF_E_SET, (uint8_t)tmp1);
 		I2C_WriteRegByte(SC8815_ADDR, SCREG_VBUSREF_E_SET2, (uint8_t)tmp2 << 6);
@@ -335,7 +336,7 @@ void SC8815_SetOutputVoltage(uint16_t NewVolt)
 	else
 	{
 		RATIO_Value = ((I2C_ReadRegByte(SC8815_ADDR, SCREG_RATIO) & 0x01) == 1) ? 5 : 12.5; //取得 VBUS 电压的比率
-		printf("RATIO_Value = %f.\n", RATIO_Value);
+		// printf("RATIO_Value = %f.\n", RATIO_Value);
 		tmp1 = NewVolt / RATIO_Value / 2;   //计算对应的参考电压
 
 		//得到 VBUSREF 寄存器 2 的值
@@ -349,7 +350,7 @@ void SC8815_SetOutputVoltage(uint16_t NewVolt)
 
 		//得到 VBUSREF 寄存器 1 的值
 		tmp1 = (tmp1 - tmp2 - 1) / 4;
-		printf("tmp1 = %d, tmp2 = %d.\n", (uint8_t)tmp1, (uint8_t)tmp2 << 6);
+		// printf("tmp1 = %d, tmp2 = %d.\n", (uint8_t)tmp1, (uint8_t)tmp2 << 6);
 		//写入到 SC8815 VBUSREF_I_SET 寄存器
 		I2C_WriteRegByte(SC8815_ADDR, SCREG_VBUSREF_I_SET, (uint8_t)tmp1);
 		I2C_WriteRegByte(SC8815_ADDR, SCREG_VBUSREF_I_SET2, (uint8_t)tmp2 << 6);

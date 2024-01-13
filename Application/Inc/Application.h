@@ -32,6 +32,20 @@ typedef enum
     APP_TIMEOUT = 0x03U
 } APP_StatusTypeDef;
 
+typedef struct
+{
+    uint16_t Set_OutVoltage;   // 设定输出电压mv
+    uint16_t fastCharge_InVoltage;  // 快充输入电压v
+    uint16_t VDD_OUT_Current;
+    uint16_t VDD_IN_Current;
+    uint16_t SC8815_VBUS_Voltage;
+    uint16_t SC8815_Battery_Voltage;
+    uint16_t SC8815_VBUS_Current;
+    uint16_t SC8815_Battery_Current;
+    uint16_t SC8815_Battery_Current_Limit;  // 8815电池(输入)限流
+    uint16_t SC8815_VBUS_Current_Limit; // 8815 VBUS(输出)限流
+}Application_Config;
+
 // 定义全局参数
 typedef struct
 {
