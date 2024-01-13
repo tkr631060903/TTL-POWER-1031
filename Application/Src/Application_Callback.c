@@ -59,6 +59,11 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart)
     }
 }
 
+unsigned int Value_count = 0;            //状态计数
+int Encoder_A_Last_Value = 0;            //第一次A项的值
+int Encoder_B_Last_Value = 0;            //第一次B项的值
+int Encoder_A_Value = 0;                 //第二次A项的值
+int Encoder_B_Value = 0;                 //第二次B项的值
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
     switch (GPIO_Pin)
@@ -79,10 +84,25 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
         printf("KEY4\r\n");
         break;
     case Rotar_L_Pin:
-        printf("Rotar_L\r\n");
-        break;
-    case Rotar_R_Pin:
-        printf("Rotar_R\r\n");
+        if (Value_count == 0) {               //边缘计数值，计数两次边缘值
+            Encoder_A_Last_Value = HAL_GPIO_ReadPin(Rotar_L_GPIO_Port, Rotar_L_Pin);   //捕获A项的值
+            Encoder_B_Last_Value = HAL_GPIO_ReadPin(Rotar_R_GPIO_Port, Rotar_R_Pin);   //捕获B项的值
+            Value_count = 1;               //开始第一次计数
+        }
+        else if (Value_count == 1) {         //完成一个边缘捕获
+            Encoder_A_Value = HAL_GPIO_ReadPin(Rotar_L_GPIO_Port, Rotar_L_Pin);        //捕获A项的值
+            Encoder_B_Value = HAL_GPIO_ReadPin(Rotar_R_GPIO_Port, Rotar_R_Pin);        //捕获B项的值
+            //状态判断处理
+            if (((Encoder_A_Last_Value == 0 && Encoder_A_Value == 1) && (Encoder_B_Last_Value == 1 && Encoder_B_Value == 0)) || ((Encoder_A_Last_Value == 1 && Encoder_A_Value == 0) && (Encoder_B_Last_Value == 0 && Encoder_B_Value == 1))) {        //逆时针旋转
+                printf("Rotar_L\r\n");     //左
+            }
+            else if (((Encoder_A_Last_Value == 0 && Encoder_A_Value == 1) && (Encoder_B_Last_Value == 0 && Encoder_B_Value == 1)) || ((Encoder_A_Last_Value == 1 && Encoder_A_Value == 0) && (Encoder_B_Last_Value == 1 && Encoder_B_Value == 0))) {  //顺时针旋转
+                printf("Rotar_R\r\n");      //右
+            }
+            Encoder_B_Last_Value = 2;       //清除状态值，不初始化0原因是在全局第一次初始化就是0，为了区别
+            Encoder_A_Last_Value = 2;       //清除状态值
+            Value_count = 0;               //清除状态值
+        }
         break;
     default:
         break;
