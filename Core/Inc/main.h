@@ -103,9 +103,7 @@ void Error_Handler(void);
 #define POWER_RELEASE_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
-#define KEY4_Pin GPIO_PIN_10
-#define KEY4_GPIO_Port GPIOA
-#define KEY4_EXTI_IRQn EXTI15_10_IRQn
+
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

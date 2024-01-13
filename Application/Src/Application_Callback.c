@@ -80,10 +80,8 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
         printf("KEY3\r\n");
         SC8815_SetOutputVoltage(12000);
         break;
-    case KEY4_Pin:
-        printf("KEY4\r\n");
-        break;
     case Rotar_L_Pin:
+        // 解析旋转编码器
         if (Value_count == 0) {               //边缘计数值，计数两次边缘值
             Encoder_A_Last_Value = HAL_GPIO_ReadPin(Rotar_L_GPIO_Port, Rotar_L_Pin);   //捕获A项的值
             Encoder_B_Last_Value = HAL_GPIO_ReadPin(Rotar_R_GPIO_Port, Rotar_R_Pin);   //捕获B项的值

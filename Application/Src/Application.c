@@ -36,14 +36,15 @@ void Application_main()
     while (1)
     {
         HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
-        printf("before: VDD_OUT:%.2fV, VDD_IN:%.2fV\r\n", ((float)AD_Value[0] * (3.3 / 4096)) / 0.1, ((float)AD_Value[1] * (3.3 / 4096)) / 0.1);
-        printf("later: VDD_OUT:%.2fV, VDD_IN:%.2fV\r\n", ((float)AD_Value[0] * (3.3 / 4096)) / 0.0975, ((float)AD_Value[1] * (3.3 / 4096)) / 0.0975);
-        printf("VBUS_Voltage:%dmV, VBUS_Current:%dmA\r\n", SC8815_Read_VBUS_Voltage(), SC8815_Read_VBUS_Current());
-        printf("BATT_Voltage:%dmV, BATT_Current:%dmA\r\n", SC8815_Read_BATT_Voltage(), SC8815_Read_BATT_Current());
-        APP_config.SC8815_VBUS_Voltage = SC8815_Read_VBUS_Voltage();
-        printf("%d\r\n", APP_config.Set_OutVoltage);
-        printf("%d\r\n", APP_config.SC8815_VBUS_Voltage);
-        printf("%d\r\n", APP_config.Set_OutVoltage - APP_config.SC8815_VBUS_Voltage);
+        // printf("before: VDD_OUT:%.2fV, VDD_IN:%.2fV\r\n", ((float)AD_Value[0] * (3.3 / 4096)) / 0.1, ((float)AD_Value[1] * (3.3 / 4096)) / 0.1);
+        // printf("later: VDD_OUT:%.2fV, VDD_IN:%.2fV\r\n", ((float)AD_Value[0] * (3.3 / 4096)) / 0.0975, ((float)AD_Value[1] * (3.3 / 4096)) / 0.0975);
+        // printf("VBUS_Voltage:%dmV, VBUS_Current:%dmA\r\n", SC8815_Read_VBUS_Voltage(), SC8815_Read_VBUS_Current());
+        // printf("BATT_Voltage:%dmV, BATT_Current:%dmA\r\n", SC8815_Read_BATT_Voltage(), SC8815_Read_BATT_Current());
+        // APP_config.SC8815_VBUS_Voltage = SC8815_Read_VBUS_Voltage();
+        // printf("%d\r\n", APP_config.Set_OutVoltage);
+        // printf("%d\r\n", APP_config.SC8815_VBUS_Voltage);
+        // printf("%d\r\n", APP_config.Set_OutVoltage - APP_config.SC8815_VBUS_Voltage);
+        printf("%d", HAL_GPIO_ReadPin(KEY4_GPIO_Port, KEY4_Pin));
         HAL_Delay(1000);
     }
 }
