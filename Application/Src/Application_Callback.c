@@ -64,6 +64,11 @@ int Encoder_A_Last_Value = 0;            //第一次A项的值
 int Encoder_B_Last_Value = 0;            //第一次B项的值
 int Encoder_A_Value = 0;                 //第二次A项的值
 int Encoder_B_Value = 0;                 //第二次B项的值
+/**
+ *@brief IO中断回调函数
+ *
+ * @param GPIO_Pin
+ */
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
     switch (GPIO_Pin)
@@ -77,8 +82,19 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
         NVIC_SystemReset(); //进行软件复位
         break;
     case KEY3_Pin:
-        printf("KEY3\r\n");
-        SC8815_SetOutputVoltage(12000);
+        // printf("KEY3\r\n");
+        if (HAL_GPIO_ReadPin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin) == 0)
+        {
+            Application_SC8815_Standby();
+            HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_RESET);
+            printf("off");
+        }
+        else {
+            HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_SET);
+            Application_SC8815_Run();
+            Application_SC8815_loadStart();
+            printf("run");
+        }
         break;
     case Rotar_L_Pin:
         // 解析旋转编码器

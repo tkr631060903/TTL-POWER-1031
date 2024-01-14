@@ -23,6 +23,7 @@
 void Application_main(void);
 void Application_Error_Handler(void);
 void Application_Assert_Failed(void);
+void Application_SoftwareDelay(uint16_t time);
 
 typedef enum
 {
@@ -36,6 +37,7 @@ typedef struct
 {
     uint16_t Set_OutVoltage;   // 设定输出电压mv
     uint16_t fastCharge_InVoltage;  // 快充输入电压v
+    uint8_t isVDD_OUT;  // 是否输出VDD
     uint16_t VDD_OUT_Current;
     uint16_t VDD_IN_Current;
     uint16_t SC8815_VBUS_Voltage;

@@ -10,7 +10,7 @@
  */
 #include "Application.h"
 
-// System_Config sys_config;
+ // System_Config sys_config;
 Application_Config APP_config;
 
 void SC8815_Soft_Protect(void)
@@ -20,6 +20,16 @@ void SC8815_Soft_Protect(void)
     {
         Application_SC8815_Standby();
         printf("SC8815 Soft Protect\r\n");
+    }
+}
+
+void Application_SoftwareDelay(uint16_t time)
+{
+    uint16_t i = 0;
+    while (time--)
+    {
+        i = 12000;  //自己定义
+        while (i--);
     }
 }
 
@@ -35,16 +45,18 @@ void Application_main()
     // Application_SC8815_Standby();
     while (1)
     {
-        HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
+        // HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
         // printf("before: VDD_OUT:%.2fV, VDD_IN:%.2fV\r\n", ((float)AD_Value[0] * (3.3 / 4096)) / 0.1, ((float)AD_Value[1] * (3.3 / 4096)) / 0.1);
         // printf("later: VDD_OUT:%.2fV, VDD_IN:%.2fV\r\n", ((float)AD_Value[0] * (3.3 / 4096)) / 0.0975, ((float)AD_Value[1] * (3.3 / 4096)) / 0.0975);
-        // printf("VBUS_Voltage:%dmV, VBUS_Current:%dmA\r\n", SC8815_Read_VBUS_Voltage(), SC8815_Read_VBUS_Current());
-        // printf("BATT_Voltage:%dmV, BATT_Current:%dmA\r\n", SC8815_Read_BATT_Voltage(), SC8815_Read_BATT_Current());
+        printf("VBUS_Voltage:%dmV, VBUS_Current:%dmA\r\n", SC8815_Read_VBUS_Voltage(), SC8815_Read_VBUS_Current());
+        printf("BATT_Voltage:%dmV, BATT_Current:%dmA\r\n", SC8815_Read_BATT_Voltage(), SC8815_Read_BATT_Current());
         // APP_config.SC8815_VBUS_Voltage = SC8815_Read_VBUS_Voltage();
         // printf("%d\r\n", APP_config.Set_OutVoltage);
         // printf("%d\r\n", APP_config.SC8815_VBUS_Voltage);
         // printf("%d\r\n", APP_config.Set_OutVoltage - APP_config.SC8815_VBUS_Voltage);
-        printf("%d", HAL_GPIO_ReadPin(KEY4_GPIO_Port, KEY4_Pin));
+        // printf("%d", HAL_GPIO_ReadPin(KEY4_GPIO_Port, KEY4_Pin));
+        printf("CE:%d\r\n", HAL_GPIO_ReadPin(SC8815_CE_GPIO_Port, SC8815_CE_Pin));
+        printf("sotp:%d\r\n", HAL_GPIO_ReadPin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin));
         HAL_Delay(1000);
     }
 }

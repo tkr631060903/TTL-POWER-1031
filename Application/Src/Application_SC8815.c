@@ -34,7 +34,8 @@ uint8_t I2C_ReadRegByte(uint8_t SlaveAddress, uint8_t RegAddress)
 void Application_SC8815_loadStart(void)
 {
 	SC8815_SFB_Disable();
-	HAL_Delay(500);
+	// HAL_Delay(500);
+	Application_SoftwareDelay(500);
 	SC8815_SFB_Enable();
 }
 
@@ -140,7 +141,7 @@ void Application_SC8815_Init(void)
 //	{
 //			// EOC 中断处理代码
 //	}
-	HAL_Delay(1000);
+	// HAL_Delay(1000);
 	Application_SC8815_loadStart();
 	printf("SC8815 Init.\n");
 }
@@ -152,7 +153,7 @@ void Application_SC8815_Init(void)
 void Application_SC8815_Shutdown(void)
 {
 	HAL_GPIO_WritePin(SC8815_CE_GPIO_Port, SC8815_CE_Pin, GPIO_PIN_SET);
-	HAL_GPIO_WritePin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin, GPIO_PIN_SET);
+	// HAL_GPIO_WritePin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin, GPIO_PIN_SET);
 }
 
 /**
