@@ -87,13 +87,13 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
         {
             Application_SC8815_Standby();
             HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_RESET);
-            printf("off");
+            // printf("off");
         }
         else {
             HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_SET);
             Application_SC8815_Run();
             Application_SC8815_loadStart();
-            printf("run");
+            // printf("run");
         }
         break;
     case Rotar_L_Pin:

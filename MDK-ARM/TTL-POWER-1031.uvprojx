@@ -879,6 +879,11 @@
               <FileType>1</FileType>
               <FilePath>..\Application\Src\Application_SC8815.c</FilePath>
             </File>
+            <File>
+              <FileName>OLED.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Application\Src\OLED.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

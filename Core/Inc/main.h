@@ -59,6 +59,10 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define LED1_Pin GPIO_PIN_14
 #define LED1_GPIO_Port GPIOC
+#define OLED_I2C_SCL_Pin GPIO_PIN_0
+#define OLED_I2C_SCL_GPIO_Port GPIOA
+#define OLED_I2C_SDA_Pin GPIO_PIN_1
+#define OLED_I2C_SDA_GPIO_Port GPIOA
 #define USART_TX_Debug_Pin GPIO_PIN_2
 #define USART_TX_Debug_GPIO_Port GPIOA
 #define USART_RX_Debug_Pin GPIO_PIN_3

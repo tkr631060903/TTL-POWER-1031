@@ -57,6 +57,7 @@ void Application_main()
         // printf("%d", HAL_GPIO_ReadPin(KEY4_GPIO_Port, KEY4_Pin));
         printf("CE:%d\r\n", HAL_GPIO_ReadPin(SC8815_CE_GPIO_Port, SC8815_CE_Pin));
         printf("sotp:%d\r\n", HAL_GPIO_ReadPin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin));
+        OLED_ShowString(1, 1, "1");
         HAL_Delay(1000);
     }
 }

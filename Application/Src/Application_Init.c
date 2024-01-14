@@ -23,13 +23,8 @@ void Application_Init(void)
     HAL_Delay(1000);
     extern ADC_HandleTypeDef hadc1;
     HAL_ADCEx_Calibration_Start(&hadc1);    // 校准ADC
-    Application_SC8815_Init();
     Application_CH224K_init();
-    // Application_SC8815_Shutdown();
-    // HAL_Delay(1000);
-    // Application_SC8815_Standby();
-    // HAL_Delay(1000);
-    // Application_SC8815_Run();
-    // SC8815_Test();
+    Application_SC8815_Init();
+    OLED_Init();  //初始化OLED
     printf("Init Success\r\n");
 }
