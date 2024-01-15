@@ -20,11 +20,16 @@
 #include "Application_SC8815.h"
 #include "CH224K.h"
 #include "OLED.h"
+#include "Application_OLED.h"
+
+#define KEY4_LONG_PRESS_THRESHOLD 2000 // 定义KEY4长按阈值，单位为毫秒
 
 void Application_main(void);
 void Application_Error_Handler(void);
 void Application_Assert_Failed(void);
 void Application_SoftwareDelay(uint16_t time);
+void KEY4_Button(void);
+void SC8815_Soft_Protect(void);
 
 typedef enum
 {
@@ -34,19 +39,23 @@ typedef enum
     APP_TIMEOUT = 0x03U
 } APP_StatusTypeDef;
 
+typedef enum
+{
+    voltageMod = 0x00U,
+    currentMod = 0x01U,
+    noneMod = 0x02U,
+    VINErrorMod = 0x03U,
+    currentProtectMod = 0x04U,
+} SetModTypeDef;
+
 typedef struct
 {
     uint16_t Set_OutVoltage;   // 设定输出电压mv
     uint16_t fastCharge_InVoltage;  // 快充输入电压v
     uint8_t isVDD_OUT;  // 是否输出VDD
-    uint16_t VDD_OUT_Current;
-    uint16_t VDD_IN_Current;
-    uint16_t SC8815_VBUS_Voltage;
-    uint16_t SC8815_Battery_Voltage;
-    uint16_t SC8815_VBUS_Current;
-    uint16_t SC8815_Battery_Current;
     uint16_t SC8815_Battery_Current_Limit;  // 8815电池(输入)限流
     uint16_t SC8815_VBUS_Current_Limit; // 8815 VBUS(输出)限流
+    SetModTypeDef SetMod;   // 设置当前为控制电压还是电流参数
 }Application_Config;
 
 // 定义全局参数

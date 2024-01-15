@@ -71,22 +71,40 @@ int Encoder_B_Value = 0;                 //第二次B项的值
  */
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
+    extern volatile Application_Config APP_config;
     switch (GPIO_Pin)
     {
     case KEY1_Pin:
-        printf("KEY1\r\n");
+        // printf("KEY1\r\n");
+        OLED_Clear();
+        __set_FAULTMASK(1); //关闭所有中断
+        if (APP_config.SetMod == currentMod)
+        {
+            APP_config.SetMod = noneMod;
+        }
+        else {
+            APP_config.SetMod = currentMod;    // 设置调节电流限流模式
+        }
+        __set_FAULTMASK(0); //开启所有中断
         break;
     case KEY2_Pin:
-        printf("KEY2\r\n");
+        OLED_Clear();
         __set_FAULTMASK(1); //关闭所有中断
-        NVIC_SystemReset(); //进行软件复位
+        if (APP_config.SetMod == voltageMod)
+        {
+            APP_config.SetMod = noneMod;
+        }
+        else {
+            APP_config.SetMod = voltageMod;    // 设置调节输出电压模式
+        }
+        __set_FAULTMASK(0); //开启所有中断
         break;
     case KEY3_Pin:
         // printf("KEY3\r\n");
         if (HAL_GPIO_ReadPin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin) == 0)
         {
-            Application_SC8815_Standby();
             HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_RESET);
+            Application_SC8815_Standby();
             // printf("off");
         }
         else {
@@ -97,6 +115,10 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
         }
         break;
     case Rotar_L_Pin:
+        if (APP_config.SetMod == noneMod)
+        {
+            break;
+        }
         // 解析旋转编码器
         if (Value_count == 0) {               //边缘计数值，计数两次边缘值
             Encoder_A_Last_Value = HAL_GPIO_ReadPin(Rotar_L_GPIO_Port, Rotar_L_Pin);   //捕获A项的值
@@ -108,10 +130,42 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
             Encoder_B_Value = HAL_GPIO_ReadPin(Rotar_R_GPIO_Port, Rotar_R_Pin);        //捕获B项的值
             //状态判断处理
             if (((Encoder_A_Last_Value == 0 && Encoder_A_Value == 1) && (Encoder_B_Last_Value == 1 && Encoder_B_Value == 0)) || ((Encoder_A_Last_Value == 1 && Encoder_A_Value == 0) && (Encoder_B_Last_Value == 0 && Encoder_B_Value == 1))) {        //逆时针旋转
-                printf("Rotar_L\r\n");     //左
+                // printf("Rotar_L\r\n");     //左
+                if (APP_config.SetMod == currentMod)
+                {
+                    APP_config.SC8815_VBUS_Current_Limit = APP_config.SC8815_VBUS_Current_Limit - 100;
+                    if ((int)APP_config.SC8815_VBUS_Current_Limit < 0)
+                    {
+                        APP_config.SC8815_VBUS_Current_Limit = 0;
+                    }
+                }
+                else if (APP_config.SetMod == voltageMod)
+                {
+                    APP_config.Set_OutVoltage = APP_config.Set_OutVoltage - 100;
+                    if ((int)APP_config.Set_OutVoltage < 0)
+                    {
+                        APP_config.Set_OutVoltage = 0;
+                    }
+                }
             }
             else if (((Encoder_A_Last_Value == 0 && Encoder_A_Value == 1) && (Encoder_B_Last_Value == 0 && Encoder_B_Value == 1)) || ((Encoder_A_Last_Value == 1 && Encoder_A_Value == 0) && (Encoder_B_Last_Value == 1 && Encoder_B_Value == 0))) {  //顺时针旋转
-                printf("Rotar_R\r\n");      //右
+                // printf("Rotar_R\r\n");      //右
+                if (APP_config.SetMod == currentMod)
+                {
+                    APP_config.SC8815_VBUS_Current_Limit = APP_config.SC8815_VBUS_Current_Limit + 100;
+                    if (APP_config.SC8815_VBUS_Current_Limit > 6000)
+                    {
+                        APP_config.SC8815_VBUS_Current_Limit = 6000;
+                    }
+                }
+                else if (APP_config.SetMod == voltageMod)
+                {
+                    APP_config.Set_OutVoltage = APP_config.Set_OutVoltage + 100;
+                    if (APP_config.Set_OutVoltage > 36000)
+                    {
+                        APP_config.Set_OutVoltage = 36000;
+                    }
+                }
             }
             Encoder_B_Last_Value = 2;       //清除状态值，不初始化0原因是在全局第一次初始化就是0，为了区别
             Encoder_A_Last_Value = 2;       //清除状态值

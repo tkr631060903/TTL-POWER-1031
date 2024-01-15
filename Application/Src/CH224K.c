@@ -60,7 +60,7 @@ void CH224K_20V(void)
  */
 void Application_CH224K_init(void)
 {
-    extern Application_Config APP_config;
+    extern volatile Application_Config APP_config;
     // CH224K_20V();
     // HAL_Delay(1000);
     // if ((SC8815_Read_BATT_Voltage() - 20000) < 500 && (APP_config.Set_OutVoltage - SC8815_Read_VBUS_Voltage()) < 200)
