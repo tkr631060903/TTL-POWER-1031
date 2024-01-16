@@ -131,6 +131,7 @@ void KEY4_Button(void)
             uint32_t currentTime = HAL_GetTick();
             if (currentTime - buttonPressStartTime >= KEY4_LONG_PRESS_THRESHOLD) {
                 // 检测到长按
+                APP_config.SetMod = fastChargeMod;
             }
         }
         else {
@@ -138,17 +139,22 @@ void KEY4_Button(void)
         }
     }
     else {
-        // KEY4单击设置电压/电流
+        // KEY4单击设置电压/电流/快充输入电压
         if (HAL_GPIO_ReadPin(KEY4_GPIO_Port, KEY4_Pin) == GPIO_PIN_SET)
         {
             if (APP_config.SetMod == voltageMod)
             {
                 SC8815_SetOutputVoltage(APP_config.Set_OutVoltage);
                 APP_config.SetMod = noneMod;
+                APP_config.set_Step = 100;
             }
-            else {
+            else if (APP_config.SetMod == currentMod) {
                 SC8815_SetBusCurrentLimit(APP_config.SC8815_VBUS_Current_Limit);
                 APP_config.SetMod = noneMod;
+                APP_config.set_Step = 100;
+            }
+            else if (APP_config.SetMod == fastChargeMod) {
+
             }
         }
     }

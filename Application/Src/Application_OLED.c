@@ -146,16 +146,21 @@ void APP_OLED_Show_currentProtectMod(void)
     OLED_ShowString(1, 1, "APP_OLED_Show_currentProtectMod");
 }
 
+void APP_OLED_Show_fastChargeMod(void)
+{
+
+}
+
 void APP_OLED_Show(void)
 {
     if (APP_config.SetMod == noneMod)
     {
         // APP_OLED_ShowVIN();
         APP_OLED_ShowVSET();
-        APP_OLED_ShowISET();
+        APP_OLED_ShowISET();    
         APP_OLED_ShowVOUT();
         APP_OLED_ShowIOUT();
-        HAL_Delay(500);
+        HAL_Delay(300);
     }
     else if (APP_config.SetMod == voltageMod) {
         APP_OLED_Show_SETVOUT();

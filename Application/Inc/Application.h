@@ -46,17 +46,21 @@ typedef enum
     noneMod = 0x02U,
     VINErrorMod = 0x03U,
     currentProtectMod = 0x04U,
+    fastChargeMod = 0x05U,
 } SetModTypeDef;
 
 typedef struct
 {
     uint16_t Set_OutVoltage;   // 设定输出电压mv
+    uint16_t Set_OutVoltage_Old;   // 设定输出电压旧值mv
     uint16_t fastCharge_InVoltage;  // 快充输入电压v
     uint8_t isVDD_OUT;  // 是否输出VDD
-    uint16_t SC8815_Battery_Current_Limit;  // 8815电池(输入)限流
-    uint16_t SC8815_VBUS_Current_Limit; // 8815 VBUS(输出)限流
+    uint16_t SC8815_Battery_Current_Limit;  // 8815电池(输入)限流mA
+    uint16_t SC8815_VBUS_Current_Limit; // 8815 VBUS(输出)限流mA
+    uint16_t SC8815_VBUS_Current_Limit_Old; // 8815 VBUS(输出)限流旧值mA
     SetModTypeDef SetMod;   // 设置当前为控制电压还是电流参数
     uint16_t DC_Voltage;   // DC电压
+    uint16_t set_Step;   // 设置电压/电流步进
 }Application_Config;
 
 #endif

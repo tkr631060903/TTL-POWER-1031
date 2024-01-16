@@ -78,40 +78,56 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
         // printf("KEY1\r\n");
         OLED_Clear();
         __set_FAULTMASK(1); //关闭所有中断
-        if (APP_config.SetMod == currentMod)
+        if (APP_config.SetMod == currentMod || APP_config.SetMod == voltageMod)
         {
-            APP_config.SetMod = noneMod;
+            // 步进除10
+            if (APP_config.set_Step == 1000)
+            {
+                APP_config.set_Step = 100;
+            }
+            break;
         }
-        else {
-            APP_config.SetMod = currentMod;    // 设置调节电流限流模式
-        }
+        APP_config.SetMod = currentMod;    // 设置调节电流限流模式
+        APP_config.SC8815_VBUS_Current_Limit_Old = APP_config.SC8815_VBUS_Current_Limit;
         __set_FAULTMASK(0); //开启所有中断
         break;
     case KEY2_Pin:
         OLED_Clear();
         __set_FAULTMASK(1); //关闭所有中断
-        if (APP_config.SetMod == voltageMod)
+        if (APP_config.SetMod == currentMod || APP_config.SetMod == voltageMod)
         {
-            APP_config.SetMod = noneMod;
+            // 步进乘10
+            if (APP_config.set_Step == 100)
+            {
+                APP_config.set_Step = 1000;
+            }
+            break;
         }
-        else {
-            APP_config.SetMod = voltageMod;    // 设置调节输出电压模式
-        }
+        APP_config.SetMod = voltageMod;    // 设置调节输出电压模式
+        APP_config.Set_OutVoltage_Old = APP_config.Set_OutVoltage;
         __set_FAULTMASK(0); //开启所有中断
         break;
     case KEY3_Pin:
         // printf("KEY3\r\n");
-        if (HAL_GPIO_ReadPin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin) == 0)
+        if (APP_config.SetMod != noneMod)
         {
-            HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_RESET);
-            Application_SC8815_Standby();
-            // printf("off");
+            APP_config.SetMod = noneMod;
+            APP_config.SC8815_VBUS_Current_Limit = APP_config.SC8815_VBUS_Current_Limit_Old;
+            APP_config.Set_OutVoltage = APP_config.Set_OutVoltage_Old;
         }
         else {
-            HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_SET);
-            Application_SC8815_Run();
-            Application_SC8815_loadStart();
-            // printf("run");
+            if (HAL_GPIO_ReadPin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin) == 0)
+            {
+                HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_RESET);
+                Application_SC8815_Standby();
+                // printf("off");
+            }
+            else {
+                HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_SET);
+                Application_SC8815_Run();
+                Application_SC8815_loadStart();
+                // printf("run");
+            }
         }
         break;
     case Rotar_L_Pin:
@@ -141,7 +157,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
                 }
                 else if (APP_config.SetMod == voltageMod)
                 {
-                    APP_config.Set_OutVoltage = APP_config.Set_OutVoltage - 100;
+                    APP_config.Set_OutVoltage = APP_config.Set_OutVoltage - APP_config.set_Step;
                     if ((int)APP_config.Set_OutVoltage < 0)
                     {
                         APP_config.Set_OutVoltage = 0;
@@ -160,7 +176,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
                 }
                 else if (APP_config.SetMod == voltageMod)
                 {
-                    APP_config.Set_OutVoltage = APP_config.Set_OutVoltage + 100;
+                    APP_config.Set_OutVoltage = APP_config.Set_OutVoltage + APP_config.set_Step;
                     if (APP_config.Set_OutVoltage > 36000)
                     {
                         APP_config.Set_OutVoltage = 36000;
