@@ -24,7 +24,11 @@ void Application_Init(void)
     extern ADC_HandleTypeDef hadc1;
     HAL_ADCEx_Calibration_Start(&hadc1);    // 校准ADC
     extern volatile Application_Config APP_config;
-    APP_config.SetMod = noneMod;
+    APP_config.SetMod = noneMod;    // 设置默认模式
+    extern ADC_HandleTypeDef hadc1;
+    uint16_t ADC_Value[2];    // ADC值,ADC_Value[0] == VDD_OUT,ADC_Value[1] == VDD_IN
+    HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&ADC_Value, 2);    // 开始ADC DMA
+    APP_config.DC_Voltage = ((float)ADC_Value[1] * (3.3 / 4096)) / 0.0975;
     Application_CH224K_init();
     Application_SC8815_Init();
     OLED_Init();  //初始化OLED

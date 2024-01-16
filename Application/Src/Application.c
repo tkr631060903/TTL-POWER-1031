@@ -10,7 +10,6 @@
  */
 #include "Application.h"
 
- // System_Config sys_config;
 volatile Application_Config APP_config;
 
 /**
@@ -19,9 +18,9 @@ volatile Application_Config APP_config;
  */
 void Application_main()
 {
-    extern ADC_HandleTypeDef hadc1;
-    uint16_t AD_Value[2];
-    HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&AD_Value, 2);
+    // extern ADC_HandleTypeDef hadc1;
+    // uint16_t AD_Value[2];
+    // HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&AD_Value, 2);
     while (1)
     {
         // HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
@@ -69,17 +68,27 @@ void Application_Assert_Failed()
  */
 void SC8815_Soft_Protect(void)
 {
-    if (SC8815_Read_VBUS_Voltage() <= APP_config.Set_OutVoltage - (APP_config.Set_OutVoltage * 0.1))
+    if (APP_config.SetMod == VINErrorMod || APP_config.SetMod == currentProtectMod)
     {
-        HAL_Delay(500);
-        if (SC8815_Read_VBUS_Voltage() <= APP_config.Set_OutVoltage - (APP_config.Set_OutVoltage * 0.1))
-        {
-            // printf("输入供电不足\r\n");
-            // APP_config.SetMod = VINErrorMod;
-            // OLED_Clear();
-            // HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_RESET);
-            // Application_SC8815_Standby();
-        }
+        return;
+    }
+    uint16_t temp = SC8815_Read_BATT_Voltage();
+    if ((temp <= APP_config.fastCharge_InVoltage - (APP_config.fastCharge_InVoltage * 0.1)) || (temp <= APP_config.DC_Voltage - (APP_config.DC_Voltage * 0.1)))
+    {
+        // printf("输入供电不足\r\n");
+        APP_config.SetMod = VINErrorMod;
+        OLED_Clear();
+        HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_RESET);
+        Application_SC8815_Standby();
+        // HAL_Delay(500);
+        // if (SC8815_Read_BATT_Voltage() <= APP_config.Set_OutVoltage - (APP_config.Set_OutVoltage * 0.1))
+        // {
+        //     // printf("输入供电不足\r\n");
+        //     APP_config.SetMod = VINErrorMod;
+        //     OLED_Clear();
+        //     HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_RESET);
+        //     Application_SC8815_Standby();
+        // }
     }
     if (APP_config.SC8815_VBUS_Current_Limit - SC8815_Read_VBUS_Current() <= 100 && SC8815_Read_VBUS_Voltage() <= APP_config.Set_OutVoltage - (APP_config.Set_OutVoltage * 0.1))
     {
@@ -89,7 +98,6 @@ void SC8815_Soft_Protect(void)
         HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_RESET);
         Application_SC8815_Standby();
     }
-    // printf("SC8815 Soft Protect\r\n");
 }
 
 /**

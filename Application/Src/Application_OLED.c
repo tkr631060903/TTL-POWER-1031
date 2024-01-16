@@ -140,6 +140,7 @@ void APP_OLED_Show_VINErrorMod(void)
 {
     OLED_ShowString(1, 1, "VINErrorMod");
 }
+
 void APP_OLED_Show_currentProtectMod(void)
 {
     OLED_ShowString(1, 1, "APP_OLED_Show_currentProtectMod");
