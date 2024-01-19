@@ -330,6 +330,7 @@ void SC8815_SetOutputVoltage(uint16_t NewVolt)
 		tmp1 = (tmp1 - tmp2 - 1) / 4;
 		// printf("tmp1 = %d, tmp2 = %d.\n", (uint8_t)tmp1, (uint8_t)tmp2 << 6);
 		//Ð´Èëµ½ SC8815 VBUSREF_E_SET ¼Ä´æÆ÷
+		// printf("tmp1 = %d, tmp2 = %d.\n", (uint8_t)tmp1, (uint8_t)tmp2 << 6);
 		I2C_WriteRegByte(SC8815_ADDR, SCREG_VBUSREF_E_SET, (uint8_t)tmp1);
 		I2C_WriteRegByte(SC8815_ADDR, SCREG_VBUSREF_E_SET2, (uint8_t)tmp2 << 6);
 	}

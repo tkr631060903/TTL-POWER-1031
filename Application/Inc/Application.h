@@ -30,6 +30,7 @@ void Application_Assert_Failed(void);
 void Application_SoftwareDelay(uint16_t time);
 void KEY4_Button(void);
 void SC8815_Soft_Protect(void);
+void SET_LED1_Status(void);
 
 typedef enum
 {

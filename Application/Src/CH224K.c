@@ -61,13 +61,13 @@ void CH224K_20V(void)
 void Application_CH224K_init(void)
 {
     extern volatile Application_Config APP_config;
-    // CH224K_20V();
-    // HAL_Delay(500);
-    // if ((SC8815_Read_BATT_Voltage() - 20000) < 500 && (APP_config.Set_OutVoltage - SC8815_Read_VBUS_Voltage()) < 200)
-    // {
-    //     APP_config.fastCharge_InVoltage = 20;
-    //     return;
-    // }
+    CH224K_20V();
+    HAL_Delay(500);
+    if ((SC8815_Read_BATT_Voltage() - 20000) < 500 && (APP_config.Set_OutVoltage - SC8815_Read_VBUS_Voltage()) < 200)
+    {
+        APP_config.fastCharge_InVoltage = 20;
+        return;
+    }
     CH224K_15V();
     HAL_Delay(500);
     if ((SC8815_Read_BATT_Voltage() - 15000) < 500)

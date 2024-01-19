@@ -3,7 +3,7 @@
 
 void SoftwareDelay(uint8_t ms)
 {
-	HAL_Delay(ms);
+	Application_SoftwareDelay(ms);
 }
 
 void I2C_WriteRegByte(uint8_t SlaveAddress, uint8_t RegAddress, uint8_t ByteData)
@@ -34,8 +34,7 @@ uint8_t I2C_ReadRegByte(uint8_t SlaveAddress, uint8_t RegAddress)
 void Application_SC8815_loadStart(void)
 {
 	SC8815_SFB_Disable();
-	// HAL_Delay(500);
-	Application_SoftwareDelay(500);
+	Application_SoftwareDelay(50);
 	SC8815_SFB_Enable();
 }
 
@@ -53,7 +52,7 @@ void Application_SC8815_Init(void)
 	SC8815_BatteryConfigStruct.IRCOMP = SCBAT_IRCOMP_0mR;
 	// SCBAT_VBAT_SEL_Internal 内部反馈
 	// SCBAT_VBAT_SEL_External 外部反馈
-	SC8815_BatteryConfigStruct.VBAT_SEL = SCBAT_VBAT_SEL_Internal;
+	SC8815_BatteryConfigStruct.VBAT_SEL = SCBAT_VBAT_SEL_External;
 	SC8815_BatteryConfigStruct.CSEL = SCBAT_CSEL_4S;
 	SC8815_BatteryConfigStruct.VCELL = SCBAT_VCELL_4v50;
 	SC8815_BatteryConfig(&SC8815_BatteryConfigStruct);
@@ -72,7 +71,7 @@ void Application_SC8815_Init(void)
 	// VBUS电压反馈模式: 
 	//   SCHWI_FB_Internal 内部反馈(最高电压25.6V)
 	//   SCHWI_FB_External 外部分压电阻反馈(最大输出不建议超过36V[手册上最大输出电压且需考虑外围元件耐压值]) 
-	SC8815_HardwareInitStruct.FB_Mode = SCHWI_FB_Internal;
+	SC8815_HardwareInitStruct.FB_Mode = SCHWI_FB_External;
 	SC8815_HardwareInitStruct.TRICKLE_SET = SCHWI_TRICKLE_SET_60;
 	SC8815_HardwareInitStruct.OVP = SCHWI_OVP_Enable;
 	SC8815_HardwareInitStruct.DITHER = SCHWI_DITHER_Disable;
@@ -100,7 +99,7 @@ void Application_SC8815_Init(void)
 	SC8815_PGATE_Disable();
 
 	/***现在可以设置 PSTOP 引脚为低, 启动 SC8815 功率转换****/
-	HAL_GPIO_WritePin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin, GPIO_PIN_RESET);
+	// HAL_GPIO_WritePin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin, GPIO_PIN_RESET);
 
 
 	/*** 示例1, 设置为充电模式,电池和 VBUS 限流 1.2A, VINREG 设置为 10V ****/
@@ -141,8 +140,9 @@ void Application_SC8815_Init(void)
 //	{
 //			// EOC 中断处理代码
 //	}
-	// HAL_Delay(1000);
-	Application_SC8815_loadStart();
+	// HAL_Delay(500);
+	// Application_SC8815_loadStart();
+
 	printf("SC8815 Init.\n");
 }
 
