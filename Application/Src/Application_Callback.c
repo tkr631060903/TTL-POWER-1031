@@ -118,12 +118,10 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
         else {
             if (HAL_GPIO_ReadPin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin) == 0)
             {
-                HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_RESET);
                 Application_SC8815_Standby();
                 // printf("off");
             }
             else {
-                HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_SET);
                 Application_SC8815_Run();
                 Application_SC8815_loadStart();
                 // printf("run");
