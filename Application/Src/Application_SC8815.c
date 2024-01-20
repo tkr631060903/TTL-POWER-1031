@@ -117,7 +117,7 @@ void Application_SC8815_Init(void)
 	extern volatile Application_Config APP_config;
 	APP_config.SC8815_Battery_Current_Limit = 6000;
 	APP_config.SC8815_VBUS_Current_Limit = 3000;
-	APP_config.Set_OutVoltage = 28000;
+	APP_config.Set_OutVoltage = 12000;
 	SC8815_SetBatteryCurrLimit(APP_config.SC8815_Battery_Current_Limit);
 	SC8815_SetBusCurrentLimit(APP_config.SC8815_VBUS_Current_Limit);
 	SC8815_SetOutputVoltage(APP_config.Set_OutVoltage);

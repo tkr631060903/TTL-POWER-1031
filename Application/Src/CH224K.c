@@ -61,13 +61,14 @@ void CH224K_20V(void)
 void Application_CH224K_init(void)
 {
     extern volatile Application_Config APP_config;
-    CH224K_20V();
-    HAL_Delay(500);
-    if ((Get_VBAT_ADC_mV - 20000) < 500 && (APP_config.Set_OutVoltage - Get_VBUS_ADC_mV) < 200)
-    {
-        APP_config.fastCharge_InVoltage = 20;
-        return;
-    }
+    // 20V输入可能导致按下KET4 MCU会重启
+    // CH224K_20V();
+    // HAL_Delay(500);
+    // if ((Get_VBAT_ADC_mV - 20000) < 500 && (APP_config.Set_OutVoltage - Get_VBUS_ADC_mV) < 200)
+    // {
+    //     APP_config.fastCharge_InVoltage = 20;
+    //     return;
+    // }
     CH224K_15V();
     HAL_Delay(500);
     if ((Get_VBAT_ADC_mV - 15000) < 500 && (APP_config.Set_OutVoltage - Get_VBUS_ADC_mV) < 200)

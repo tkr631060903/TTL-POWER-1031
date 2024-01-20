@@ -125,6 +125,12 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
         if (APP_config.SetMod != noneMod)
         {
             APP_config.SetMod = noneMod;
+            if (APP_config.SetMod == VINErrorMod || currentProtectMod)
+            {
+                SC8815_SetOutputVoltage(APP_config.Set_OutVoltage);
+                SC8815_SetBusCurrentLimit(APP_config.SC8815_VBUS_Current_Limit);
+                break;
+            }
             APP_config.SC8815_VBUS_Current_Limit = APP_config.SC8815_VBUS_Current_Limit_Old;
             APP_config.Set_OutVoltage = APP_config.Set_OutVoltage_Old;
         }
@@ -181,7 +187,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
                     }
                 }
                 else if (((Encoder_A_Last_Value == 0 && Encoder_A_Value == 1) && (Encoder_B_Last_Value == 0 && Encoder_B_Value == 1)) || ((Encoder_A_Last_Value == 1 && Encoder_A_Value == 0) && (Encoder_B_Last_Value == 1 && Encoder_B_Value == 0)))  //顺时针旋转
-                {  
+                {
                     printf("Rotar_R\r\n");      //右
                     if (APP_config.SetMod == currentMod)
                     {

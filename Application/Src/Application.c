@@ -44,6 +44,10 @@ void Application_main()
         // printf("%d", HAL_GPIO_ReadPin(KEY4_GPIO_Port, KEY4_Pin));
         // printf("CE:%d\r\n", HAL_GPIO_ReadPin(SC8815_CE_GPIO_Port, SC8815_CE_Pin));
         // printf("sotp:%d\r\n", HAL_GPIO_ReadPin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin));
+        // extern TIM_HandleTypeDef htim4;
+        // HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_4);
+        // HAL_Delay(100);
+        // HAL_TIM_PWM_Stop(&htim4, TIM_CHANNEL_4);
         APP_OLED_Show();
         KEY4_Button();
         SC8815_Soft_Protect();
@@ -81,7 +85,7 @@ void SC8815_Soft_Protect(void)
     {
         return;
     }
-    extern uint16_t ADC_Value[2];
+    // extern uint16_t ADC_Value[2];
     uint16_t temp = Get_VBAT_ADC_mV;
     if ((temp <= APP_config.fastCharge_InVoltage - (APP_config.fastCharge_InVoltage * 0.1)) || (temp <= APP_config.DC_Voltage - (APP_config.DC_Voltage * 0.1)))
     {
@@ -90,14 +94,18 @@ void SC8815_Soft_Protect(void)
         APP_config.SetMod = VINErrorMod;
         Application_SC8815_Standby();
     }
-    temp = Get_VBUS_ADC_mV;
-    if (abs((int)APP_config.SC8815_VBUS_Current_Limit - temp) <= 100 && temp <= APP_config.Set_OutVoltage - (APP_config.Set_OutVoltage * 0.1))
+    // if (abs((int)APP_config.SC8815_VBUS_Current_Limit - SC8815_Read_VBUS_Current()) <= 100 && Get_VBUS_ADC_mV <= APP_config.Set_OutVoltage - (APP_config.Set_OutVoltage * 0.1))
+    if (HAL_GPIO_ReadPin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin) == GPIO_PIN_RESET)
     {
-        // printf("触发限流保护\r\n");
-        OLED_Clear();
-        APP_config.SetMod = currentProtectMod;
-        Application_SC8815_Standby();
+        if (SC8815_Read_VBUS_Current() >= APP_config.SC8815_VBUS_Current_Limit || Get_VBUS_ADC_mV <= APP_config.Set_OutVoltage - (APP_config.Set_OutVoltage * 0.1))
+        {
+            // printf("触发限流保护\r\n");
+            OLED_Clear();
+            APP_config.SetMod = currentProtectMod;
+            Application_SC8815_Standby();
+        }
     }
+
 }
 
 /**

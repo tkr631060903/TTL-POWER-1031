@@ -28,10 +28,10 @@ void Application_Init(void)
     APP_config.SetMod = noneMod;    // 设置默认模式
     extern ADC_HandleTypeDef hadc1;
     HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&ADC_Value, 2);    // 开始ADC DMA
-    APP_config.DC_Voltage = Get_VBAT_ADC_mV;
     APP_config.set_Step = 100;  // 设置默认步进
     Application_CH224K_init();
     Application_SC8815_Init();
     OLED_Init();  //初始化OLED
+    APP_config.DC_Voltage = Get_VBAT_ADC_mV;
     printf("Init Success\r\n");
 }

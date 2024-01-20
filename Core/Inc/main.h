@@ -105,6 +105,8 @@ void Error_Handler(void);
 #define CH224K_CFG3_GPIO_Port GPIOB
 #define POWER_RELEASE_Pin GPIO_PIN_8
 #define POWER_RELEASE_GPIO_Port GPIOB
+#define BUZZER_Pin GPIO_PIN_9
+#define BUZZER_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 
