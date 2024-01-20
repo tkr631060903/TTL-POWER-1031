@@ -13,6 +13,7 @@
 
 #include "main.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include "usart.h"
 #include "Application_Init.h"
 #include "UART_Debug.h"
@@ -23,6 +24,13 @@
 #include "Application_OLED.h"
 
 #define KEY4_LONG_PRESS_THRESHOLD 2000 // 定义KEY4长按阈值，单位为毫秒
+#define ADC_Divider_Ratio 0.0975    // ADC分压比
+#define Get_VBUS_ADC_V ((float)ADC_Value[0] * (3.3 / 4096) / ADC_Divider_Ratio)   // 获取MCU ADC采样VBUS单位V
+#define Get_VBAT_ADC_V ((float)ADC_Value[1] * (3.3 / 4096) / ADC_Divider_Ratio)   // 获取MCU ADC采样VBAT单位V
+#define Get_VBUS_ADC_mV (((float)ADC_Value[0] * (3.3 / 4096) / ADC_Divider_Ratio) * 1000)   // 获取MCU ADC采样VBUS单位mV
+#define Get_VBAT_ADC_mV (((float)ADC_Value[1] * (3.3 / 4096) / ADC_Divider_Ratio) * 1000)   // 获取MCU ADC采样VBAT单位mV
+
+extern uint16_t ADC_Value[2];
 
 void Application_main(void);
 void Application_Error_Handler(void);
@@ -60,7 +68,7 @@ typedef struct
     uint16_t SC8815_VBUS_Current_Limit; // 8815 VBUS(输出)限流mA
     uint16_t SC8815_VBUS_Current_Limit_Old; // 8815 VBUS(输出)限流旧值mA
     SetModTypeDef SetMod;   // 设置当前为控制电压还是电流参数
-    uint16_t DC_Voltage;   // DC电压
+    uint16_t DC_Voltage;   // DC电压单位mV
     uint16_t set_Step;   // 设置电压/电流步进
 }Application_Config;
 

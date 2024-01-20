@@ -18,14 +18,14 @@ volatile Application_Config APP_config;
  */
 void Application_main()
 {
-    extern uint16_t ADC_Value[2];
+    // extern uint16_t ADC_Value[2];
     // int i = 0;
     // SC8815_SetOutputVoltage(1000);
     // HAL_GPIO_WritePin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin, GPIO_PIN_RESET);
     while (1)
     {
         // printf("before: VDD_OUT:%.2fV, VDD_IN:%.2fV\r\n", ((float)ADC_Value[0] * (3.3 / 4096)) / 0.1, ((float)ADC_Value[1] * (3.3 / 4096)) / 0.1);
-        // printf("later: VDD_OUT:%.2fV, VDD_IN:%.2fV\r\n", ((float)ADC_Value[0] * (3.3 / 4096)) / 0.0975, ((float)ADC_Value[1] * (3.3 / 4096)) / 0.0975);
+        // printf("later: VDD_OUT:%.2fV, VDD_IN:%.2fV\r\n", ((float)ADC_Value[0] * (3.3 / 4096)) / ADC_Divider_Ratio, ((float)ADC_Value[1] * (3.3 / 4096)) / ADC_Divider_Ratio);
         // printf("VBUS_Voltage:%dmV, VBUS_Current:%dmA\r\n", SC8815_Read_VBUS_Voltage(), SC8815_Read_VBUS_Current());
         // printf("BATT_Voltage:%dmV, BATT_Current:%dmA\r\n", SC8815_Read_BATT_Voltage(), SC8815_Read_BATT_Current());
         // printf("%d\r\n", SC8815_OTG_IsEnable());
@@ -81,19 +81,21 @@ void SC8815_Soft_Protect(void)
     {
         return;
     }
-    uint16_t temp = SC8815_Read_BATT_Voltage();
+    extern uint16_t ADC_Value[2];
+    uint16_t temp = Get_VBAT_ADC_mV;
     if ((temp <= APP_config.fastCharge_InVoltage - (APP_config.fastCharge_InVoltage * 0.1)) || (temp <= APP_config.DC_Voltage - (APP_config.DC_Voltage * 0.1)))
     {
         // printf("输入供电不足\r\n");
-        APP_config.SetMod = VINErrorMod;
         OLED_Clear();
+        APP_config.SetMod = VINErrorMod;
         Application_SC8815_Standby();
     }
-    if (APP_config.SC8815_VBUS_Current_Limit - SC8815_Read_VBUS_Current() <= 100 && SC8815_Read_VBUS_Voltage() <= APP_config.Set_OutVoltage - (APP_config.Set_OutVoltage * 0.1))
+    temp = Get_VBUS_ADC_mV;
+    if (abs((int)APP_config.SC8815_VBUS_Current_Limit - temp) <= 100 && temp <= APP_config.Set_OutVoltage - (APP_config.Set_OutVoltage * 0.1))
     {
         // printf("触发限流保护\r\n");
-        APP_config.SetMod = currentProtectMod;
         OLED_Clear();
+        APP_config.SetMod = currentProtectMod;
         Application_SC8815_Standby();
     }
 }
@@ -130,6 +132,7 @@ void KEY4_Button(void)
             if (currentTime - buttonPressStartTime >= KEY4_LONG_PRESS_THRESHOLD) {
                 // 检测到长按
                 APP_config.SetMod = fastChargeMod;
+                printf("fastChargeMod\r\n");
             }
         }
         else {

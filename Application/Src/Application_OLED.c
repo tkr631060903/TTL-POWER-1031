@@ -52,7 +52,8 @@ void APP_OLED_ShowISET(uint8_t line)
 void APP_OLED_ShowVOUT(uint8_t line)
 {
     OLED_ShowString(line, 1, "VOUT:");
-    uint16_t temp = SC8815_Read_VBUS_Voltage();
+    uint16_t temp = Get_VBUS_ADC_mV;
+    // uint16_t temp = SC8815_Read_VBUS_Voltage();
     if (temp / 1000 >= 10)
     {
         OLED_ShowNum(line, 6, temp / 1000, 2);
@@ -148,7 +149,7 @@ void APP_OLED_Show_currentProtectMod(void)
 
 void APP_OLED_Show_fastChargeMod(void)
 {
-
+    OLED_ShowString(1, 1, "fastCharge");
 }
 
 void APP_OLED_Show(void)
@@ -173,6 +174,9 @@ void APP_OLED_Show(void)
         break;
     case currentProtectMod:
         APP_OLED_Show_currentProtectMod();
+        break;
+    case fastChargeMod:
+        APP_OLED_Show_fastChargeMod();
         break;
     default:
         break;
