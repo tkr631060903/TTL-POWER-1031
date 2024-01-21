@@ -945,6 +945,11 @@
               <FileType>1</FileType>
               <FilePath>..\Application\Src\Application_OLED.c</FilePath>
             </File>
+            <File>
+              <FileName>Application_BUZZER.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Application\Src\Application_BUZZER.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

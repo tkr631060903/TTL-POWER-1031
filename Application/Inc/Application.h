@@ -22,6 +22,7 @@
 #include "CH224K.h"
 #include "OLED.h"
 #include "Application_OLED.h"
+#include "Application_BUZZER.h"
 
 #define KEY4_LONG_PRESS_THRESHOLD 2000 // 定义KEY4长按阈值，单位为毫秒
 #define ADC_Divider_Ratio 0.0975    // ADC分压比
@@ -53,8 +54,8 @@ typedef enum
     voltageMod = 0x00U,
     currentMod = 0x01U,
     noneMod = 0x02U,
-    VINErrorMod = 0x03U,
-    currentProtectMod = 0x04U,
+    VINProtectMod = 0x03U,
+    VOUTProtectMod = 0x04U,
     fastChargeMod = 0x05U,
 } SetModTypeDef;
 

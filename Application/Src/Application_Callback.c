@@ -79,6 +79,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
         OLED_Clear();
         SoftwareDelay(50);
         OLED_Clear();
+        BUZZER_OPEN(100);
         // __set_FAULTMASK(1); //关闭所有中断
         if (APP_config.SetMod == currentMod || APP_config.SetMod == voltageMod)
         {
@@ -100,6 +101,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
         OLED_Clear();
         SoftwareDelay(50);
         OLED_Clear();
+        BUZZER_OPEN(100);
         // __set_FAULTMASK(1); //关闭所有中断
         if (APP_config.SetMod == currentMod || APP_config.SetMod == voltageMod)
         {
@@ -119,13 +121,11 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
         break;
     case KEY3_Pin:
         // printf("KEY3\r\n");
-        OLED_Clear();
-        SoftwareDelay(50);
-        OLED_Clear();
+        BUZZER_OPEN(100);
         if (APP_config.SetMod != noneMod)
         {
             APP_config.SetMod = noneMod;
-            if (APP_config.SetMod == VINErrorMod || currentProtectMod)
+            if (APP_config.SetMod == VINProtectMod || VOUTProtectMod)
             {
                 SC8815_SetOutputVoltage(APP_config.Set_OutVoltage);
                 SC8815_SetBusCurrentLimit(APP_config.SC8815_VBUS_Current_Limit);
@@ -164,7 +164,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
                 //状态判断处理
                 if (((Encoder_A_Last_Value == 0 && Encoder_A_Value == 1) && (Encoder_B_Last_Value == 1 && Encoder_B_Value == 0)) || ((Encoder_A_Last_Value == 1 && Encoder_A_Value == 0) && (Encoder_B_Last_Value == 0 && Encoder_B_Value == 1)))   //逆时针旋转
                 {
-                    printf("Rotar_L\r\n");     //左
+                    // printf("Rotar_L\r\n");     //左
                     if (APP_config.SetMod == currentMod)
                     {
                         if ((int)APP_config.SC8815_VBUS_Current_Limit - APP_config.set_Step <= 300)
@@ -185,10 +185,11 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
                             APP_config.Set_OutVoltage = APP_config.Set_OutVoltage - APP_config.set_Step;
                         }
                     }
+                    BUZZER_OPEN(100);
                 }
                 else if (((Encoder_A_Last_Value == 0 && Encoder_A_Value == 1) && (Encoder_B_Last_Value == 0 && Encoder_B_Value == 1)) || ((Encoder_A_Last_Value == 1 && Encoder_A_Value == 0) && (Encoder_B_Last_Value == 1 && Encoder_B_Value == 0)))  //顺时针旋转
                 {
-                    printf("Rotar_R\r\n");      //右
+                    // printf("Rotar_R\r\n");      //右
                     if (APP_config.SetMod == currentMod)
                     {
                         APP_config.SC8815_VBUS_Current_Limit = APP_config.SC8815_VBUS_Current_Limit + APP_config.set_Step;
@@ -205,6 +206,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
                             APP_config.Set_OutVoltage = 36000;
                         }
                     }
+                    BUZZER_OPEN(100);
                 }
                 Encoder_B_Last_Value = 2;       //清除状态值，不初始化0原因是在全局第一次初始化就是0，为了区别
                 Encoder_A_Last_Value = 2;       //清除状态值

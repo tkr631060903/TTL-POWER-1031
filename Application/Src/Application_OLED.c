@@ -137,14 +137,14 @@ void APP_OLED_Show_SETIOUT(void)
     }
 }
 
-void APP_OLED_Show_VINErrorMod(void)
+void APP_OLED_Show_VINProtectMod(void)
 {
-    OLED_ShowString(1, 1, "VINErrorMod");
+    OLED_ShowString(1, 1, "VINProtect");
 }
 
-void APP_OLED_Show_currentProtectMod(void)
+void APP_OLED_Show_VOUTProtectMod(void)
 {
-    OLED_ShowString(1, 1, "currentProtec");
+    OLED_ShowString(1, 1, "VOUTProtect");
 }
 
 void APP_OLED_Show_fastChargeMod(void)
@@ -152,16 +152,24 @@ void APP_OLED_Show_fastChargeMod(void)
     OLED_ShowString(1, 1, "fastCharge");
 }
 
+uint32_t OLEDFlushTime = 0;
 void APP_OLED_Show(void)
 {
     switch (APP_config.SetMod)
     {
     case noneMod:
-        APP_OLED_ShowVSET(1);
-        APP_OLED_ShowISET(2);
-        APP_OLED_ShowVOUT(3);
-        APP_OLED_ShowIOUT(4);
-        // HAL_Delay(300);
+        if (OLEDFlushTime == 0)
+        {
+            OLEDFlushTime = HAL_GetTick();
+        }
+        else if (HAL_GetTick() - OLEDFlushTime >= 300)
+        {
+            OLEDFlushTime = 0;
+            APP_OLED_ShowVSET(1);
+            APP_OLED_ShowISET(2);
+            APP_OLED_ShowVOUT(3);
+            APP_OLED_ShowIOUT(4);
+        }
         break;
     case voltageMod:
         APP_OLED_Show_SETVOUT();
@@ -169,11 +177,11 @@ void APP_OLED_Show(void)
     case currentMod:
         APP_OLED_Show_SETIOUT();
         break;
-    case VINErrorMod:
-        APP_OLED_Show_VINErrorMod();
+    case VINProtectMod:
+        APP_OLED_Show_VINProtectMod();
         break;
-    case currentProtectMod:
-        APP_OLED_Show_currentProtectMod();
+    case VOUTProtectMod:
+        APP_OLED_Show_VOUTProtectMod();
         break;
     case fastChargeMod:
         APP_OLED_Show_fastChargeMod();

@@ -79,30 +79,52 @@ void Application_Assert_Failed()
  *@brief SC8815软件保护
  *
  */
+uint32_t VINProtectTick = 0;
+uint32_t VOUTProtectTick = 0;
 void SC8815_Soft_Protect(void)
 {
-    if (APP_config.SetMod == VINErrorMod || APP_config.SetMod == currentProtectMod)
+    if (APP_config.SetMod == VINProtectMod || APP_config.SetMod == VOUTProtectMod)
     {
         return;
     }
-    // extern uint16_t ADC_Value[2];
     uint16_t temp = Get_VBAT_ADC_mV;
-    if ((temp <= APP_config.fastCharge_InVoltage - (APP_config.fastCharge_InVoltage * 0.1)) || (temp <= APP_config.DC_Voltage - (APP_config.DC_Voltage * 0.1)))
+    if ((temp <= APP_config.fastCharge_InVoltage - (APP_config.fastCharge_InVoltage * 0.1)) || (temp <= APP_config.DC_Voltage - (APP_config.DC_Voltage * 0.1))) // 输入保护
     {
-        // printf("输入供电不足\r\n");
-        OLED_Clear();
-        APP_config.SetMod = VINErrorMod;
-        Application_SC8815_Standby();
+        if (VINProtectTick == 0)
+        {
+            VINProtectTick = HAL_GetTick();
+        }
+        else {
+            if (HAL_GetTick() - VINProtectTick >= 10)
+            {
+                // printf("输入供电不足\r\n");
+                Application_SC8815_Standby();
+                OLED_Clear();
+                APP_config.SetMod = VINProtectMod;
+                VINProtectTick = 0;
+                BUZZER_OPEN(2000);
+            }
+        }
     }
-    // if (abs((int)APP_config.SC8815_VBUS_Current_Limit - SC8815_Read_VBUS_Current()) <= 100 && Get_VBUS_ADC_mV <= APP_config.Set_OutVoltage - (APP_config.Set_OutVoltage * 0.1))
     if (HAL_GPIO_ReadPin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin) == GPIO_PIN_RESET)
     {
-        if (SC8815_Read_VBUS_Current() >= APP_config.SC8815_VBUS_Current_Limit || Get_VBUS_ADC_mV <= APP_config.Set_OutVoltage - (APP_config.Set_OutVoltage * 0.1))
+        if (SC8815_Read_VBUS_Current() >= APP_config.SC8815_VBUS_Current_Limit || Get_VBUS_ADC_mV <= APP_config.Set_OutVoltage - (APP_config.Set_OutVoltage * 0.1)) // 输出保护
         {
-            // printf("触发限流保护\r\n");
-            OLED_Clear();
-            APP_config.SetMod = currentProtectMod;
-            Application_SC8815_Standby();
+            if (VOUTProtectTick == 0)
+            {
+                VOUTProtectTick = HAL_GetTick();
+            }
+            else {
+                if (HAL_GetTick() - VOUTProtectTick >= 10)
+                {
+                    // printf("触发限流保护\r\n");
+                    Application_SC8815_Standby();
+                    OLED_Clear();
+                    APP_config.SetMod = VOUTProtectMod;
+                    VOUTProtectTick = 0;
+                    BUZZER_OPEN(2000);
+                }
+            }
         }
     }
 
@@ -151,6 +173,7 @@ void KEY4_Button(void)
         // KEY4单击设置电压/电流/快充输入电压
         if (HAL_GPIO_ReadPin(KEY4_GPIO_Port, KEY4_Pin) == GPIO_PIN_SET)
         {
+            BUZZER_OPEN(100);
             if (APP_config.SetMod == voltageMod)
             {
                 SC8815_SetOutputVoltage(APP_config.Set_OutVoltage);
