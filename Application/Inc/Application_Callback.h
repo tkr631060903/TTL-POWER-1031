@@ -8,8 +8,13 @@
  * @copyright Copyright (c) 2023
  * 
  */
+#ifndef __Application_Callback_H__
+#define __Application_Callback_H__
+
 #include "Application.h"
 
 #define UART_Cmd_Length 10
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart);
+
+#endif

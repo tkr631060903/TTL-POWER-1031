@@ -9,9 +9,14 @@
  *
  */
 #include "Application_Init.h"
+#include "Application.h"
+#include "Application_ADC.h"
+#include "Application_SC8815.h"
+#include "usart.h"
+#include "CH224K.h"
+#include "Application_OLED.h"
 
 uint8_t Uart2_ReceiveBuff = 0;  //串口2接收缓冲区
-uint16_t ADC_Value[2];    // ADC值,ADC_Value[0] == VBUS,ADC_Value[1] == VBAT
 
 /**
  * @brief 应用初始化
@@ -33,5 +38,6 @@ void Application_Init(void)
     Application_SC8815_Init();
     OLED_Init();  //初始化OLED
     APP_config.DC_Voltage = Get_VBAT_ADC_mV;
+    printf("DeadTime:%d\r\n", SC8815_GetDeadTime());
     printf("Init Success\r\n");
 }

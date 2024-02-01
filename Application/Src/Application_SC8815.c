@@ -1,3 +1,13 @@
+/**
+ *@file Application_SC8815.c
+ * @author TanKairong (tkr631060903@gmail.com)
+ * @brief SC8815应用程序实现
+ * @version 0.1
+ * @date 2024-01-31
+ * 
+ * @copyright Copyright (c) 2024
+ * 
+ */
 #include "Application_SC8815.h"
 #include "Application.h"
 
@@ -33,9 +43,19 @@ uint8_t I2C_ReadRegByte(uint8_t SlaveAddress, uint8_t RegAddress)
  */
 void Application_SC8815_loadStart(void)
 {
-	SC8815_SFB_Disable();
-	Application_SoftwareDelay(50);
-	SC8815_SFB_Enable();
+	// SC8815_SFB_Disable();
+	// Application_SoftwareDelay(50);
+	// SC8815_SFB_Enable();
+	if (APP_config.SC8815Mod == SC8815LoadStart)
+	{
+		extern uint32_t VOUTOpenTime;
+		VOUTOpenTime = HAL_GetTick();
+		APP_config.SC8815Mod = SC8815Run;
+		Application_SC8815_Run();
+		SC8815_SFB_Disable();
+		HAL_Delay(100);
+		SC8815_SFB_Enable();
+	}
 }
 
 void Application_SC8815_Init(void)
@@ -64,7 +84,7 @@ void Application_SC8815_Init(void)
 	SC8815_HardwareInitStruct.VBUS_RATIO = SCHWI_VBUS_RATIO_12_5x;
 	SC8815_HardwareInitStruct.VINREG_Ratio = SCHWI_VINREG_RATIO_100x;
 	SC8815_HardwareInitStruct.SW_FREQ = SCHWI_FREQ_450KHz;
-	SC8815_HardwareInitStruct.DeadTime = SCHWI_DT_40ns;
+	SC8815_HardwareInitStruct.DeadTime = SCHWI_DT_20ns;
 	SC8815_HardwareInitStruct.ICHAR = SCHWI_ICHAR_IBAT;
 	SC8815_HardwareInitStruct.TRICKLE = SCHWI_TRICKLE_Disable;
 	SC8815_HardwareInitStruct.TERM = SCHWI_TERM_Enable;
@@ -115,9 +135,9 @@ void Application_SC8815_Init(void)
 	// SC8815_SetBusCurrentLimit(3000);
 	// SC8815_SetOutputVoltage(12000);
 	extern volatile Application_Config APP_config;
-	APP_config.SC8815_Battery_Current_Limit = 6000;
-	APP_config.SC8815_VBUS_Current_Limit = 3000;
-	APP_config.Set_OutVoltage = 12000;
+	APP_config.SC8815_Battery_Current_Limit = 12000;
+	APP_config.SC8815_VBUS_Current_Limit = 6000;
+	APP_config.Set_OutVoltage = 15000;
 	SC8815_SetBatteryCurrLimit(APP_config.SC8815_Battery_Current_Limit);
 	SC8815_SetBusCurrentLimit(APP_config.SC8815_VBUS_Current_Limit);
 	SC8815_SetOutputVoltage(APP_config.Set_OutVoltage);

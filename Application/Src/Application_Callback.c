@@ -10,6 +10,10 @@
  */
 #include "Application_Callback.h"
 #include <string.h>
+#include "Application_SC8815.h"
+#include "usart.h"
+#include "Application_OLED.h"
+#include "Application_BUZZER.h"
 
 char uart2_Cmd[UART_Cmd_Length];
 int cmd_Index = 0;  //串口1命令计数指针
@@ -79,7 +83,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
         OLED_Clear();
         SoftwareDelay(50);
         OLED_Clear();
-        BUZZER_OPEN(100);
+        // BUZZER_OPEN(100);
         // __set_FAULTMASK(1); //关闭所有中断
         if (APP_config.SetMod == currentMod || APP_config.SetMod == voltageMod)
         {
@@ -101,7 +105,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
         OLED_Clear();
         SoftwareDelay(50);
         OLED_Clear();
-        BUZZER_OPEN(100);
+        // BUZZER_OPEN(100);
         // __set_FAULTMASK(1); //关闭所有中断
         if (APP_config.SetMod == currentMod || APP_config.SetMod == voltageMod)
         {
@@ -121,7 +125,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
         break;
     case KEY3_Pin:
         // printf("KEY3\r\n");
-        BUZZER_OPEN(100);
+        // BUZZER_OPEN(100);
         if (APP_config.SetMod != noneMod)
         {
             APP_config.SetMod = noneMod;
@@ -139,11 +143,12 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
             {
                 Application_SC8815_Standby();
                 // printf("off");
+                // APP_config.SC8815Mod = SC8815Standby;
             }
             else {
-                Application_SC8815_Run();
-                Application_SC8815_loadStart();
+                // Application_SC8815_loadStart();
                 // printf("run");
+                APP_config.SC8815Mod = SC8815LoadStart;
             }
         }
         break;
@@ -185,7 +190,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
                             APP_config.Set_OutVoltage = APP_config.Set_OutVoltage - APP_config.set_Step;
                         }
                     }
-                    BUZZER_OPEN(100);
+                    // BUZZER_OPEN(100);
                 }
                 else if (((Encoder_A_Last_Value == 0 && Encoder_A_Value == 1) && (Encoder_B_Last_Value == 0 && Encoder_B_Value == 1)) || ((Encoder_A_Last_Value == 1 && Encoder_A_Value == 0) && (Encoder_B_Last_Value == 1 && Encoder_B_Value == 0)))  //顺时针旋转
                 {

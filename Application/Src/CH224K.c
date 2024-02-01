@@ -1,5 +1,6 @@
 #include "CH224K.h"
 #include "Application.h"
+#include "Application_ADC.h"
 
 /**
  *@brief 申请快充输入5V电压

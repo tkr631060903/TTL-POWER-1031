@@ -955,4 +955,15 @@ void SC8815_SetOTGFBMode(uint8_t NewVal)
 	I2C_WriteRegByte(SC8815_ADDR, SCREG_CTRL1_SET, tmp);
 }
 
+/**
+ *@brief 获取VBUS SHORT状态
+ * 
+ * @return 返回值0未进入保护模式，返回值1进入保护模式 
+ */
+uint8_t SC8815_GetVBUSShort(void)
+{
+	uint8_t temp = I2C_ReadRegByte(SC8815_ADDR, SCREG_STATUS) & 0x08;
+	return (temp == 0x08) ? 1 : 0;
+}
+
 /*****END OF FILE****/

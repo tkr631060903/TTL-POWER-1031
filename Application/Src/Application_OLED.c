@@ -1,4 +1,6 @@
 #include "Application_OLED.h"
+#include "Application_ADC.h"
+#include "Application_SC8815.h"
 
 extern volatile Application_Config APP_config;
 

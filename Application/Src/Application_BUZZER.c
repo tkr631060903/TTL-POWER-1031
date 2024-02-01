@@ -10,7 +10,7 @@ extern TIM_HandleTypeDef htim4;
 void BUZZER_OPEN(uint32_t time)
 {
     HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_4);
-    Application_SoftwareDelay(100);
+    Application_SoftwareDelay(time);
     HAL_TIM_PWM_Stop(&htim4, TIM_CHANNEL_4);
 }
 

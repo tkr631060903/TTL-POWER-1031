@@ -950,6 +950,11 @@
               <FileType>1</FileType>
               <FilePath>..\Application\Src\Application_BUZZER.c</FilePath>
             </File>
+            <File>
+              <FileName>Application_ADC.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Application\Src\Application_ADC.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

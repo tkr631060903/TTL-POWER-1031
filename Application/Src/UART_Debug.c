@@ -9,6 +9,7 @@
  * 
  */
 #include "UART_Debug.h"
+#include "Application.h"
 
 extern UART_HandleTypeDef huart2;
 
