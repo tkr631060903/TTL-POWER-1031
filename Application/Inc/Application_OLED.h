@@ -1,5 +1,5 @@
-#ifndef __Application_OLED_H__
-#define __Application_OLED_H__
+#ifndef Application_OLED_H
+#define Application_OLED_H
 
 #include "Application.h"
 #include "OLED.h"

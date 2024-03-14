@@ -81,75 +81,6 @@ void Application_Assert_Failed()
 }
 
 /**
- *@brief SC8815软件保护
- *
- */
-uint32_t VOUTOpenTime = 0;
-void SC8815_Soft_Protect(void)
-{
-    if (APP_config.SetMod == VINProtectMod || APP_config.SetMod == VOUTProtectMod)
-    {
-        return;
-    }
-    uint16_t temp = Get_VBAT_ADC_mV;
-    if (HAL_GPIO_ReadPin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin) == GPIO_PIN_RESET)
-    {
-        if ((temp <= APP_config.fastCharge_InVoltage - (APP_config.fastCharge_InVoltage * 0.1)) || (temp <= APP_config.DC_Voltage - (APP_config.DC_Voltage * 0.1))) // 输入保护
-        {
-            uint32_t VBAT = 0;
-            for (uint8_t i = 0; i < 5; i++)
-            {
-                if (VBAT == 0)
-                {
-                    VBAT = Get_VBAT_ADC_mV;
-                }
-                else {
-                    VBAT = (VBAT + Get_VBAT_ADC_mV) / 2;
-                }
-                HAL_Delay(10);
-            }
-            if ((VBAT <= APP_config.fastCharge_InVoltage - (APP_config.fastCharge_InVoltage * 0.1)) || (VBAT <= APP_config.DC_Voltage - (APP_config.DC_Voltage * 0.1)))
-            {
-                // printf("输入供电不足\r\n");
-                Application_SC8815_Standby();
-                OLED_Clear();
-                APP_config.SetMod = VINProtectMod;
-                // BUZZER_OPEN(200);
-            }
-        }
-        if (HAL_GetTick() - VOUTOpenTime >= 100)
-        {
-            if (SC8815_Read_VBUS_Current() >= APP_config.SC8815_VBUS_Current_Limit || Get_VBUS_ADC_mV <= APP_config.Set_OutVoltage - (APP_config.Set_OutVoltage * 0.1)) // 输出保护
-            {
-                uint32_t VBUS = 0, IBUS = 0;
-                for (uint8_t i = 0; i < 5; i++)
-                {
-                    if (VBUS == 0)
-                    {
-                        VBUS = Get_VBUS_ADC_mV;
-                        IBUS = SC8815_Read_VBUS_Current();
-                    }
-                    else {
-                        VBUS = (VBUS + Get_VBUS_ADC_mV) / 2;
-                        IBUS = (IBUS + SC8815_Read_VBUS_Current()) / 2;
-                    }
-                    HAL_Delay(10);
-                }
-                printf("VBUSSHORT:%d\r\n", SC8815_GetVBUSShort());
-                if (IBUS >= APP_config.SC8815_VBUS_Current_Limit || VBUS <= APP_config.Set_OutVoltage - (APP_config.Set_OutVoltage * 0.1))
-                {
-                    // printf("触发限流保护\r\n");
-                    Application_SC8815_Standby();
-                    OLED_Clear();
-                    APP_config.SetMod = VOUTProtectMod;
-                    // BUZZER_OPEN(200);
-                }
-            }
-        }
-    }
-}
-
-/**
  *@brief 软件延时72MHz时钟配置 = 1ms
  *
  * @param time
@@ -192,10 +123,10 @@ void KEY4_Button(void)
         // KEY4单击设置电压/电流/快充输入电压
         if (HAL_GPIO_ReadPin(KEY4_GPIO_Port, KEY4_Pin) == GPIO_PIN_SET)
         {
-            // BUZZER_OPEN(100);
+            BUZZER_OPEN(100);
             if (APP_config.SetMod == voltageMod)
             {
-                SC8815_SetOutputVoltage(APP_config.Set_OutVoltage);
+                SC8815_SetOutputVoltage(APP_config.VOUT);
                 APP_config.SetMod = noneMod;
                 APP_config.set_Step = 100;
             }

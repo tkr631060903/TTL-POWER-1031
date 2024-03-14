@@ -8,8 +8,8 @@
  * @copyright Copyright (c) 2023
  *
  */
-#ifndef __Application_H__
-#define __Application_H__
+#ifndef Application_H
+#define Application_H
 
 #include "main.h"
 #include "UART_Debug.h"
@@ -17,8 +17,8 @@
 #define KEY4_LONG_PRESS_THRESHOLD 2000 // 定义KEY4长按阈值，单位为毫秒
 // #define Get_VBUS_ADC_V ((float)ADC_Value[0] * (3.3 / 4096) / 0.0975)   // 获取MCU ADC采样VBUS单位V
 // #define Get_VBAT_ADC_V ((float)ADC_Value[1] * (3.3 / 4096) / 0.0975)   // 获取MCU ADC采样VBAT单位V
-#define Get_VBUS_ADC_mV ((10.754 * ((float)ADC_Value[0] * (3.3 / 4096)) - 0.1974) * 1000)   // 获取MCU ADC采样VBUS单位mV
-#define Get_VBAT_ADC_mV ((10.754 * ((float)ADC_Value[1] * (3.3 / 4096)) - 0.1974) * 1000)    // 获取MCU ADC采样VBAT单位mV
+// #define Get_VBUS_ADC_mV ((10.754 * ((float)ADC_Value[0] * (3.3 / 4096)) - 0.1974) * 1000)   // 获取MCU ADC采样VBUS单位mV
+// #define Get_VBAT_ADC_mV ((10.754 * ((float)ADC_Value[1] * (3.3 / 4096)) - 0.1974) * 1000)    // 获取MCU ADC采样VBAT单位mV
 
 
 void Application_main(void);
@@ -49,16 +49,16 @@ typedef enum
 
 typedef struct
 {
-    uint16_t Set_OutVoltage;   // 设定输出电压mv
-    uint16_t Set_OutVoltage_Old;   // 设定输出电压旧值mv
+    uint8_t SC8815Mod;  // SC8815当前工作模式
+    uint16_t VOUT;   // 设定输出电压mv
+    uint16_t VOUT_Old;   // 设定输出电压旧值mv
     uint16_t fastCharge_InVoltage;  // 快充输入电压v
     uint16_t SC8815_Battery_Current_Limit;  // 8815电池(输入)限流mA
     uint16_t SC8815_VBUS_Current_Limit; // 8815 VBUS(输出)限流mA
     uint16_t SC8815_VBUS_Current_Limit_Old; // 8815 VBUS(输出)限流旧值mA
-    SetModTypeDef SetMod;   // 设置当前为控制电压还是电流参数
     uint16_t DC_Voltage;   // DC电压单位mV
     uint16_t set_Step;   // 设置电压/电流步进
-    uint8_t SC8815Mod;
+    SetModTypeDef SetMod;   // 设置当前为控制电压还是电流参数
 }Application_Config;
 
 extern volatile Application_Config APP_config;

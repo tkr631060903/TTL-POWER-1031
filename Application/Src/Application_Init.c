@@ -37,7 +37,7 @@ void Application_Init(void)
     Application_CH224K_init();
     Application_SC8815_Init();
     OLED_Init();  //初始化OLED
-    APP_config.DC_Voltage = Get_VBAT_ADC_mV;
+    APP_config.DC_Voltage = App_getVBAT_mV();
     printf("DeadTime:%d\r\n", SC8815_GetDeadTime());
     printf("Init Success\r\n");
 }

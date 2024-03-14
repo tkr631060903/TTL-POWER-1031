@@ -4,12 +4,15 @@
  * @brief SC8815应用程序实现
  * @version 0.1
  * @date 2024-01-31
- * 
+ *
  * @copyright Copyright (c) 2024
- * 
+ *
  */
 #include "Application_SC8815.h"
 #include "Application.h"
+#include "Application_BUZZER.h"
+#include "Application_ADC.h"
+#include "Application_OLED.h"
 
 void SoftwareDelay(uint8_t ms)
 {
@@ -49,12 +52,12 @@ void Application_SC8815_loadStart(void)
 	if (APP_config.SC8815Mod == SC8815LoadStart)
 	{
 		extern uint32_t VOUTOpenTime;
-		VOUTOpenTime = HAL_GetTick();
 		APP_config.SC8815Mod = SC8815Run;
 		Application_SC8815_Run();
 		SC8815_SFB_Disable();
 		HAL_Delay(100);
 		SC8815_SFB_Enable();
+		VOUTOpenTime = HAL_GetTick();
 	}
 }
 
@@ -137,10 +140,10 @@ void Application_SC8815_Init(void)
 	extern volatile Application_Config APP_config;
 	APP_config.SC8815_Battery_Current_Limit = 12000;
 	APP_config.SC8815_VBUS_Current_Limit = 6000;
-	APP_config.Set_OutVoltage = 15000;
+	APP_config.VOUT = 15000;
 	SC8815_SetBatteryCurrLimit(APP_config.SC8815_Battery_Current_Limit);
 	SC8815_SetBusCurrentLimit(APP_config.SC8815_VBUS_Current_Limit);
-	SC8815_SetOutputVoltage(APP_config.Set_OutVoltage);
+	SC8815_SetOutputVoltage(APP_config.VOUT);
 	SC8815_OTG_Enable();
 
 	/*** 示例3, 读取 SC8815 ADC 数据 ****/
@@ -164,6 +167,78 @@ void Application_SC8815_Init(void)
 	// Application_SC8815_loadStart();
 
 	printf("SC8815 Init.\n");
+}
+
+
+/**
+ *@brief SC8815软件保护
+ *
+ */
+uint32_t VOUTOpenTime = 0;
+void SC8815_Soft_Protect(void)
+{
+    if (APP_config.SetMod == VINProtectMod || APP_config.SetMod == VOUTProtectMod)
+    {
+        return;
+    }
+    if (HAL_GPIO_ReadPin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin) == GPIO_PIN_RESET)
+    {
+        uint16_t temp = App_getVBAT_mV();
+        if ((temp <= APP_config.fastCharge_InVoltage - (APP_config.fastCharge_InVoltage * 0.1)) || (temp <= APP_config.DC_Voltage - (APP_config.DC_Voltage * 0.1))) // 输入保护
+        {
+            uint16_t VBAT = 0;
+            for (uint8_t i = 0; i < 5; i++)
+            {
+                if (VBAT == 0)
+                {
+                    VBAT = App_getVBAT_mV();
+                }
+                else {
+                    VBAT = (VBAT + App_getVBAT_mV()) / 2;
+                }
+                HAL_Delay(10);
+            }
+            if ((VBAT <= APP_config.fastCharge_InVoltage - (APP_config.fastCharge_InVoltage * 0.1)) || (VBAT <= APP_config.DC_Voltage - (APP_config.DC_Voltage * 0.1)))
+            {
+                // printf("输入供电不足\r\n");
+                Application_SC8815_Standby();
+                OLED_Clear();
+                APP_config.SetMod = VINProtectMod;
+                BUZZER_OPEN(200);
+            }
+        }
+        if (HAL_GetTick() - VOUTOpenTime >= 100)
+        {
+            if (SC8815_Read_VBUS_Current() >= APP_config.SC8815_VBUS_Current_Limit || App_getVBUS_mV() <= APP_config.VOUT - (APP_config.VOUT * 0.1)) // 输出保护
+            {
+                uint16_t VBUS = 0, IBUS = 0;
+                for (uint8_t i = 0; i < 5; i++)
+                {
+                    if (VBUS == 0)
+                    {
+                        VBUS = App_getVBUS_mV();
+                        IBUS = SC8815_Read_VBUS_Current();
+                    }
+                    else {
+                        VBUS = (VBUS + App_getVBUS_mV()) / 2;
+                        IBUS = (IBUS + SC8815_Read_VBUS_Current()) / 2;
+                    }
+                    printf("VBUS:%dmV, IBUS:%dmA\r\n", VBUS, IBUS);
+                    HAL_Delay(10);
+                }
+                printf("VBUSSHORT:%d\r\n", SC8815_GetVBUSShort());
+                if (IBUS >= APP_config.SC8815_VBUS_Current_Limit || VBUS <= APP_config.VOUT - (APP_config.VOUT * 0.1))
+                {
+                    printf("VBUS/5:%dmV, IBUS/5:%dmA\r\n", VBUS, IBUS);
+                    // printf("触发限流保护\r\n");
+                    Application_SC8815_Standby();
+                    OLED_Clear();
+                    APP_config.SetMod = VOUTProtectMod;
+                    BUZZER_OPEN(200);
+                }
+            }
+        }
+    }
 }
 
 /**

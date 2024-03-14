@@ -17,7 +17,7 @@ uint16_t ADC_Value[2];    // ADC值,ADC_Value[0] == VBUS,ADC_Value[1] == VBAT
  * 
  * @return VBUS单位mV 
  */
-float App_getVBUS_mV(void)
+uint16_t App_getVBUS_mV(void)
 {
     return ((10.754 * ((float)ADC_Value[0] * (3.3 / 4096)) - 0.1974) * 1000);
 }
@@ -27,7 +27,7 @@ float App_getVBUS_mV(void)
  * 
  * @return VBUS单位V 
  */
-float App_getVBUS_V(void)
+uint16_t App_getVBUS_V(void)
 {
     return 10.754 * ((float)ADC_Value[0] * (3.3 / 4096)) - 0.1974;
 }
@@ -37,7 +37,7 @@ float App_getVBUS_V(void)
  * 
  * @return VBAT单位mV 
  */
-float App_getVBAT_mV(void)
+uint16_t App_getVBAT_mV(void)
 {
     return ((10.754 * ((float)ADC_Value[1] * (3.3 / 4096)) - 0.1974) * 1000);
 }
@@ -47,7 +47,7 @@ float App_getVBAT_mV(void)
  * 
  * @return VBAT单位V 
  */
-float App_getVBAT_V(void)
+uint16_t App_getVBAT_V(void)
 {
     return 10.754 * ((float)ADC_Value[1] * (3.3 / 4096)) - 0.1974;
 }

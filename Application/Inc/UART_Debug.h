@@ -8,8 +8,8 @@
  * @copyright Copyright (c) 2023
  * 
  */
-#ifndef __UART_Debug_H__
-#define __UART_Debug_H__
+#ifndef UART_Debug_H
+#define UART_Debug_H
 
 #include <stdio.h>
 

@@ -8,8 +8,8 @@
  * @copyright Copyright (c) 2023
  * 
  */
-#ifndef __Application_Callback_H__
-#define __Application_Callback_H__
+#ifndef Application_Callback_H
+#define Application_Callback_H
 
 #include "Application.h"
 

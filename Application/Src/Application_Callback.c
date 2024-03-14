@@ -83,7 +83,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
         OLED_Clear();
         SoftwareDelay(50);
         OLED_Clear();
-        // BUZZER_OPEN(100);
+        BUZZER_OPEN(100);
         // __set_FAULTMASK(1); //关闭所有中断
         if (APP_config.SetMod == currentMod || APP_config.SetMod == voltageMod)
         {
@@ -105,7 +105,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
         OLED_Clear();
         SoftwareDelay(50);
         OLED_Clear();
-        // BUZZER_OPEN(100);
+        BUZZER_OPEN(100);
         // __set_FAULTMASK(1); //关闭所有中断
         if (APP_config.SetMod == currentMod || APP_config.SetMod == voltageMod)
         {
@@ -119,24 +119,24 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
         if (APP_config.SetMod == noneMod)
         {
             APP_config.SetMod = voltageMod;    // 设置调节输出电压模式
-            APP_config.Set_OutVoltage_Old = APP_config.Set_OutVoltage;
+            APP_config.VOUT_Old = APP_config.VOUT;
         }
         // __set_FAULTMASK(0); //开启所有中断
         break;
     case KEY3_Pin:
         // printf("KEY3\r\n");
-        // BUZZER_OPEN(100);
+        BUZZER_OPEN(100);
         if (APP_config.SetMod != noneMod)
         {
             APP_config.SetMod = noneMod;
             if (APP_config.SetMod == VINProtectMod || VOUTProtectMod)
             {
-                SC8815_SetOutputVoltage(APP_config.Set_OutVoltage);
+                SC8815_SetOutputVoltage(APP_config.VOUT);
                 SC8815_SetBusCurrentLimit(APP_config.SC8815_VBUS_Current_Limit);
                 break;
             }
             APP_config.SC8815_VBUS_Current_Limit = APP_config.SC8815_VBUS_Current_Limit_Old;
-            APP_config.Set_OutVoltage = APP_config.Set_OutVoltage_Old;
+            APP_config.VOUT = APP_config.VOUT_Old;
         }
         else {
             if (HAL_GPIO_ReadPin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin) == 0)
@@ -182,15 +182,15 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
                     }
                     else if (APP_config.SetMod == voltageMod)
                     {
-                        if ((int)APP_config.Set_OutVoltage - APP_config.set_Step <= 0)
+                        if ((int)APP_config.VOUT - APP_config.set_Step <= 0)
                         {
                             APP_config.SC8815_VBUS_Current_Limit = 0;
                         }
                         else {
-                            APP_config.Set_OutVoltage = APP_config.Set_OutVoltage - APP_config.set_Step;
+                            APP_config.VOUT = APP_config.VOUT - APP_config.set_Step;
                         }
                     }
-                    // BUZZER_OPEN(100);
+                    BUZZER_OPEN(100);
                 }
                 else if (((Encoder_A_Last_Value == 0 && Encoder_A_Value == 1) && (Encoder_B_Last_Value == 0 && Encoder_B_Value == 1)) || ((Encoder_A_Last_Value == 1 && Encoder_A_Value == 0) && (Encoder_B_Last_Value == 1 && Encoder_B_Value == 0)))  //顺时针旋转
                 {
@@ -205,10 +205,10 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
                     }
                     else if (APP_config.SetMod == voltageMod)
                     {
-                        APP_config.Set_OutVoltage = APP_config.Set_OutVoltage + APP_config.set_Step;
-                        if (APP_config.Set_OutVoltage >= 36000)
+                        APP_config.VOUT = APP_config.VOUT + APP_config.set_Step;
+                        if (APP_config.VOUT >= 36000)
                         {
-                            APP_config.Set_OutVoltage = 36000;
+                            APP_config.VOUT = 36000;
                         }
                     }
                     BUZZER_OPEN(100);

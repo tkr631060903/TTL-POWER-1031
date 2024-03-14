@@ -14,19 +14,19 @@ void APP_OLED_ShowVIN(uint8_t line)
 void APP_OLED_ShowVSET(uint8_t line)
 {
     OLED_ShowString(line, 1, "VSET:");
-    if (APP_config.Set_OutVoltage / 1000 >= 10)
+    if (APP_config.VOUT / 1000 >= 10)
     {
-        OLED_ShowNum(line, 6, APP_config.Set_OutVoltage / 1000, 2);
+        OLED_ShowNum(line, 6, APP_config.VOUT / 1000, 2);
         OLED_ShowString(line, 8, ".");
-        OLED_ShowNum(line, 9, APP_config.Set_OutVoltage / 100, 1);
-        OLED_ShowNum(line, 10, APP_config.Set_OutVoltage / 10, 1);
+        OLED_ShowNum(line, 9, APP_config.VOUT / 100, 1);
+        OLED_ShowNum(line, 10, APP_config.VOUT / 10, 1);
         OLED_ShowString(line, 11, "V");
     }
     else {
-        OLED_ShowNum(line, 6, APP_config.Set_OutVoltage / 1000, 1);
+        OLED_ShowNum(line, 6, APP_config.VOUT / 1000, 1);
         OLED_ShowString(line, 7, ".");
-        OLED_ShowNum(line, 8, APP_config.Set_OutVoltage / 100, 1);
-        OLED_ShowNum(line, 9, APP_config.Set_OutVoltage / 10, 1);
+        OLED_ShowNum(line, 8, APP_config.VOUT / 100, 1);
+        OLED_ShowNum(line, 9, APP_config.VOUT / 10, 1);
         OLED_ShowString(line, 10, "V");
     }
 }
@@ -54,7 +54,7 @@ void APP_OLED_ShowISET(uint8_t line)
 void APP_OLED_ShowVOUT(uint8_t line)
 {
     OLED_ShowString(line, 1, "VOUT:");
-    uint16_t temp = Get_VBUS_ADC_mV;
+    uint16_t temp = App_getVBUS_mV();
     // uint16_t temp = SC8815_Read_VBUS_Voltage();
     if (temp / 1000 >= 10)
     {
@@ -100,7 +100,7 @@ void APP_OLED_Show_SETVOUT(void)
     // OLED_Clear_Part(3, 1, 16);
     // OLED_Clear_Part(4, 1, 16);
     OLED_ShowString(1, 1, "SETVOUT:");
-    uint16_t temp = APP_config.Set_OutVoltage;
+    uint16_t temp = APP_config.VOUT;
     if (temp / 1000 >= 10)
     {
         OLED_ShowNum(1, 9, temp / 1000, 2);

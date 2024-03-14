@@ -8,16 +8,16 @@
  * @copyright Copyright (c) 2024
  * 
  */
-#ifndef __Application_ADC_H__
-#define __Application_ADC_H__
+#ifndef Application_ADC_H
+#define Application_ADC_H
 
 #include "Application.h"
 
 extern uint16_t ADC_Value[2];
 
-float App_getVBUS_mV(void);
-float App_getVBUS_V(void);
-float App_getVBAT_mV(void);
-float App_getVBAT_V(void);
+uint16_t App_getVBUS_mV(void);
+uint16_t App_getVBUS_V(void);
+uint16_t App_getVBAT_mV(void);
+uint16_t App_getVBAT_V(void);
 
 #endif

@@ -8,8 +8,8 @@
  * @copyright Copyright (c) 2024
  * 
  */
-#ifndef __Application_SC8815_H__
-#define __Application_SC8815_H__
+#ifndef Application_SC8815_H
+#define Application_SC8815_H
 
 #include "SC8815.h"
 
@@ -26,5 +26,6 @@ void Application_SC8815_Shutdown(void);
 void Application_SC8815_Standby(void);
 void Application_SC8815_Run(void);
 void Application_SC8815_loadStart(void);
+void SC8815_Soft_Protect(void);
 
 #endif

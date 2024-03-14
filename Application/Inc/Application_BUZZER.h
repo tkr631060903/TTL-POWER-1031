@@ -1,5 +1,5 @@
-#ifndef __Application_BUZZER_H__
-#define __Application_BUZZER_H__
+#ifndef Application_BUZZER_H
+#define Application_BUZZER_H
 
 #include "Application.h"
 
