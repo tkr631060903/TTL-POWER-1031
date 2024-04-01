@@ -11,7 +11,7 @@
 #include "Application.h"
 #include "Application_ADC.h"
 #include "Application_SC8815.h"
-#include "Application_OLED.h"
+// #include "Application_OLED.h"
 #include "Application_BUZZER.h"
 
 volatile Application_Config APP_config;
@@ -52,7 +52,7 @@ void Application_main()
         // HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_4);
         // HAL_Delay(100);
         // HAL_TIM_PWM_Stop(&htim4, TIM_CHANNEL_4);
-        APP_OLED_Show();
+        // APP_OLED_Show();
         KEY4_Button();
         SC8815_Soft_Protect();
         SET_LED1_Status();

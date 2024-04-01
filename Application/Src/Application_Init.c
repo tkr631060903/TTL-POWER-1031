@@ -14,7 +14,6 @@
 #include "Application_SC8815.h"
 #include "usart.h"
 #include "CH224K.h"
-#include "Application_OLED.h"
 
 uint8_t Uart2_ReceiveBuff = 0;  //串口2接收缓冲区
 
@@ -36,7 +35,6 @@ void Application_Init(void)
     APP_config.set_Step = 100;  // 设置默认步进
     Application_CH224K_init();
     Application_SC8815_Init();
-    OLED_Init();  //初始化OLED
     APP_config.DC_Voltage = App_getVBAT_mV();
     printf("DeadTime:%d\r\n", SC8815_GetDeadTime());
     printf("Init Success\r\n");

@@ -12,7 +12,7 @@
 #include "Application.h"
 #include "Application_BUZZER.h"
 #include "Application_ADC.h"
-#include "Application_OLED.h"
+// #include "Application_OLED.h"
 
 void SoftwareDelay(uint8_t ms)
 {
@@ -202,7 +202,7 @@ void SC8815_Soft_Protect(void)
             {
                 // printf("输入供电不足\r\n");
                 Application_SC8815_Standby();
-                OLED_Clear();
+                // OLED_Clear();
                 APP_config.SetMod = VINProtectMod;
                 BUZZER_OPEN(200);
             }
@@ -232,7 +232,7 @@ void SC8815_Soft_Protect(void)
                     printf("VBUS/5:%dmV, IBUS/5:%dmA\r\n", VBUS, IBUS);
                     // printf("触发限流保护\r\n");
                     Application_SC8815_Standby();
-                    OLED_Clear();
+                    // OLED_Clear();
                     APP_config.SetMod = VOUTProtectMod;
                     BUZZER_OPEN(200);
                 }

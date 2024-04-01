@@ -12,7 +12,6 @@
 #include <string.h>
 #include "Application_SC8815.h"
 #include "usart.h"
-#include "Application_OLED.h"
 #include "Application_BUZZER.h"
 
 char uart2_Cmd[UART_Cmd_Length];
@@ -80,9 +79,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
     {
     case KEY1_Pin:
         // printf("KEY1\r\n");
-        OLED_Clear();
         SoftwareDelay(50);
-        OLED_Clear();
         BUZZER_OPEN(100);
         // __set_FAULTMASK(1); //关闭所有中断
         if (APP_config.SetMod == currentMod || APP_config.SetMod == voltageMod)
@@ -102,9 +99,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
         // __set_FAULTMASK(0); //开启所有中断
         break;
     case KEY2_Pin:
-        OLED_Clear();
         SoftwareDelay(50);
-        OLED_Clear();
         BUZZER_OPEN(100);
         // __set_FAULTMASK(1); //关闭所有中断
         if (APP_config.SetMod == currentMod || APP_config.SetMod == voltageMod)

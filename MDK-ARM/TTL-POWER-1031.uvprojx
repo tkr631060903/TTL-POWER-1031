@@ -55,7 +55,7 @@
           <CreateHexFile>1</CreateHexFile>
           <DebugInformation>1</DebugInformation>
           <BrowseInformation>1</BrowseInformation>
-          <ListingPath></ListingPath>
+          <ListingPath>.\Listing\</ListingPath>
           <HexFormatSelection>1</HexFormatSelection>
           <Merge32K>0</Merge32K>
           <CreateBatchFile>0</CreateBatchFile>
@@ -934,16 +934,6 @@
               <FileName>Application_SC8815.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Application\Src\Application_SC8815.c</FilePath>
-            </File>
-            <File>
-              <FileName>OLED.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Application\Src\OLED.c</FilePath>
-            </File>
-            <File>
-              <FileName>Application_OLED.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Application\Src\Application_OLED.c</FilePath>
             </File>
             <File>
               <FileName>Application_BUZZER.c</FileName>
