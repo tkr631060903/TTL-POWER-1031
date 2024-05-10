@@ -13,11 +13,15 @@
 
 #include "Application.h"
 
-extern uint16_t ADC_Value[2];
+#define SAMPLING_RATE 0.0008056640625  // 3.3/4096
 
-uint16_t App_getVBUS_mV(void);
-uint16_t App_getVBUS_V(void);
-uint16_t App_getVBAT_mV(void);
-uint16_t App_getVBAT_V(void);
+extern uint16_t ADC_Value[4];
+
+float App_getVBUS_mV(void);
+float App_getVBUS_V(void);
+float App_getIBUS_mA(void);
+float App_getIBUS_A(void);
+float App_getVBAT_mV(void);
+float App_getVBAT_V(void);
 
 #endif

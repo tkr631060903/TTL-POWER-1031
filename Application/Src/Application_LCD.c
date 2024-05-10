@@ -1,0 +1,179 @@
+#include "Application_LCD.h"
+#include "pic.h"
+#include "Application_ADC.h"
+#include "Application_SC8815.h"
+
+void LCD_show(void)
+{
+    LCD_ShowString(0, 0, "VBAT:", RED, BLACK, 32, 0);
+    LCD_ShowFloatNum(80, 0, App_getVBAT_V(), 4, RED, BLACK, 32);
+    LCD_ShowChar(160, 0, 'V', RED, BLACK, 32, 0);
+    LCD_ShowString(0, 33, "VBUS:", RED, BLACK, 32, 0);
+    LCD_ShowFloatNum(80, 33, App_getVBUS_V(), 4, RED, BLACK, 32);
+    LCD_ShowChar(160, 33, 'V', RED, BLACK, 32, 0);
+    LCD_ShowString(0, 66, "IBUS:", RED, BLACK, 32, 0);
+    LCD_ShowFloatNum(80, 66, App_getIBUS_mA(), 4, RED, BLACK, 32);
+    LCD_ShowString(160, 66, "mA", RED, BLACK, 32, 0);
+    LCD_ShowString(0, 99, "88VBUS:", RED, BLACK, 32, 0);
+    LCD_ShowIntNum(110, 99, SC8815_Read_VBUS_Voltage(), 5, RED, BLACK, 32);
+    LCD_ShowString(190, 99, "mV", RED, BLACK, 32, 0);
+}
+
+extern Application_Config APP_config;
+
+void APP_LCD_ShowVIN()
+{
+    LCD_ShowString(0, 0, "VIN:", RED, BLACK, 32, 0);
+    LCD_ShowIntNum(60, 0, APP_config.fastCharge_InVoltage, 2, RED, BLACK, 32);
+    LCD_ShowChar(100, 0, 'V', RED, BLACK, 32, 0);
+}
+
+void APP_LCD_ShowVSET()
+{
+    LCD_ShowString(0, 0, "VSET:", RED, BLACK, 32, 0);
+    float temp = APP_config.VOUT / 1000;
+    if (temp < 10)
+    {
+        LCD_ShowFloatNum(80, 0, temp, 3, RED, BLACK, 32);
+        LCD_ShowChar(150, 0, 'V', RED, BLACK, 32, 0);
+    }
+    else {
+        LCD_ShowFloatNum(80, 0, temp, 4, RED, BLACK, 32);
+        LCD_ShowChar(160, 0, 'V', RED, BLACK, 32, 0);
+    }
+}
+
+void APP_LCD_ShowISET()
+{
+    LCD_ShowString(0, 33, "ISET:", RED, BLACK, 32, 0);
+    float temp = APP_config.SC8815_VBUS_Current_Limit / 1000;
+    if (temp < 10)
+    {
+        LCD_ShowFloatNum(80, 33, temp, 3, RED, BLACK, 32);
+        LCD_ShowChar(150, 33, 'A', RED, BLACK, 32, 0);
+    }
+    else {
+        LCD_ShowFloatNum(80, 33, temp, 4, RED, BLACK, 32);
+        LCD_ShowChar(160, 33, 'A', RED, BLACK, 32, 0);
+    }
+}
+
+void APP_LCD_ShowVOUT()
+{
+    LCD_ShowString(0, 66, "VOUT:", RED, BLACK, 32, 0);
+    float temp = App_getVBUS_mV() / 1000;
+    if (temp < 10)
+    {
+        LCD_ShowFloatNum(80, 66, temp, 3, RED, BLACK, 32);
+        LCD_ShowChar(150, 66, 'V', RED, BLACK, 32, 0);
+    }
+    else {
+        LCD_ShowFloatNum(80, 66, temp, 4, RED, BLACK, 32);
+        LCD_ShowChar(160, 66, 'V', RED, BLACK, 32, 0);
+    }
+}
+
+void APP_LCD_ShowIOUT()
+{
+    LCD_ShowString(0, 99, "IOUT:", RED, BLACK, 32, 0);
+    float temp = SC8815_Read_VBUS_Current() / 1000;
+    if (temp < 10)
+    {
+        LCD_ShowFloatNum(80, 99, temp, 3, RED, BLACK, 32);
+        LCD_ShowChar(150, 99, 'A', RED, BLACK, 32, 0);
+    }
+    else {
+        LCD_ShowFloatNum(80, 99, temp, 4, RED, BLACK, 32);
+        LCD_ShowChar(160, 99, 'A', RED, BLACK, 32, 0);
+    }
+}
+
+void APP_LCD_Show_SETVOUT(void)
+{
+    LCD_ShowString(0, 0, "SETVOUT:", RED, BLACK, 32, 0);
+    float temp = APP_config.VOUT / 1000;
+    if (temp < 10)
+    {
+        LCD_ShowFloatNum(140, 0, temp, 3, RED, BLACK, 32);
+        LCD_ShowChar(220, 0, 'V', RED, BLACK, 32, 0);
+    }
+    else {
+        LCD_ShowFloatNum(140, 0, temp, 4, RED, BLACK, 32);
+        LCD_ShowChar(240, 0, 'V', RED, BLACK, 32, 0);
+    }
+}
+
+void APP_LCD_Show_SETIOUT(void)
+{
+    LCD_ShowString(0, 0, "SETIOUT:", RED, BLACK, 32, 0);
+    float temp = APP_config.SC8815_VBUS_Current_Limit / 1000;
+    if (temp < 10)
+    {
+        LCD_ShowFloatNum(140, 0, temp, 3, RED, BLACK, 32);
+        LCD_ShowChar(220, 0, 'A', RED, BLACK, 32, 0);
+    }
+    else {
+        LCD_ShowFloatNum(140, 0, temp, 4, RED, BLACK, 32);
+        LCD_ShowChar(240, 0, 'A', RED, BLACK, 32, 0);
+    }
+}
+
+void APP_LCD_Show_VINProtectMod(void)
+{
+    LCD_ShowString(0, 0, "VINProtect:", RED, BLACK, 32, 0);
+}
+
+void APP_LCD_Show_VOUTProtectMod(void)
+{
+    LCD_ShowString(0, 0, "VOUTProtect:", RED, BLACK, 32, 0);
+}
+
+void APP_LCD_Show_fastChargeMod(void)
+{
+    LCD_ShowString(0, 0, "fastCharge:", RED, BLACK, 32, 0);
+}
+
+static uint32_t LCDFlushTime = 0;
+void APP_LCD_Show(void)
+{
+    if (APP_config.LCD_Clear)
+    {
+        LCD_Fill_DMA(0, 0, LCD_W, LCD_H, BLACK);
+        APP_config.LCD_Clear = 0;
+        return;
+    }
+    switch (APP_config.SetMod)
+    {
+    case noneMod:
+        if (LCDFlushTime == 0)
+        {
+            LCDFlushTime = HAL_GetTick();
+        }
+        else if (HAL_GetTick() - LCDFlushTime >= 300)
+        {
+            LCDFlushTime = 0;
+            APP_LCD_ShowVSET();
+            APP_LCD_ShowISET();
+            APP_LCD_ShowVOUT();
+            APP_LCD_ShowIOUT();
+        }
+        break;
+    case voltageMod:
+        APP_LCD_Show_SETVOUT();
+        break;
+    case currentMod:
+        APP_LCD_Show_SETIOUT();
+        break;
+    case VINProtectMod:
+        APP_LCD_Show_VINProtectMod();
+        break;
+    case VOUTProtectMod:
+        APP_LCD_Show_VOUTProtectMod();
+        break;
+    case fastChargeMod:
+        APP_LCD_Show_fastChargeMod();
+        break;
+    default:
+        break;
+    }
+}

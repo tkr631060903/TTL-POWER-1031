@@ -49,7 +49,8 @@ typedef enum
 typedef struct
 {
     uint8_t SC8815Mod;  // SC8815当前工作模式
-    uint16_t VOUT;   // 设定输出电压mv
+    uint8_t LCD_Clear;  // LCD是否清屏
+    float VOUT;   // 设定输出电压mv
     uint16_t VOUT_Old;   // 设定输出电压旧值mv
     uint16_t fastCharge_InVoltage;  // 快充输入电压v
     uint16_t SC8815_Battery_Current_Limit;  // 8815电池(输入)限流mA
@@ -60,6 +61,6 @@ typedef struct
     SetModTypeDef SetMod;   // 设置当前为控制电压还是电流参数
 }Application_Config;
 
-extern volatile Application_Config APP_config;
+extern Application_Config APP_config;
 
 #endif

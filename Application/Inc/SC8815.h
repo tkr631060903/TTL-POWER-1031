@@ -22,7 +22,6 @@ extern "C" {
 
 //包含标准类型定义头文件
 #include <stdint.h>
-#include "i2c.h"
 
 //使用此库需要提供以下外部函数,这是SC8815库需要使用的函数
 extern void I2C_WriteRegByte(uint8_t SlaveAddress, uint8_t RegAddress, uint8_t ByteData);   //通过I2C向设备寄存器写一个字节

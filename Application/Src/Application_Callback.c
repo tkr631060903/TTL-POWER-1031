@@ -14,38 +14,37 @@
 #include "usart.h"
 #include "Application_BUZZER.h"
 
-char uart2_Cmd[UART_Cmd_Length];
-int cmd_Index = 0;  //串口1命令计数指针
-
-/**
- * @brief 串口中断回调函数
- *
- * @param huart
- */
+ /**
+  * @brief 串口中断回调函数
+  *
+  * @param huart
+  */
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart)
 {
-    if (huart == &huart2)
+    if (huart == &huart1)
     {
-        extern uint8_t Uart2_ReceiveBuff;
-        HAL_UART_Transmit(&huart2, &Uart2_ReceiveBuff, 1, 1000);    //调式串口回显
-        uart2_Cmd[cmd_Index] = (char)Uart2_ReceiveBuff;   //保持串口命令到uart2_Cmd
+        static char uart1_Cmd[UART_Cmd_Length];
+        static int cmd_Index = 0;  //串口1命令计数指针
+        extern uint8_t Uart1_ReceiveBuff;
+        HAL_UART_Transmit(&huart1, &Uart1_ReceiveBuff, 1, 1000);    //调式串口回显
+        uart1_Cmd[cmd_Index] = (char)Uart1_ReceiveBuff;   //保持串口命令到uart1_Cmd
         cmd_Index++;
         if (cmd_Index >= UART_Cmd_Length)
         {
-            // 初始化uart2_Cmd，uart2_Cmd全置为0
-            memset(uart2_Cmd, 0, UART_Cmd_Length);
+            // 初始化uart1_Cmd，uart1_Cmd全置为0
+            memset(uart1_Cmd, 0, UART_Cmd_Length);
             cmd_Index = 0;
             // while (cmd_Index > 0)
             // {
-            //     uart2_Cmd[cmd_Index] = 0;
+            //     uart1_Cmd[cmd_Index] = 0;
             //     cmd_Index--;
             // }
-            // uart2_Cmd[0] = 0;
+            // uart1_Cmd[0] = 0;
         }
-        if (Uart2_ReceiveBuff == '\r')
+        if (Uart1_ReceiveBuff == '\r')
         {
             printf("\n");
-            if (strcmp("rst\r", uart2_Cmd) == 0)
+            if (strcmp("rst\r", uart1_Cmd) == 0)
             {
                 printf("SysRest\r\n");
                 __set_FAULTMASK(1); //关闭所有中断
@@ -54,11 +53,11 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart)
             else {
                 printf("Not Cmd\r\n");
             }
-            // 初始化uart2_Cmd，uart2_Cmd全置为0
-            memset(uart2_Cmd, 0, UART_Cmd_Length);
+            // 初始化uart1_Cmd，uart1_Cmd全置为0
+            memset(uart1_Cmd, 0, UART_Cmd_Length);
             cmd_Index = 0;
         }
-        HAL_UART_Receive_IT(&huart2, &Uart2_ReceiveBuff, 1);
+        HAL_UART_Receive_IT(&huart1, &Uart1_ReceiveBuff, 1);
     }
 }
 
@@ -74,13 +73,18 @@ int Encoder_B_Value = 0;                 //第二次B项的值
  */
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
-    extern volatile Application_Config APP_config;
+    extern Application_Config APP_config;
     switch (GPIO_Pin)
     {
     case KEY1_Pin:
         // printf("KEY1\r\n");
-        SoftwareDelay(50);
+        // SoftwareDelay(50);
+        // if (HAL_GPIO_ReadPin(KEY1_GPIO_Port, KEY1_Pin) == GPIO_PIN_SET)
+        // {
+        //     return;
+        // }
         BUZZER_OPEN(100);
+        APP_config.LCD_Clear = 1;
         // __set_FAULTMASK(1); //关闭所有中断
         if (APP_config.SetMod == currentMod || APP_config.SetMod == voltageMod)
         {
@@ -99,8 +103,14 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
         // __set_FAULTMASK(0); //开启所有中断
         break;
     case KEY2_Pin:
-        SoftwareDelay(50);
+        // SoftwareDelay(50);
+        // if (HAL_GPIO_ReadPin(KEY2_GPIO_Port, KEY2_Pin) == GPIO_PIN_SET)
+        // {
+        //     return;
+        // }
+        // printf("KEY2\r\n");
         BUZZER_OPEN(100);
+        APP_config.LCD_Clear = 1;
         // __set_FAULTMASK(1); //关闭所有中断
         if (APP_config.SetMod == currentMod || APP_config.SetMod == voltageMod)
         {
@@ -119,13 +129,19 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
         // __set_FAULTMASK(0); //开启所有中断
         break;
     case KEY3_Pin:
+        // SoftwareDelay(10);
+        // if (HAL_GPIO_ReadPin(KEY3_GPIO_Port, KEY3_Pin) == GPIO_PIN_SET)
+        // {
+        //     return;
+        // }
         // printf("KEY3\r\n");
-        BUZZER_OPEN(100);
+        // BUZZER_OPEN(100);
         if (APP_config.SetMod != noneMod)
         {
             APP_config.SetMod = noneMod;
             if (APP_config.SetMod == VINProtectMod || VOUTProtectMod)
             {
+                APP_config.LCD_Clear = 1;
                 SC8815_SetOutputVoltage(APP_config.VOUT);
                 SC8815_SetBusCurrentLimit(APP_config.SC8815_VBUS_Current_Limit);
                 break;
@@ -141,9 +157,10 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
                 // APP_config.SC8815Mod = SC8815Standby;
             }
             else {
+                // APP_config.SC8815Mod = SC8815LoadStart;
+                Application_SC8815_Run();
                 // Application_SC8815_loadStart();
                 // printf("run");
-                APP_config.SC8815Mod = SC8815LoadStart;
             }
         }
         break;

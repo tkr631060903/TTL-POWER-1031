@@ -12,33 +12,161 @@
 #include "Application.h"
 #include "Application_BUZZER.h"
 #include "Application_ADC.h"
-// #include "Application_OLED.h"
+ // #include "Application_SC8815.h"
 
+/**
+ *@brief 软件延时
+ *
+ * @param ms 毫秒
+ */
 void SoftwareDelay(uint8_t ms)
 {
 	Application_SoftwareDelay(ms);
 }
 
-void I2C_WriteRegByte(uint8_t SlaveAddress, uint8_t RegAddress, uint8_t ByteData)
+//延时
+void IIC_delay(void)
 {
-	uint8_t data[2] = { RegAddress, ByteData };
-	// HAL_StatusTypeDef status = HAL_I2C_Master_Transmit(&hi2c2, SlaveAddress, data, 2, 100);
-	// printf("status = %d\r\n", status);
-	HAL_I2C_Master_Transmit(&hi2c2, SlaveAddress, data, 2, 100);
+	// uint8_t i;
+	// for (i = 0; i < 10; i++);
+	i2c_delay(5);
+}
+
+/**
+ *@brief SC8815软件I2C起始信号
+ *
+ */
+void i2c_Start(void)
+{
+	SC8815_SDA_Set();
+	SC8815_SCL_Set();
+	IIC_delay();
+	SC8815_SDA_Clr();
+	IIC_delay();
+	SC8815_SCL_Clr();
+	IIC_delay();
+}
+
+//结束信号
+void i2c_Stop(void)
+{
+	SC8815_SDA_Clr();
+	SC8815_SCL_Set();
+	IIC_delay();
+	SC8815_SDA_Set();
+}
+
+//等待信号响应
+void i2c_WaitAck(void) //测数据信号的电平
+{
+	SC8815_SDA_Set();
+	IIC_delay();
+	SC8815_SCL_Set();
+	IIC_delay();
+	SC8815_SCL_Clr();
+	IIC_delay();
+}
+
+/**
+ *@brief SC8815软件I2C非应答信号
+ *
+ */
+void i2c_NAck(void)
+{
+	SC8815_I2C_SDA_1();    //cpu驱动SDA=1
+	IIC_delay();
+	SC8815_I2C_SCL_1();    //产生一个高电平时钟
+	IIC_delay();
+	SC8815_I2C_SCL_0();
+	IIC_delay();
+}
+
+//写入一个字节
+void i2c_SendByte(uint8_t dat)
+{
+	uint8_t i;
+	for (i = 0;i < 8;i++)
+	{
+		if (dat & 0x80)//将dat的8位从最高位依次写入
+		{
+			SC8815_SDA_Set();
+		}
+		else
+		{
+			SC8815_SDA_Clr();
+		}
+		IIC_delay();
+		SC8815_SCL_Set();
+		IIC_delay();
+		SC8815_SCL_Clr();//将时钟信号设置为低电平
+		dat <<= 1;
+	}
+}
+
+/**
+ *@brief SC8815软件I2C读取一个字节
+ *
+ * @return uint8_t 读取到的数据
+ */
+uint8_t i2c_ReadByte(void)
+{
+	uint8_t i;
+	uint8_t value = 0;
+	/*读取到第一个bit为数据的bit7*/
+	for (i = 0;i < 8;i++)
+	{
+		value <<= 1;
+		SC8815_I2C_SCL_1();
+		IIC_delay();
+		if (SC8815_I2C_SDA_READ())
+		{
+			value++;
+		}
+		SC8815_I2C_SCL_0();
+		IIC_delay();
+	}
+	return value;
 }
 
 uint8_t I2C_ReadRegByte(uint8_t SlaveAddress, uint8_t RegAddress)
 {
-	uint8_t ReceiveData = 0;
-	// HAL_StatusTypeDef status = HAL_I2C_Master_Transmit(&hi2c2, SlaveAddress, &RegAddress, 1, 100);
-	// printf("status = %d\r\n", status);
-	// status = HAL_I2C_Master_Receive(&hi2c2, SlaveAddress, &ReceiveData, 1, 100);
-	// printf("status = %d\r\n", status);
-	// printf("ReceiveData = %x\r\n", ReceiveData);
-	HAL_I2C_Master_Transmit(&hi2c2, SlaveAddress, &RegAddress, 1, 100);
-	HAL_I2C_Master_Receive(&hi2c2, SlaveAddress, &ReceiveData, 1, 100);
-	return ReceiveData;
+	i2c_Start();
+	i2c_SendByte(SC8815_WRITE_ADDR);
+	i2c_WaitAck();
+	i2c_SendByte(RegAddress);
+	i2c_WaitAck();
+	i2c_Start();
+	i2c_SendByte(SC8815_READ_ADDR);
+	i2c_WaitAck();
+	uint8_t data = i2c_ReadByte();
+	i2c_NAck();
+	i2c_Stop();
+	return data;
 }
+
+void I2C_WriteRegByte(uint8_t SlaveAddress, uint8_t RegAddress, uint8_t ByteData)
+{
+	i2c_Start();
+	i2c_SendByte(SC8815_WRITE_ADDR);
+	i2c_WaitAck();
+	i2c_SendByte(RegAddress);
+	i2c_WaitAck();
+	i2c_SendByte(ByteData);
+	i2c_WaitAck();
+	i2c_Stop();
+	// while (I2C_ReadRegByte(SlaveAddress, RegAddress) != ByteData)
+	// {
+	// 	i2c_Start();
+	// 	i2c_SendByte(SC8815_WRITE_ADDR);
+	// 	i2c_WaitAck();
+	// 	i2c_SendByte(RegAddress);
+	// 	i2c_WaitAck();
+	// 	i2c_SendByte(ByteData);
+	// 	i2c_WaitAck();
+	// 	i2c_Stop();
+	// }
+}
+
 
 /**
  *@brief SC8815带载启动
@@ -49,16 +177,14 @@ void Application_SC8815_loadStart(void)
 	// SC8815_SFB_Disable();
 	// Application_SoftwareDelay(50);
 	// SC8815_SFB_Enable();
-	if (APP_config.SC8815Mod == SC8815LoadStart)
-	{
-		extern uint32_t VOUTOpenTime;
-		APP_config.SC8815Mod = SC8815Run;
-		Application_SC8815_Run();
-		SC8815_SFB_Disable();
-		HAL_Delay(100);
-		SC8815_SFB_Enable();
-		VOUTOpenTime = HAL_GetTick();
-	}
+	extern uint32_t VOUTOpenTime;
+	APP_config.SC8815Mod = SC8815Run;
+	Application_SC8815_Run();
+	SC8815_SFB_Disable();
+	// HAL_Delay(50);
+	Application_SoftwareDelay(50);
+	SC8815_SFB_Enable();
+	VOUTOpenTime = HAL_GetTick();
 }
 
 void Application_SC8815_Init(void)
@@ -72,12 +198,12 @@ void Application_SC8815_Init(void)
 	SoftwareDelay(50);   //必要的启动延时
 
 	//配置 SC8815 电池参数选项
-	SC8815_BatteryConfigStruct.IRCOMP = SCBAT_IRCOMP_0mR;
+	SC8815_BatteryConfigStruct.IRCOMP = SCBAT_IRCOMP_20mR;
 	// SCBAT_VBAT_SEL_Internal 内部反馈
 	// SCBAT_VBAT_SEL_External 外部反馈
-	SC8815_BatteryConfigStruct.VBAT_SEL = SCBAT_VBAT_SEL_External;
-	SC8815_BatteryConfigStruct.CSEL = SCBAT_CSEL_4S;
-	SC8815_BatteryConfigStruct.VCELL = SCBAT_VCELL_4v50;
+	SC8815_BatteryConfigStruct.VBAT_SEL = SCBAT_VBAT_SEL_Internal;
+	SC8815_BatteryConfigStruct.CSEL = SCBAT_CSEL_3S;
+	SC8815_BatteryConfigStruct.VCELL = SCBAT_VCELL_4v10;
 	SC8815_BatteryConfig(&SC8815_BatteryConfigStruct);
 
 	//配置 SC8815 硬件参数选项
@@ -86,15 +212,15 @@ void Application_SC8815_Init(void)
 	SC8815_HardwareInitStruct.VBAT_RATIO = SCHWI_VBAT_RATIO_12_5x;
 	SC8815_HardwareInitStruct.VBUS_RATIO = SCHWI_VBUS_RATIO_12_5x;
 	SC8815_HardwareInitStruct.VINREG_Ratio = SCHWI_VINREG_RATIO_100x;
-	SC8815_HardwareInitStruct.SW_FREQ = SCHWI_FREQ_450KHz;
-	SC8815_HardwareInitStruct.DeadTime = SCHWI_DT_20ns;
+	SC8815_HardwareInitStruct.SW_FREQ = SCHWI_FREQ_150KHz;
+	SC8815_HardwareInitStruct.DeadTime = SCHWI_DT_80ns;
 	SC8815_HardwareInitStruct.ICHAR = SCHWI_ICHAR_IBAT;
 	SC8815_HardwareInitStruct.TRICKLE = SCHWI_TRICKLE_Disable;
 	SC8815_HardwareInitStruct.TERM = SCHWI_TERM_Enable;
 	// VBUS电压反馈模式: 
 	//   SCHWI_FB_Internal 内部反馈(最高电压25.6V)
 	//   SCHWI_FB_External 外部分压电阻反馈(最大输出不建议超过36V[手册上最大输出电压且需考虑外围元件耐压值]) 
-	SC8815_HardwareInitStruct.FB_Mode = SCHWI_FB_External;
+	SC8815_HardwareInitStruct.FB_Mode = SCHWI_FB_Internal;
 	SC8815_HardwareInitStruct.TRICKLE_SET = SCHWI_TRICKLE_SET_60;
 	SC8815_HardwareInitStruct.OVP = SCHWI_OVP_Enable;
 	SC8815_HardwareInitStruct.DITHER = SCHWI_DITHER_Disable;
@@ -137,10 +263,10 @@ void Application_SC8815_Init(void)
 	// SC8815_SetBatteryCurrLimit(5000);
 	// SC8815_SetBusCurrentLimit(3000);
 	// SC8815_SetOutputVoltage(12000);
-	extern volatile Application_Config APP_config;
+	extern Application_Config APP_config;
 	APP_config.SC8815_Battery_Current_Limit = 12000;
-	APP_config.SC8815_VBUS_Current_Limit = 6000;
-	APP_config.VOUT = 15000;
+	APP_config.SC8815_VBUS_Current_Limit = 1000;
+	APP_config.VOUT = 5000;
 	SC8815_SetBatteryCurrLimit(APP_config.SC8815_Battery_Current_Limit);
 	SC8815_SetBusCurrentLimit(APP_config.SC8815_VBUS_Current_Limit);
 	SC8815_SetOutputVoltage(APP_config.VOUT);
@@ -163,8 +289,7 @@ void Application_SC8815_Init(void)
 //	{
 //			// EOC 中断处理代码
 //	}
-	// HAL_Delay(500);
-	// Application_SC8815_loadStart();
+	// Application_SC8815_Run();
 
 	printf("SC8815 Init.\n");
 }
@@ -177,68 +302,68 @@ void Application_SC8815_Init(void)
 uint32_t VOUTOpenTime = 0;
 void SC8815_Soft_Protect(void)
 {
-    if (APP_config.SetMod == VINProtectMod || APP_config.SetMod == VOUTProtectMod)
-    {
-        return;
-    }
-    if (HAL_GPIO_ReadPin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin) == GPIO_PIN_RESET)
-    {
-        uint16_t temp = App_getVBAT_mV();
-        if ((temp <= APP_config.fastCharge_InVoltage - (APP_config.fastCharge_InVoltage * 0.1)) || (temp <= APP_config.DC_Voltage - (APP_config.DC_Voltage * 0.1))) // 输入保护
-        {
-            uint16_t VBAT = 0;
-            for (uint8_t i = 0; i < 5; i++)
-            {
-                if (VBAT == 0)
-                {
-                    VBAT = App_getVBAT_mV();
-                }
-                else {
-                    VBAT = (VBAT + App_getVBAT_mV()) / 2;
-                }
-                HAL_Delay(10);
-            }
-            if ((VBAT <= APP_config.fastCharge_InVoltage - (APP_config.fastCharge_InVoltage * 0.1)) || (VBAT <= APP_config.DC_Voltage - (APP_config.DC_Voltage * 0.1)))
-            {
-                // printf("输入供电不足\r\n");
-                Application_SC8815_Standby();
-                // OLED_Clear();
-                APP_config.SetMod = VINProtectMod;
-                BUZZER_OPEN(200);
-            }
-        }
-        if (HAL_GetTick() - VOUTOpenTime >= 100)
-        {
-            if (SC8815_Read_VBUS_Current() >= APP_config.SC8815_VBUS_Current_Limit || App_getVBUS_mV() <= APP_config.VOUT - (APP_config.VOUT * 0.1)) // 输出保护
-            {
-                uint16_t VBUS = 0, IBUS = 0;
-                for (uint8_t i = 0; i < 5; i++)
-                {
-                    if (VBUS == 0)
-                    {
-                        VBUS = App_getVBUS_mV();
-                        IBUS = SC8815_Read_VBUS_Current();
-                    }
-                    else {
-                        VBUS = (VBUS + App_getVBUS_mV()) / 2;
-                        IBUS = (IBUS + SC8815_Read_VBUS_Current()) / 2;
-                    }
-                    printf("VBUS:%dmV, IBUS:%dmA\r\n", VBUS, IBUS);
-                    HAL_Delay(10);
-                }
-                printf("VBUSSHORT:%d\r\n", SC8815_GetVBUSShort());
-                if (IBUS >= APP_config.SC8815_VBUS_Current_Limit || VBUS <= APP_config.VOUT - (APP_config.VOUT * 0.1))
-                {
-                    printf("VBUS/5:%dmV, IBUS/5:%dmA\r\n", VBUS, IBUS);
-                    // printf("触发限流保护\r\n");
-                    Application_SC8815_Standby();
-                    // OLED_Clear();
-                    APP_config.SetMod = VOUTProtectMod;
-                    BUZZER_OPEN(200);
-                }
-            }
-        }
-    }
+	if (APP_config.SetMod == VINProtectMod || APP_config.SetMod == VOUTProtectMod)
+	{
+		return;
+	}
+	if (HAL_GPIO_ReadPin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin) == GPIO_PIN_RESET)
+	{
+		uint16_t temp = App_getVBAT_mV();
+		if ((temp <= APP_config.fastCharge_InVoltage - (APP_config.fastCharge_InVoltage * 0.1)) || (temp <= APP_config.DC_Voltage - (APP_config.DC_Voltage * 0.1))) // 输入保护
+		{
+			uint16_t VBAT = 0;
+			for (uint8_t i = 0; i < 5; i++)
+			{
+				if (VBAT == 0)
+				{
+					VBAT = App_getVBAT_mV();
+				}
+				else {
+					VBAT = (VBAT + App_getVBAT_mV()) / 2;
+				}
+				HAL_Delay(10);
+			}
+			if ((VBAT <= APP_config.fastCharge_InVoltage - (APP_config.fastCharge_InVoltage * 0.1)) || (VBAT <= APP_config.DC_Voltage - (APP_config.DC_Voltage * 0.1)))
+			{
+				// printf("输入供电不足\r\n");
+				Application_SC8815_Standby();
+				// SC8815_Clear();
+				APP_config.SetMod = VINProtectMod;
+				BUZZER_OPEN(200);
+			}
+		}
+		if (HAL_GetTick() - VOUTOpenTime >= 100)
+		{
+			if (SC8815_Read_VBUS_Current() >= APP_config.SC8815_VBUS_Current_Limit || App_getVBUS_mV() <= APP_config.VOUT - (APP_config.VOUT * 0.1)) // 输出保护
+			{
+				uint16_t VBUS = 0, IBUS = 0;
+				for (uint8_t i = 0; i < 5; i++)
+				{
+					if (VBUS == 0)
+					{
+						VBUS = App_getVBUS_mV();
+						IBUS = SC8815_Read_VBUS_Current();
+					}
+					else {
+						VBUS = (VBUS + App_getVBUS_mV()) / 2;
+						IBUS = (IBUS + SC8815_Read_VBUS_Current()) / 2;
+					}
+					printf("VBUS:%dmV, IBUS:%dmA\r\n", VBUS, IBUS);
+					HAL_Delay(10);
+				}
+				printf("VBUSSHORT:%d\r\n", SC8815_GetVBUSShort());
+				if (IBUS >= APP_config.SC8815_VBUS_Current_Limit || VBUS <= APP_config.VOUT - (APP_config.VOUT * 0.1))
+				{
+					printf("VBUS/5:%dmV, IBUS/5:%dmA\r\n", VBUS, IBUS);
+					// printf("触发限流保护\r\n");
+					Application_SC8815_Standby();
+					// SC8815_Clear();
+					APP_config.SetMod = VOUTProtectMod;
+					BUZZER_OPEN(200);
+				}
+			}
+		}
+	}
 }
 
 /**
@@ -259,6 +384,7 @@ void Application_SC8815_Standby(void)
 {
 	HAL_GPIO_WritePin(SC8815_CE_GPIO_Port, SC8815_CE_Pin, GPIO_PIN_RESET);
 	HAL_GPIO_WritePin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(POWER_RELEASE_GPIO_Port, POWER_RELEASE_Pin, GPIO_PIN_SET);	//放电
 }
 
 /**
@@ -267,6 +393,7 @@ void Application_SC8815_Standby(void)
  */
 void Application_SC8815_Run(void)
 {
+	HAL_GPIO_WritePin(POWER_RELEASE_GPIO_Port, POWER_RELEASE_Pin, GPIO_PIN_RESET);
 	HAL_GPIO_WritePin(SC8815_CE_GPIO_Port, SC8815_CE_Pin, GPIO_PIN_RESET);
 	HAL_GPIO_WritePin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin, GPIO_PIN_RESET);
 }
