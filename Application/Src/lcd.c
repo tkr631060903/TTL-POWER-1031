@@ -1,7 +1,6 @@
 #include "lcd.h"
 #include "lcd_init.h"
 #include "lcdfont.h"
-// #include "Application.h"
 
 /******************************************************************************
 	  函数说明：在指定区域填充颜色
@@ -28,9 +27,9 @@ void LCD_Fill_DMA(uint16_t xsta, uint16_t ysta, uint16_t xend, uint16_t yend, ui
 	extern SPI_HandleTypeDef hspi2;
 	extern DMA_HandleTypeDef hdma_spi2_tx;
 	uint16_t num = ((xend - xsta) * (yend - ysta)) * 2;
-	int SIZE = 256, i = 0;
-	uint8_t color1[SIZE];
-	while (i < SIZE)
+	int i = 0;
+	uint8_t color1[LCD_Fill_DMA_SIZE];
+	while (i < LCD_Fill_DMA_SIZE)
 	{
 		color1[i] = color >> 8;
 		color1[i + 1] = color;
@@ -51,15 +50,15 @@ void LCD_Fill_DMA(uint16_t xsta, uint16_t ysta, uint16_t xend, uint16_t yend, ui
 	// {
 	// 	Error_Handler();
 	// }
-	while (num > SIZE)
+	while (num > LCD_Fill_DMA_SIZE)
 	{
-		HAL_SPI_Transmit_DMA(&hspi2, color1, SIZE);
+		HAL_SPI_Transmit_DMA(&hspi2, color1, LCD_Fill_DMA_SIZE);
 		while (HAL_DMA_GetState(&hdma_spi2_tx) != HAL_DMA_STATE_READY);
-		num -= SIZE;
+		num -= LCD_Fill_DMA_SIZE;
 	}
 	HAL_SPI_Transmit_DMA(&hspi2, color1, num);
 	while (HAL_DMA_GetState(&hdma_spi2_tx) != HAL_DMA_STATE_READY);
-	// HAL_SPI_Transmit_DMA(&hspi2, color1, SIZE);
+	// HAL_SPI_Transmit_DMA(&hspi2, color1, LCD_Fill_DMA_SIZE);
 	// while (HAL_DMA_GetState(&hdma_spi2_tx) != HAL_DMA_STATE_READY);
 	// hspi2.Init.DataSize = SPI_DATASIZE_8BIT;
 	// if (HAL_SPI_Init(&hspi2) != HAL_OK)

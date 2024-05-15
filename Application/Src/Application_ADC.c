@@ -10,7 +10,7 @@
  */
 #include "Application_ADC.h"
 
-uint16_t ADC_Value[4];    // ADC值,ADC_Value[0] == VBUS,ADC_Value[1] == VBAT
+uint16_t ADC_Value[4];
 
 /**
  *@brief 使用ADC获取VBUS电压
@@ -70,4 +70,148 @@ float App_getVBAT_mV(void)
 float App_getVBAT_V(void)
 {
     return 12 * ((float)ADC_Value[3] * SAMPLING_RATE);
+}
+
+/**
+ * @brief 冒泡排序法
+ * 
+ * @param arr 待排序数组
+ * @param size 数组长度
+ */
+void BubbleSort(float *arr, int size)
+{
+    int i, j, tmp;
+    for (i = 0; i < size - 1; i++)
+    {
+        for (j = 0; j < size - i - 1; j++)
+        {
+            if (arr[j] > arr[j + 1])
+            {
+                tmp = arr[j];
+                arr[j] = arr[j + 1];
+                arr[j + 1] = tmp;
+            }
+        }
+    }
+}
+
+/**
+ *@brief 使用ADC获取VBUS电压并做平均
+ *
+ * @return VBUS单位mV
+ */
+float App_getVBUS_average_mV(void)
+{
+    // 可考虑在主循环添加一个持续ADC采样的功能，存在一个固定的环形buff里，然后再此函数做平均计算即可
+    float res_arr[10], res = 0;
+    for (int i = 0; i < 10; i++)
+    {
+        res_arr[i] = App_getVBUS_mV();
+    }
+    BubbleSort(res_arr, 10);
+    for (int i = 1; i < 9; i++)
+    {
+        res += res_arr[i];
+    }
+    return res / 8;
+}
+
+/**
+ *@brief 使用ADC获取VBUS电压并做平均
+ *
+ * @return VBUS单位V
+ */
+float App_getVBUS_average_V(void)
+{
+    float res_arr[10], res = 0;
+    for (int i = 0; i < 10; i++)
+    {
+        res_arr[i] = App_getVBUS_V();
+    }
+    BubbleSort(res_arr, 10);
+    for (int i = 1; i < 9; i++)
+    {
+        res += res_arr[i];
+    }
+    return res / 8;
+}
+
+/**
+ *@brief 使用ADC获取VBUS电流并做平均
+ *
+ * @return 单位mA
+ */
+float App_getIBUS_average_mA(void)
+{
+    float res_arr[10], res = 0;
+    for (int i = 0; i < 10; i++)
+    {
+        res_arr[i] = App_getIBUS_mA();
+    }
+    BubbleSort(res_arr, 10);
+    for (int i = 1; i < 9; i++)
+    {
+        res += res_arr[i];
+    }
+    return res / 8;
+}
+
+/**
+ *@brief 使用ADC获取VBUS电流并做平均
+ *
+ * @return 单位A
+ */
+float App_getIBUS_average_A(void)
+{
+    float res_arr[10], res = 0;
+    for (int i = 0; i < 10; i++)
+    {
+        res_arr[i] = App_getIBUS_A();
+    }
+    BubbleSort(res_arr, 10);
+    for (int i = 1; i < 9; i++)
+    {
+        res += res_arr[i];
+    }
+    return res / 8;
+}
+
+/**
+ *@brief 使用ADC获取VBAT电压并做平均
+ *
+ * @return VBAT单位mV
+ */
+float App_getVBAT_average_mV(void)
+{
+    float res_arr[10], res = 0;
+    for (int i = 0; i < 10; i++)
+    {
+        res_arr[i] = App_getVBAT_mV();
+    }
+    BubbleSort(res_arr, 10);
+    for (int i = 1; i < 9; i++)
+    {
+        res += res_arr[i];
+    }
+    return res / 8;
+}
+
+/**
+ *@brief 使用ADC获取VBAT电压并做平均
+ *
+ * @return VBAT单位V
+ */
+float App_getVBAT_average_V(void)
+{
+    float res_arr[10], res = 0;
+    for (int i = 0; i < 10; i++)
+    {
+        res_arr[i] = App_getVBAT_V();
+    }
+    BubbleSort(res_arr, 10);
+    for (int i = 1; i < 9; i++)
+    {
+        res += res_arr[i];
+    }
+    return res / 8;
 }

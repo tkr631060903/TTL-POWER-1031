@@ -31,7 +31,7 @@ void APP_LCD_ShowVIN()
 void APP_LCD_ShowVSET()
 {
     LCD_ShowString(0, 0, "VSET:", RED, BLACK, 32, 0);
-    float temp = APP_config.VOUT / 1000;
+    float temp = SC8815_Config.SC8815_VBUS / 1000;
     if (temp < 10)
     {
         LCD_ShowFloatNum(80, 0, temp, 3, RED, BLACK, 32);
@@ -46,7 +46,7 @@ void APP_LCD_ShowVSET()
 void APP_LCD_ShowISET()
 {
     LCD_ShowString(0, 33, "ISET:", RED, BLACK, 32, 0);
-    float temp = APP_config.SC8815_VBUS_Current_Limit / 1000;
+    float temp = SC8815_Config.SC8815_IBUS_Limit / 1000;
     if (temp < 10)
     {
         LCD_ShowFloatNum(80, 33, temp, 3, RED, BLACK, 32);
@@ -91,7 +91,7 @@ void APP_LCD_ShowIOUT()
 void APP_LCD_Show_SETVOUT(void)
 {
     LCD_ShowString(0, 0, "SETVOUT:", RED, BLACK, 32, 0);
-    float temp = APP_config.VOUT / 1000;
+    float temp = SC8815_Config.SC8815_VBUS / 1000;
     if (temp < 10)
     {
         LCD_ShowFloatNum(140, 0, temp, 3, RED, BLACK, 32);
@@ -106,7 +106,7 @@ void APP_LCD_Show_SETVOUT(void)
 void APP_LCD_Show_SETIOUT(void)
 {
     LCD_ShowString(0, 0, "SETIOUT:", RED, BLACK, 32, 0);
-    float temp = APP_config.SC8815_VBUS_Current_Limit / 1000;
+    float temp = SC8815_Config.SC8815_IBUS_Limit / 1000;
     if (temp < 10)
     {
         LCD_ShowFloatNum(140, 0, temp, 3, RED, BLACK, 32);
@@ -118,12 +118,12 @@ void APP_LCD_Show_SETIOUT(void)
     }
 }
 
-void APP_LCD_Show_VINProtectMod(void)
+void APP_LCD_Show_VINProtectMode(void)
 {
     LCD_ShowString(0, 0, "VINProtect:", RED, BLACK, 32, 0);
 }
 
-void APP_LCD_Show_VOUTProtectMod(void)
+void APP_LCD_Show_VOUTProtectMode(void)
 {
     LCD_ShowString(0, 0, "VOUTProtect:", RED, BLACK, 32, 0);
 }
@@ -133,7 +133,7 @@ void APP_LCD_Show_fastChargeMod(void)
     LCD_ShowString(0, 0, "fastCharge:", RED, BLACK, 32, 0);
 }
 
-static uint32_t LCDFlushTime = 0;
+static uint16_t LCDFlushTime = 0;
 void APP_LCD_Show(void)
 {
     if (APP_config.LCD_Clear)
@@ -142,9 +142,9 @@ void APP_LCD_Show(void)
         APP_config.LCD_Clear = 0;
         return;
     }
-    switch (APP_config.SetMod)
+    switch (APP_config.Sys_Mode)
     {
-    case noneMod:
+    case normalMode:
         if (LCDFlushTime == 0)
         {
             LCDFlushTime = HAL_GetTick();
@@ -158,19 +158,19 @@ void APP_LCD_Show(void)
             APP_LCD_ShowIOUT();
         }
         break;
-    case voltageMod:
+    case setVBUSMode:
         APP_LCD_Show_SETVOUT();
         break;
-    case currentMod:
+    case setIBUSMode:
         APP_LCD_Show_SETIOUT();
         break;
-    case VINProtectMod:
-        APP_LCD_Show_VINProtectMod();
+    case VINProtectMode:
+        APP_LCD_Show_VINProtectMode();
         break;
-    case VOUTProtectMod:
-        APP_LCD_Show_VOUTProtectMod();
+    case VOUTProtectMode:
+        APP_LCD_Show_VOUTProtectMode();
         break;
-    case fastChargeMod:
+    case fastChargeMode:
         APP_LCD_Show_fastChargeMod();
         break;
     default:

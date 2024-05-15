@@ -14,5 +14,6 @@
 #include <stdio.h>
 
 int fputc(int ch, FILE* f);
+int ascii_process(char *cmd);
 
 #endif

@@ -28,8 +28,8 @@ void Application_main()
         // SC8815_Soft_Protect();
         SET_LED1_Status();
         APP_LCD_Show();
-        printf("ADC-->VBAT:%fV, VBUS:%fV, IBUS:%fmA\r\n", App_getVBAT_V(), App_getVBUS_V(), App_getIBUS_mA());
-        printf("SC8815-->VBAT:%dmV, VBUS:%dmV, IBUS:%dmA\r\n", SC8815_Read_BATT_Voltage(), SC8815_Read_VBUS_Voltage(), SC8815_Read_BATT_Current());
+        // printf("ADC-->VBAT:%fV, VBUS:%fV, IBUS:%fmA\r\n", App_getVBAT_V(), App_getVBUS_V(), App_getIBUS_mA());
+        // printf("SC8815-->VBAT:%dmV, VBUS:%dmV, IBUS:%dmA\r\n", SC8815_Read_BATT_Voltage(), SC8815_Read_VBUS_Voltage(), SC8815_Read_BATT_Current());
     }
 }
 
@@ -75,7 +75,7 @@ void Application_SoftwareDelay(uint16_t time)
 uint32_t buttonPressStartTime = 0;
 void KEY4_Button(void)
 {
-    if (APP_config.SetMod == noneMod)
+    if (APP_config.Sys_Mode == normalMode)
     {
         if (HAL_GPIO_ReadPin(KEY4_GPIO_Port, KEY4_Pin) == GPIO_PIN_SET) {
             if (buttonPressStartTime == 0) {
@@ -84,8 +84,8 @@ void KEY4_Button(void)
             uint32_t currentTime = HAL_GetTick();
             if (currentTime - buttonPressStartTime >= KEY4_LONG_PRESS_THRESHOLD) {
                 // 检测到长按
-                APP_config.SetMod = fastChargeMod;
-                printf("fastChargeMod\r\n");
+                APP_config.Sys_Mode = fastChargeMode;
+                printf("fastChargeMode\r\n");
             }
         }
         else {
@@ -98,18 +98,20 @@ void KEY4_Button(void)
         {
             BUZZER_OPEN(100);
             APP_config.LCD_Clear = 1;
-            if (APP_config.SetMod == voltageMod)
+            if (APP_config.Sys_Mode == setVBUSMode)
             {
-                SC8815_SetOutputVoltage(APP_config.VOUT);
-                APP_config.SetMod = noneMod;
-                APP_config.set_Step = 1000;
+                SC8815_SetOutputVoltage(SC8815_Config.SC8815_VBUS);
+                APP_config.Sys_Mode = normalMode;
+                SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
+                SC8815_Config.SC8815_VBUS_Old = SC8815_Config.SC8815_VBUS;
             }
-            else if (APP_config.SetMod == currentMod) {
-                SC8815_SetBusCurrentLimit(APP_config.SC8815_VBUS_Current_Limit);
-                APP_config.SetMod = noneMod;
-                APP_config.set_Step = 1000;
+            else if (APP_config.Sys_Mode == setIBUSMode) {
+                SC8815_SetBusCurrentLimit(SC8815_Config.SC8815_IBUS_Limit);
+                APP_config.Sys_Mode = normalMode;
+                SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
+                SC8815_Config.SC8815_IBUS_Limit_Old = SC8815_Config.SC8815_IBUS_Limit;
             }
-            else if (APP_config.SetMod == fastChargeMod) {
+            else if (APP_config.Sys_Mode == fastChargeMode) {
 
             }
         }

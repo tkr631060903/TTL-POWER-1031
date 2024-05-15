@@ -23,5 +23,11 @@ float App_getIBUS_mA(void);
 float App_getIBUS_A(void);
 float App_getVBAT_mV(void);
 float App_getVBAT_V(void);
+float App_getVBUS_average_mV(void);
+float App_getVBUS_average_V(void);
+float App_getIBUS_average_mA(void);
+float App_getIBUS_average_A(void);
+float App_getVBAT_average_mV(void);
+float App_getVBAT_average_V(void);
 
 #endif

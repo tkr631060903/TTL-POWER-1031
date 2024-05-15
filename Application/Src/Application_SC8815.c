@@ -12,7 +12,8 @@
 #include "Application.h"
 #include "Application_BUZZER.h"
 #include "Application_ADC.h"
- // #include "Application_SC8815.h"
+
+SC8815_ConfigTypeDef SC8815_Config;
 
 /**
  *@brief 软件延时
@@ -146,6 +147,7 @@ uint8_t I2C_ReadRegByte(uint8_t SlaveAddress, uint8_t RegAddress)
 
 void I2C_WriteRegByte(uint8_t SlaveAddress, uint8_t RegAddress, uint8_t ByteData)
 {
+    uint16_t check_timeout = 0;
 	i2c_Start();
 	i2c_SendByte(SC8815_WRITE_ADDR);
 	i2c_WaitAck();
@@ -154,17 +156,17 @@ void I2C_WriteRegByte(uint8_t SlaveAddress, uint8_t RegAddress, uint8_t ByteData
 	i2c_SendByte(ByteData);
 	i2c_WaitAck();
 	i2c_Stop();
-	// while (I2C_ReadRegByte(SlaveAddress, RegAddress) != ByteData)
-	// {
-	// 	i2c_Start();
-	// 	i2c_SendByte(SC8815_WRITE_ADDR);
-	// 	i2c_WaitAck();
-	// 	i2c_SendByte(RegAddress);
-	// 	i2c_WaitAck();
-	// 	i2c_SendByte(ByteData);
-	// 	i2c_WaitAck();
-	// 	i2c_Stop();
-	// }
+	while (I2C_ReadRegByte(SlaveAddress, RegAddress) != ByteData && check_timeout++ < 1000)
+	{
+		i2c_Start();
+		i2c_SendByte(SC8815_WRITE_ADDR);
+		i2c_WaitAck();
+		i2c_SendByte(RegAddress);
+		i2c_WaitAck();
+		i2c_SendByte(ByteData);
+		i2c_WaitAck();
+		i2c_Stop();
+	}
 }
 
 
@@ -174,17 +176,13 @@ void I2C_WriteRegByte(uint8_t SlaveAddress, uint8_t RegAddress, uint8_t ByteData
  */
 void Application_SC8815_loadStart(void)
 {
-	// SC8815_SFB_Disable();
-	// Application_SoftwareDelay(50);
-	// SC8815_SFB_Enable();
-	extern uint32_t VOUTOpenTime;
 	APP_config.SC8815Mod = SC8815Run;
 	Application_SC8815_Run();
 	SC8815_SFB_Disable();
 	// HAL_Delay(50);
 	Application_SoftwareDelay(50);
 	SC8815_SFB_Enable();
-	VOUTOpenTime = HAL_GetTick();
+	SC8815_Config.VOUTOpenTime = HAL_GetTick();
 }
 
 void Application_SC8815_Init(void)
@@ -263,13 +261,12 @@ void Application_SC8815_Init(void)
 	// SC8815_SetBatteryCurrLimit(5000);
 	// SC8815_SetBusCurrentLimit(3000);
 	// SC8815_SetOutputVoltage(12000);
-	extern Application_Config APP_config;
-	APP_config.SC8815_Battery_Current_Limit = 12000;
-	APP_config.SC8815_VBUS_Current_Limit = 1000;
-	APP_config.VOUT = 5000;
-	SC8815_SetBatteryCurrLimit(APP_config.SC8815_Battery_Current_Limit);
-	SC8815_SetBusCurrentLimit(APP_config.SC8815_VBUS_Current_Limit);
-	SC8815_SetOutputVoltage(APP_config.VOUT);
+    SC8815_Config.SC8815_IBAT_Limit = 12000;
+    SC8815_Config.SC8815_IBUS_Limit = 1000;
+    SC8815_Config.SC8815_VBUS = 5000;
+	SC8815_SetBatteryCurrLimit(SC8815_Config.SC8815_IBAT_Limit);
+	SC8815_SetBusCurrentLimit(SC8815_Config.SC8815_IBUS_Limit);
+	SC8815_SetOutputVoltage(SC8815_Config.SC8815_VBUS);
 	SC8815_OTG_Enable();
 
 	/*** 示例3, 读取 SC8815 ADC 数据 ****/
@@ -291,6 +288,8 @@ void Application_SC8815_Init(void)
 //	}
 	// Application_SC8815_Run();
 
+    SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
+    Application_SC8815_Standby();
 	printf("SC8815 Init.\n");
 }
 
@@ -299,10 +298,9 @@ void Application_SC8815_Init(void)
  *@brief SC8815软件保护
  *
  */
-uint32_t VOUTOpenTime = 0;
 void SC8815_Soft_Protect(void)
 {
-	if (APP_config.SetMod == VINProtectMod || APP_config.SetMod == VOUTProtectMod)
+	if (APP_config.Sys_Mode == VINProtectMode || APP_config.Sys_Mode == VOUTProtectMode)
 	{
 		return;
 	}
@@ -328,13 +326,13 @@ void SC8815_Soft_Protect(void)
 				// printf("输入供电不足\r\n");
 				Application_SC8815_Standby();
 				// SC8815_Clear();
-				APP_config.SetMod = VINProtectMod;
+				APP_config.Sys_Mode = VINProtectMode;
 				BUZZER_OPEN(200);
 			}
 		}
-		if (HAL_GetTick() - VOUTOpenTime >= 100)
+		if (HAL_GetTick() - SC8815_Config.VOUTOpenTime >= 100)
 		{
-			if (SC8815_Read_VBUS_Current() >= APP_config.SC8815_VBUS_Current_Limit || App_getVBUS_mV() <= APP_config.VOUT - (APP_config.VOUT * 0.1)) // 输出保护
+			if (SC8815_Read_VBUS_Current() >= SC8815_Config.SC8815_IBUS_Limit || App_getVBUS_mV() <= SC8815_Config.SC8815_VBUS - (SC8815_Config.SC8815_VBUS * 0.1)) // 输出保护
 			{
 				uint16_t VBUS = 0, IBUS = 0;
 				for (uint8_t i = 0; i < 5; i++)
@@ -352,13 +350,13 @@ void SC8815_Soft_Protect(void)
 					HAL_Delay(10);
 				}
 				printf("VBUSSHORT:%d\r\n", SC8815_GetVBUSShort());
-				if (IBUS >= APP_config.SC8815_VBUS_Current_Limit || VBUS <= APP_config.VOUT - (APP_config.VOUT * 0.1))
+				if (IBUS >= SC8815_Config.SC8815_IBUS_Limit || VBUS <= SC8815_Config.SC8815_VBUS - (SC8815_Config.SC8815_VBUS * 0.1))
 				{
 					printf("VBUS/5:%dmV, IBUS/5:%dmA\r\n", VBUS, IBUS);
 					// printf("触发限流保护\r\n");
 					Application_SC8815_Standby();
 					// SC8815_Clear();
-					APP_config.SetMod = VOUTProtectMod;
+					APP_config.Sys_Mode = VOUTProtectMode;
 					BUZZER_OPEN(200);
 				}
 			}

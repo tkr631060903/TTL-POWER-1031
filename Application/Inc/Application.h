@@ -15,11 +15,6 @@
 #include "UART_Debug.h"
 
 #define KEY4_LONG_PRESS_THRESHOLD 2000 // 定义KEY4长按阈值，单位为毫秒
-// #define Get_VBUS_ADC_V ((float)ADC_Value[0] * (3.3 / 4096) / 0.0975)   // 获取MCU ADC采样VBUS单位V
-// #define Get_VBAT_ADC_V ((float)ADC_Value[1] * (3.3 / 4096) / 0.0975)   // 获取MCU ADC采样VBAT单位V
-// #define Get_VBUS_ADC_mV ((10.754 * ((float)ADC_Value[0] * (3.3 / 4096)) - 0.1974) * 1000)   // 获取MCU ADC采样VBUS单位mV
-// #define Get_VBAT_ADC_mV ((10.754 * ((float)ADC_Value[1] * (3.3 / 4096)) - 0.1974) * 1000)    // 获取MCU ADC采样VBAT单位mV
-
 
 void Application_main(void);
 void Application_Error_Handler(void);
@@ -38,28 +33,23 @@ typedef enum
 
 typedef enum
 {
-    voltageMod = 0x00U,
-    currentMod = 0x01U,
-    noneMod = 0x02U,
-    VINProtectMod = 0x03U,
-    VOUTProtectMod = 0x04U,
-    fastChargeMod = 0x05U,
-} SetModTypeDef;
+    normalMode = 0x00U,      // 正常模式
+    setVBUSMode = 0x01U,     // 设置VBUS
+    setIBUSMode = 0x02U,     // 设置IBUS
+    VINProtectMode = 0x03U,  // 输入保护
+    VOUTProtectMode = 0x04U, // 输出保护
+    fastChargeMode = 0x05U,  // 设置快充
+} Sys_ModeTypeDef;           // 系统当前模式
 
 typedef struct
 {
-    uint8_t SC8815Mod;  // SC8815当前工作模式
-    uint8_t LCD_Clear;  // LCD是否清屏
-    float VOUT;   // 设定输出电压mv
-    uint16_t VOUT_Old;   // 设定输出电压旧值mv
-    uint16_t fastCharge_InVoltage;  // 快充输入电压v
-    uint16_t SC8815_Battery_Current_Limit;  // 8815电池(输入)限流mA
-    uint16_t SC8815_VBUS_Current_Limit; // 8815 VBUS(输出)限流mA
-    uint16_t SC8815_VBUS_Current_Limit_Old; // 8815 VBUS(输出)限流旧值mA
-    uint16_t DC_Voltage;   // DC电压单位mV
-    uint16_t set_Step;   // 设置电压/电流步进
-    SetModTypeDef SetMod;   // 设置当前为控制电压还是电流参数
-}Application_Config;
+    uint8_t SC8815Mod;             // SC8815当前工作模式
+    uint8_t LCD_Clear;             // LCD是否清屏
+    uint16_t fastCharge_InVoltage; // 快充输入电压v
+    uint16_t DC_Voltage;           // DC电压单位mV
+    uint16_t set_Step;             // 设置电压/电流步进
+    Sys_ModeTypeDef Sys_Mode;      // 设置当前为控制电压还是电流参数
+} Application_Config;
 
 extern Application_Config APP_config;
 

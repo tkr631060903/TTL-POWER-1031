@@ -6,7 +6,6 @@
 #include "lcd_init.h"
 
 void LCD_show(void);
-
 void APP_LCD_Show(void);
 
 #endif

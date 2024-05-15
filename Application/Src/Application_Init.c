@@ -16,7 +16,7 @@
 #include "CH224K.h"
 #include "APPlication_LCD.h"
 
-uint8_t Uart1_ReceiveBuff = 0;  //串口2接收缓冲区
+uint8_t Uart1_ReceiveBuff = 0;  //串口1接收缓冲区
 
 /**
  * @brief 应用初始化
@@ -25,16 +25,12 @@ uint8_t Uart1_ReceiveBuff = 0;  //串口2接收缓冲区
 void Application_Init(void)
 {
     // 初始化串口中断输入
-    Application_SC8815_Standby();
     HAL_UART_Receive_IT(&huart1, &Uart1_ReceiveBuff, 1);
-    HAL_Delay(200);
+    HAL_Delay(100);
     extern ADC_HandleTypeDef hadc1;
     HAL_ADCEx_Calibration_Start(&hadc1);    // 校准ADC
-    extern Application_Config APP_config;
-    APP_config.SetMod = noneMod;    // 设置默认模式
-    extern ADC_HandleTypeDef hadc1;
     HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&ADC_Value, 4);    // 开始ADC DMA
-    APP_config.set_Step = 1000;  // 设置默认步进
+    APP_config.Sys_Mode = normalMode;    // 设置默认模式
     Application_CH224K_init();
     Application_SC8815_Init();
     LCD_Init();
