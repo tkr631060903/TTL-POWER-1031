@@ -24,11 +24,16 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart)
 {
     if (huart == &huart1)
     {
-        static char uart1_Cmd[UART_Cmd_Length];
-        static int cmd_Index = 0;  //串口1命令计数指针
-        extern uint8_t Uart1_ReceiveBuff;
-        HAL_UART_Transmit(&huart1, &Uart1_ReceiveBuff, 1, 1000);    //调式串口回显
-        if (Uart1_ReceiveBuff == '\r')
+        extern char uart1_Cmd[UART_Cmd_Length];
+        extern uint8_t cmd_Index;  //串口1命令计数指针
+        extern uint8_t uart1_Receive_Data;
+        HAL_UART_Receive_IT(&huart1, &uart1_Receive_Data, 1);
+        if ((char)uart1_Receive_Data == '\n')
+        {
+            return;
+        }    
+        // HAL_UART_Transmit(&huart1, &uart1_Receive_Data, 1, 10);    //调式串口回显
+        if ((char)uart1_Receive_Data == '\r')
         {
             // if (strcmp("rst\r", uart1_Cmd) == 0)
             // {
@@ -36,36 +41,25 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart)
             //     __set_FAULTMASK(1); //关闭所有中断
             //     NVIC_SystemReset(); //进行软件复位
             // }
-            
-            // 考虑是否在做串口命令
-            ascii_process(uart1_Cmd);
-            // if (ascii_process(uart1_Cmd))
-            // {
-            //     printf("%s ok\r\n", uart1_Cmd);
-            // }else{
-            //     printf("%s error\r\n", uart1_Cmd);
-            // }
-            // 初始化uart1_Cmd，uart1_Cmd全置为0
-            cmd_Index = 0;
-            HAL_UART_Receive_IT(&huart1, &Uart1_ReceiveBuff, 1);
+            if (ascii_process(uart1_Cmd))
+            {
+                printf("%s ok\r\n", uart1_Cmd);
+            }else{
+                printf("%s error\r\n", uart1_Cmd);
+            }
+            // 清楚uart1_Cmd，uart1_Cmd全置为0
             memset(uart1_Cmd, 0, UART_Cmd_Length);
+            cmd_Index = 0;
+            return;
+        }else if (cmd_Index >= UART_Cmd_Length)
+        {
+            // 清楚uart1_Cmd，uart1_Cmd全置为0
+            printf("Command too long\r\n");
+            memset(uart1_Cmd, 0, UART_Cmd_Length);
+            cmd_Index = 0;
             return;
         }
-        uart1_Cmd[cmd_Index] = (char)Uart1_ReceiveBuff;   //保持串口命令到uart1_Cmd
-        cmd_Index++;
-        if (cmd_Index >= UART_Cmd_Length)
-        {
-            // 初始化uart1_Cmd，uart1_Cmd全置为0
-            memset(uart1_Cmd, 0, UART_Cmd_Length);
-            cmd_Index = 0;
-            // while (cmd_Index > 0)
-            // {
-            //     uart1_Cmd[cmd_Index] = 0;
-            //     cmd_Index--;
-            // }
-            // uart1_Cmd[0] = 0;
-        }
-        HAL_UART_Receive_IT(&huart1, &Uart1_ReceiveBuff, 1);
+        uart1_Cmd[cmd_Index++] = (char)uart1_Receive_Data;   //保存串口命令到uart1_Cmd
     }
 }
 
@@ -129,25 +123,21 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
             SC8815_Config.SC8815_VBUS = SC8815_Config.SC8815_VBUS_Old;
         }else if (APP_config.Sys_Mode == normalMode) 
         {
-            if (HAL_GPIO_ReadPin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin) == 0)
+            if (HAL_GPIO_ReadPin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin) == RESET)
             {
                 Application_SC8815_Standby();
-                // printf("off");
-                // APP_config.SC8815Mod = SC8815Standby;
+                SC8815_Config.SC8815_Status = SC8815_Standby;
             }
             else {
-                // APP_config.SC8815Mod = SC8815LoadStart;
+                SC8815_Config.SC8815_Status = SC8815_LoadStart;
                 // Application_SC8815_Run();
-                Application_SC8815_loadStart();
-                // printf("run");
+                // Application_SC8815_loadStart();
             }
         }
         break;
     case Rotar_L_Pin:
-        if (APP_config.Sys_Mode == normalMode)
+        if (APP_config.Sys_Mode != normalMode)
         {
-        }
-        else {
             // 解析旋转编码器
             if (Value_count == 0) {               //边缘计数值，计数两次边缘值
                 Encoder_A_Last_Value = HAL_GPIO_ReadPin(Rotar_L_GPIO_Port, Rotar_L_Pin);   //捕获A项的值
@@ -163,17 +153,16 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
                     // printf("Rotar_L\r\n");     //左
                     if (APP_config.Sys_Mode == setIBUSMode)
                     {
-                        if ((int)SC8815_Config.SC8815_IBUS_Limit - SC8815_Config.SC8815_VBUS_IBUS_Step <= 300)
+                        if (SC8815_Config.SC8815_IBUS_Limit - SC8815_Config.SC8815_VBUS_IBUS_Step <= 300)
                         {
                             SC8815_Config.SC8815_IBUS_Limit = 300;
                         }
                         else {
                             SC8815_Config.SC8815_IBUS_Limit = SC8815_Config.SC8815_IBUS_Limit - SC8815_Config.SC8815_VBUS_IBUS_Step;
                         }
-                    }
-                    else if (APP_config.Sys_Mode == setVBUSMode)
+                    }else if (APP_config.Sys_Mode == setVBUSMode)
                     {
-                        if ((int)SC8815_Config.SC8815_VBUS - SC8815_Config.SC8815_VBUS_IBUS_Step <= 0)
+                        if (SC8815_Config.SC8815_VBUS - SC8815_Config.SC8815_VBUS_IBUS_Step <= 0)
                         {
                             SC8815_Config.SC8815_IBUS_Limit = 0;
                         }

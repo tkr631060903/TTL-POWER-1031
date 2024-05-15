@@ -40,30 +40,22 @@
 
 typedef enum
 {
-    SC8815Run = 0x00U,
-    SC8815Shutdown = 0x01U,
-    SC8815Standby = 0x02U,
-    SC8815LoadStart = 0x03U,
-} SC8815ModTypeDef;
-
-// typedef enum
-// {
-//     SC8815Run = 0x00U,
-//     SC8815Shutdown = 0x01U,
-//     SC8815Standby = 0x02U,
-//     SC8815LoadStart = 0x03U,
-// } SC8815_StatusTypeDef;
+    SC8815_Run = 0x00U,
+    SC8815_Shutdown = 0x01U,
+    SC8815_Standby = 0x02U,
+    SC8815_LoadStart = 0x03U,
+} SC8815_StatusTypeDef;
 
 typedef struct
 {
-    uint8_t SC8815_Status;       // 8815状态
-    uint16_t SC8815_IBAT_Limit;  // 8815电池(输入)限流mA
-    float SC8815_IBUS_Limit;     // 8815 VBUS(输出)限流mA
-    float SC8815_IBUS_Limit_Old; // 8815 VBUS(输出)限流mA旧值
-    float SC8815_VBUS;           // 8815 VBUS输出电压mv
-    float SC8815_VBUS_Old;       // 8815 VBUS输出电压mv旧值
-    float SC8815_VBUS_IBUS_Step; // 8815 VBUS输出电压/电流步进值
-    uint32_t VOUTOpenTime;       // 8815 输出开启时间
+    SC8815_StatusTypeDef SC8815_Status; // 8815状态
+    uint16_t SC8815_IBAT_Limit;         // 8815电池(输入)限流mA
+    float SC8815_IBUS_Limit;            // 8815 VBUS(输出)限流mA
+    float SC8815_IBUS_Limit_Old;        // 8815 VBUS(输出)限流mA旧值
+    float SC8815_VBUS;                  // 8815 VBUS输出电压mv
+    float SC8815_VBUS_Old;              // 8815 VBUS输出电压mv旧值
+    float SC8815_VBUS_IBUS_Step;        // 8815 VBUS输出电压/电流步进值
+    uint32_t VOUT_Open_Time;            // 8815 输出开启时间
 } SC8815_ConfigTypeDef;
 
 extern SC8815_ConfigTypeDef SC8815_Config;

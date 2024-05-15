@@ -2,6 +2,7 @@
 #include "Application.h"
 #include "Application_ADC.h"
 #include "Application_SC8815.h"
+#include <math.h>
 
 /**
  *@brief 申请快充输入5V电压
@@ -63,36 +64,36 @@ void CH224K_20V(void)
 void Application_CH224K_init(void)
 {
     CH224K_20V();
-    HAL_Delay(500);
-    if ((App_getVBAT_mV() - 20000) < 500 && (SC8815_Config.SC8815_VBUS - App_getVBUS_mV()) < 200)
+    HAL_Delay(100);
+    if (fabsf(App_getVBAT_mV() - 20000) < 500)
     {
         APP_config.fastCharge_InVoltage = 20;
         return;
     }
     CH224K_15V();
-    HAL_Delay(500);
-    if ((App_getVBAT_mV() - 15000) < 500 && (SC8815_Config.SC8815_VBUS - App_getVBUS_mV()) < 200)
+    HAL_Delay(100);
+    if (fabsf(App_getVBAT_mV() - 15000) < 500)
     {
         APP_config.fastCharge_InVoltage = 15;
         return;
     }
     CH224K_12V();
-    HAL_Delay(500);
-    if ((App_getVBAT_mV() - 12000) < 500 && (SC8815_Config.SC8815_VBUS - App_getVBUS_mV()) < 200)
+    HAL_Delay(100);
+    if (fabsf(App_getVBAT_mV() - 12000) < 500)
     {
         APP_config.fastCharge_InVoltage = 12;
         return;
     }
     CH224K_9V();
-    HAL_Delay(500);
-    if ((App_getVBAT_mV() - 9000) < 500 && (SC8815_Config.SC8815_VBUS - App_getVBUS_mV()) < 200)
+    HAL_Delay(100);
+    if (fabsf(App_getVBAT_mV() - 9000) < 500)
     {
         APP_config.fastCharge_InVoltage = 9;
         return;
     }
     CH224K_5V();
-    HAL_Delay(500);
-    if ((App_getVBAT_mV() - 5000) < 500 && (SC8815_Config.SC8815_VBUS - App_getVBUS_mV()) < 200)
+    HAL_Delay(100);
+    if (fabsf(App_getVBAT_mV() - 5000) < 500)
     {
         APP_config.fastCharge_InVoltage = 5;
         return;

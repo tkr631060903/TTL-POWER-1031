@@ -13,6 +13,9 @@
 #include <string.h>
 #include "Application_SC8815.h"
 
+char uart1_Cmd[UART_Cmd_Length];    //命令缓冲区
+uint8_t cmd_Index = 0;  //串口1命令计数指针
+uint8_t uart1_Receive_Data = 0;  //串口1中断接收数据
 extern UART_HandleTypeDef huart1;
 
 #define CMD_STR_CNT 5 // 命令参数数量
@@ -68,7 +71,11 @@ int setIBUS_handler(CmdStr param, short param_cnt)
     {
         return 0;
     }
-    SC8815_SetBusCurrentLimit((*(char *)param[1]) - '0');
+    int val;
+    sscanf(param[1], "%d", &val);
+    SC8815_Config.SC8815_VBUS = val;
+    SC8815_Config.SC8815_VBUS_Old = val;
+    SC8815_SetBusCurrentLimit(val);
     return 1;
 }
 
@@ -79,7 +86,12 @@ int setIBAT_handler(CmdStr param, short param_cnt)
         return 0;
     }
     Application_SC8815_Standby();
-    SC8815_SetBatteryCurrLimit((*(char *)param[1]) - '0');
+    int val;
+    sscanf(param[1], "%d", &val);
+    SC8815_Config.SC8815_VBUS = val;
+    SC8815_Config.SC8815_VBUS_Old = val;
+    SC8815_SetBusCurrentLimit(val);
+    SC8815_SetBatteryCurrLimit((*(char*)param[1]) - '0');
     return 1;
 }
 
@@ -233,7 +245,7 @@ int ascii_getparam(CmdStr param, unsigned char *cmdstr, char split_char)
     // if (i < CMD_STR_CNT)
     //     param[i++] = p;
     // return i;
-		return 1;
+	return 1;
 }
 
 int splitString(char* input, char delimiter, char** tokens, int max_tokens, CmdStr param) {
@@ -258,7 +270,7 @@ int ascii_process(char *cmd)
     int map_cnt = sizeof(handler_map_static) / sizeof(lookup_table_t);
     // param_cnt = ascii_getparam(param, cmd, ',');
     char* tokens[10];
-    param_cnt = splitString(cmd, ',', tokens, 10, param);
+    param_cnt = splitString(cmd, ':', tokens, 10, param);
     for (i = 0; i < map_cnt; i++)
     {
         if (!strcasecmp(param[0], handler_map[i].desc))

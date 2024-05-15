@@ -24,11 +24,14 @@ void Application_main()
 {
     while (1)
     {
+        Application_SC8815_loadStart();
         KEY4_Button();
         // SC8815_Soft_Protect();
         SET_LED1_Status();
         APP_LCD_Show();
-        // printf("ADC-->VBAT:%fV, VBUS:%fV, IBUS:%fmA\r\n", App_getVBAT_V(), App_getVBUS_V(), App_getIBUS_mA());
+        // printf("FADC-->VBAT:%fV, VBUS:%fV, IBUS:%fmA\r\n", App_getVBAT_V(), App_getVBUS_V(), App_getIBUS_mA());
+        // printf("SC8815-->VBAT:%dmV, VBUS:%dmV, IBUS:%dmA\r\n", SC8815_Read_BATT_Voltage(), SC8815_Read_VBUS_Voltage(), SC8815_Read_BATT_Current());
+        // printf("ADC-->VBAT:%fV, VBUS:%fV, IBUS:%fmA\r\n", App_getVBAT_average_V(), App_getVBUS_average_V(), App_getIBUS_average_mA());
         // printf("SC8815-->VBAT:%dmV, VBUS:%dmV, IBUS:%dmA\r\n", SC8815_Read_BATT_Voltage(), SC8815_Read_VBUS_Voltage(), SC8815_Read_BATT_Current());
     }
 }

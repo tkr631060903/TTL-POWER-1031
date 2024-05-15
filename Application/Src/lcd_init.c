@@ -3,8 +3,8 @@
 #include "UART_Debug.h"
 
 extern SPI_HandleTypeDef hspi2;
-static uint8_t LCD_Buff[256];
-static uint16_t LCD_Buff_Point = 0;
+// static uint8_t LCD_Buff[128];
+// static uint16_t LCD_Buff_Point = 0;
 
 void delay(uint16_t time)
 {
@@ -25,10 +25,11 @@ void LCD_Writ_Bus(uint8_t dat)
 	while (HAL_SPI_GetState(&hspi2) == HAL_SPI_STATE_RESET);//检查接收标志位
 	HAL_SPI_Transmit(&hspi2, &dat, 1, 10);//发送
 	// HAL_SPI_Transmit_DMA(&hspi2, &dat, 1);
-    // if(LCD_Buff_Point == 255)
+
+    // if(LCD_Buff_Point == 127)
     // {
     //     while (HAL_SPI_GetState(&hspi2) == HAL_SPI_STATE_RESET);//检查接收标志位
-    //     HAL_SPI_Transmit_DMA(&hspi2, LCD_Buff, 256);
+    //     HAL_SPI_Transmit_DMA(&hspi2, LCD_Buff, 128);
     //     LCD_Buff_Point = 0;
     // }else{
     //     LCD_Buff[LCD_Buff_Point] = dat;

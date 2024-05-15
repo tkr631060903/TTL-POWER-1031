@@ -145,18 +145,22 @@ void APP_LCD_Show(void)
     switch (APP_config.Sys_Mode)
     {
     case normalMode:
-        if (LCDFlushTime == 0)
-        {
-            LCDFlushTime = HAL_GetTick();
-        }
-        else if (HAL_GetTick() - LCDFlushTime >= 300)
-        {
-            LCDFlushTime = 0;
-            APP_LCD_ShowVSET();
-            APP_LCD_ShowISET();
-            APP_LCD_ShowVOUT();
-            APP_LCD_ShowIOUT();
-        }
+        // if (LCDFlushTime == 0)
+        // {
+        //     LCDFlushTime = HAL_GetTick();
+        // }
+        // else if (HAL_GetTick() - LCDFlushTime >= 300)
+        // {
+        //     LCDFlushTime = 0;
+        //     APP_LCD_ShowVSET();
+        //     APP_LCD_ShowISET();
+        //     APP_LCD_ShowVOUT();
+        //     APP_LCD_ShowIOUT();
+        // }
+        APP_LCD_ShowVSET();
+        APP_LCD_ShowISET();
+        APP_LCD_ShowVOUT();
+        APP_LCD_ShowIOUT();
         break;
     case setVBUSMode:
         APP_LCD_Show_SETVOUT();

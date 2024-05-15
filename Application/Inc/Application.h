@@ -43,11 +43,8 @@ typedef enum
 
 typedef struct
 {
-    uint8_t SC8815Mod;             // SC8815当前工作模式
     uint8_t LCD_Clear;             // LCD是否清屏
     uint16_t fastCharge_InVoltage; // 快充输入电压v
-    uint16_t DC_Voltage;           // DC电压单位mV
-    uint16_t set_Step;             // 设置电压/电流步进
     Sys_ModeTypeDef Sys_Mode;      // 设置当前为控制电压还是电流参数
 } Application_Config;
 

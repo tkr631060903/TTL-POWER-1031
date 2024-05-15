@@ -13,6 +13,8 @@
 
 #include <stdio.h>
 
+#define UART_Cmd_Length 20
+
 int fputc(int ch, FILE* f);
 int ascii_process(char *cmd);
 

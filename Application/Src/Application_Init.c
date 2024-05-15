@@ -15,8 +15,7 @@
 #include "usart.h"
 #include "CH224K.h"
 #include "APPlication_LCD.h"
-
-uint8_t Uart1_ReceiveBuff = 0;  //串口1接收缓冲区
+#include "Application_BUZZER.h"
 
 /**
  * @brief 应用初始化
@@ -25,7 +24,8 @@ uint8_t Uart1_ReceiveBuff = 0;  //串口1接收缓冲区
 void Application_Init(void)
 {
     // 初始化串口中断输入
-    HAL_UART_Receive_IT(&huart1, &Uart1_ReceiveBuff, 1);
+    extern uint8_t uart1_Receive_Data;  //串口1接收缓冲区
+    HAL_UART_Receive_IT(&huart1, &uart1_Receive_Data, 1);
     HAL_Delay(100);
     extern ADC_HandleTypeDef hadc1;
     HAL_ADCEx_Calibration_Start(&hadc1);    // 校准ADC
@@ -36,5 +36,7 @@ void Application_Init(void)
     LCD_Init();
     LCD_Fill_DMA(0, 0, LCD_W, LCD_H, BLACK);
     // Application_SC8815_Run();
+    BUZZER_OPEN(100);
+    BUZZER_OPEN(300);
     printf("Init Success\r\n");
 }

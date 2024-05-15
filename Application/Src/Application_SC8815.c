@@ -148,17 +148,9 @@ uint8_t I2C_ReadRegByte(uint8_t SlaveAddress, uint8_t RegAddress)
 void I2C_WriteRegByte(uint8_t SlaveAddress, uint8_t RegAddress, uint8_t ByteData)
 {
     uint16_t check_timeout = 0;
-	i2c_Start();
-	i2c_SendByte(SC8815_WRITE_ADDR);
-	i2c_WaitAck();
-	i2c_SendByte(RegAddress);
-	i2c_WaitAck();
-	i2c_SendByte(ByteData);
-	i2c_WaitAck();
-	i2c_Stop();
-	while (I2C_ReadRegByte(SlaveAddress, RegAddress) != ByteData && check_timeout++ < 1000)
-	{
-		i2c_Start();
+    do
+    {
+        i2c_Start();
 		i2c_SendByte(SC8815_WRITE_ADDR);
 		i2c_WaitAck();
 		i2c_SendByte(RegAddress);
@@ -166,7 +158,7 @@ void I2C_WriteRegByte(uint8_t SlaveAddress, uint8_t RegAddress, uint8_t ByteData
 		i2c_SendByte(ByteData);
 		i2c_WaitAck();
 		i2c_Stop();
-	}
+    } while (I2C_ReadRegByte(SlaveAddress, RegAddress) != ByteData && check_timeout++ < 1000);
 }
 
 
@@ -176,13 +168,15 @@ void I2C_WriteRegByte(uint8_t SlaveAddress, uint8_t RegAddress, uint8_t ByteData
  */
 void Application_SC8815_loadStart(void)
 {
-	APP_config.SC8815Mod = SC8815Run;
-	Application_SC8815_Run();
-	SC8815_SFB_Disable();
-	// HAL_Delay(50);
-	Application_SoftwareDelay(50);
-	SC8815_SFB_Enable();
-	SC8815_Config.VOUTOpenTime = HAL_GetTick();
+    if (SC8815_Config.SC8815_Status == SC8815_LoadStart)
+    {
+        Application_SC8815_Run();
+        SC8815_SFB_Disable();
+        HAL_Delay(50);
+        // Application_SoftwareDelay(50);
+        SC8815_SFB_Enable();
+        SC8815_Config.VOUT_Open_Time = HAL_GetTick();
+    }
 }
 
 void Application_SC8815_Init(void)
@@ -300,68 +294,62 @@ void Application_SC8815_Init(void)
  */
 void SC8815_Soft_Protect(void)
 {
-	if (APP_config.Sys_Mode == VINProtectMode || APP_config.Sys_Mode == VOUTProtectMode)
+	if (HAL_GPIO_ReadPin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin) == GPIO_PIN_SET || APP_config.Sys_Mode == VINProtectMode || APP_config.Sys_Mode == VOUTProtectMode)
 	{
 		return;
 	}
-	if (HAL_GPIO_ReadPin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin) == GPIO_PIN_RESET)
-	{
-		uint16_t temp = App_getVBAT_mV();
-		if ((temp <= APP_config.fastCharge_InVoltage - (APP_config.fastCharge_InVoltage * 0.1)) || (temp <= APP_config.DC_Voltage - (APP_config.DC_Voltage * 0.1))) // 输入保护
-		{
-			uint16_t VBAT = 0;
-			for (uint8_t i = 0; i < 5; i++)
-			{
-				if (VBAT == 0)
-				{
-					VBAT = App_getVBAT_mV();
-				}
-				else {
-					VBAT = (VBAT + App_getVBAT_mV()) / 2;
-				}
-				HAL_Delay(10);
-			}
-			if ((VBAT <= APP_config.fastCharge_InVoltage - (APP_config.fastCharge_InVoltage * 0.1)) || (VBAT <= APP_config.DC_Voltage - (APP_config.DC_Voltage * 0.1)))
-			{
-				// printf("输入供电不足\r\n");
-				Application_SC8815_Standby();
-				// SC8815_Clear();
-				APP_config.Sys_Mode = VINProtectMode;
-				BUZZER_OPEN(200);
-			}
-		}
-		if (HAL_GetTick() - SC8815_Config.VOUTOpenTime >= 100)
-		{
-			if (SC8815_Read_VBUS_Current() >= SC8815_Config.SC8815_IBUS_Limit || App_getVBUS_mV() <= SC8815_Config.SC8815_VBUS - (SC8815_Config.SC8815_VBUS * 0.1)) // 输出保护
-			{
-				uint16_t VBUS = 0, IBUS = 0;
-				for (uint8_t i = 0; i < 5; i++)
-				{
-					if (VBUS == 0)
-					{
-						VBUS = App_getVBUS_mV();
-						IBUS = SC8815_Read_VBUS_Current();
-					}
-					else {
-						VBUS = (VBUS + App_getVBUS_mV()) / 2;
-						IBUS = (IBUS + SC8815_Read_VBUS_Current()) / 2;
-					}
-					printf("VBUS:%dmV, IBUS:%dmA\r\n", VBUS, IBUS);
-					HAL_Delay(10);
-				}
-				printf("VBUSSHORT:%d\r\n", SC8815_GetVBUSShort());
-				if (IBUS >= SC8815_Config.SC8815_IBUS_Limit || VBUS <= SC8815_Config.SC8815_VBUS - (SC8815_Config.SC8815_VBUS * 0.1))
-				{
-					printf("VBUS/5:%dmV, IBUS/5:%dmA\r\n", VBUS, IBUS);
-					// printf("触发限流保护\r\n");
-					Application_SC8815_Standby();
-					// SC8815_Clear();
-					APP_config.Sys_Mode = VOUTProtectMode;
-					BUZZER_OPEN(200);
-				}
-			}
-		}
-	}
+    if ((App_getVBAT_mV() <= APP_config.fastCharge_InVoltage - (APP_config.fastCharge_InVoltage * 0.1))) // 输入保护
+    {
+        uint16_t VBAT = 0;
+        for (uint8_t i = 0; i < 5; i++)
+        {
+            if (VBAT == 0)
+            {
+                VBAT = App_getVBAT_mV();
+            }
+            else {
+                VBAT = (VBAT + App_getVBAT_mV()) / 2;
+            }
+            HAL_Delay(10);
+        }
+        if ((VBAT <= APP_config.fastCharge_InVoltage - (APP_config.fastCharge_InVoltage * 0.1)))
+        {
+            // printf("输入供电不足\r\n");
+            Application_SC8815_Standby();
+            APP_config.Sys_Mode = VINProtectMode;
+            BUZZER_OPEN(200);
+        }
+    }
+    if (HAL_GetTick() - SC8815_Config.VOUT_Open_Time >= 100)
+    {
+        if (SC8815_Read_VBUS_Current() >= SC8815_Config.SC8815_IBUS_Limit || App_getVBUS_mV() <= SC8815_Config.SC8815_VBUS - (SC8815_Config.SC8815_VBUS * 0.1)) // 输出保护
+        {
+            uint16_t VBUS = 0, IBUS = 0;
+            for (uint8_t i = 0; i < 5; i++)
+            {
+                if (VBUS == 0)
+                {
+                    VBUS = App_getVBUS_mV();
+                    IBUS = SC8815_Read_VBUS_Current();
+                }
+                else {
+                    VBUS = (VBUS + App_getVBUS_mV()) / 2;
+                    IBUS = (IBUS + SC8815_Read_VBUS_Current()) / 2;
+                }
+                printf("VBUS:%dmV, IBUS:%dmA\r\n", VBUS, IBUS);
+                HAL_Delay(10);
+            }
+            printf("VBUSSHORT:%d\r\n", SC8815_GetVBUSShort());
+            if (IBUS >= SC8815_Config.SC8815_IBUS_Limit || VBUS <= SC8815_Config.SC8815_VBUS - (SC8815_Config.SC8815_VBUS * 0.1))
+            {
+                printf("VBUS/5:%dmV, IBUS/5:%dmA\r\n", VBUS, IBUS);
+                // printf("触发限流保护\r\n");
+                Application_SC8815_Standby();
+                APP_config.Sys_Mode = VOUTProtectMode;
+                BUZZER_OPEN(200);
+            }
+        }
+    }
 }
 
 /**
