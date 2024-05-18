@@ -4,6 +4,8 @@
 #include "Application_SC8815.h"
 #include <math.h>
 
+uint8_t fastCharge_list[] = {5, 9, 12, 15, 20};
+
 /**
  *@brief 申请快充输入5V电压
  *
@@ -98,4 +100,5 @@ void Application_CH224K_init(void)
         APP_config.fastCharge_InVoltage = 5;
         return;
     }
+    APP_config.fastCharge_InVoltage = 5;
 }

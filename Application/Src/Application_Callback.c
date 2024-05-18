@@ -31,7 +31,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart)
         if ((char)uart1_Receive_Data == '\n')
         {
             return;
-        }    
+        }
         // HAL_UART_Transmit(&huart1, &uart1_Receive_Data, 1, 10);    //调式串口回显
         if ((char)uart1_Receive_Data == '\r')
         {
@@ -44,16 +44,18 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart)
             if (ascii_process(uart1_Cmd))
             {
                 printf("%s ok\r\n", uart1_Cmd);
-            }else{
+            }
+            else {
                 printf("%s error\r\n", uart1_Cmd);
             }
-            // 清楚uart1_Cmd，uart1_Cmd全置为0
+            // 清除uart1_Cmd，uart1_Cmd全置为0
             memset(uart1_Cmd, 0, UART_Cmd_Length);
             cmd_Index = 0;
             return;
-        }else if (cmd_Index >= UART_Cmd_Length)
+        }
+        else if (cmd_Index >= UART_Cmd_Length)
         {
-            // 清楚uart1_Cmd，uart1_Cmd全置为0
+            // 清除uart1_Cmd，uart1_Cmd全置为0
             printf("Command too long\r\n");
             memset(uart1_Cmd, 0, UART_Cmd_Length);
             cmd_Index = 0;
@@ -75,6 +77,9 @@ int Encoder_B_Value = 0;                 //第二次B项的值
  */
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
+    extern uint8_t key2_press;
+    extern uint32_t key2PressStartTime;
+    extern uint8_t fastCharge_list[];
     switch (GPIO_Pin)
     {
     case KEY1_Pin:
@@ -85,7 +90,8 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
         {
             // 步进除10
             SC8815_Config.SC8815_VBUS_IBUS_Step = 100;
-        }else if (APP_config.Sys_Mode == normalMode)
+        }
+        else if (APP_config.Sys_Mode == normalMode)
         {
             APP_config.Sys_Mode = setIBUSMode;    // 设置调节电流限流模式
             SC8815_Config.SC8815_IBUS_Limit_Old = SC8815_Config.SC8815_IBUS_Limit;  // 保存IBUS限流值
@@ -93,19 +99,12 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
         // __set_FAULTMASK(0); //开启所有中断
         break;
     case KEY2_Pin:
-        BUZZER_OPEN(100);
-        APP_config.LCD_Clear = 1;
-        // __set_FAULTMASK(1); //关闭所有中断
-        if ((APP_config.Sys_Mode == setVBUSMode || APP_config.Sys_Mode == setIBUSMode) && SC8815_Config.SC8815_VBUS_IBUS_Step == 100)
+        if (key2_press)return;
+        key2_press = 1;
+        if (key2PressStartTime == 0)
         {
-            // 步进乘10
-            SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
-        }else if (APP_config.Sys_Mode == normalMode)
-        {
-            APP_config.Sys_Mode = setVBUSMode;    // 设置调节输出电压模式
-            SC8815_Config.SC8815_VBUS_Old = SC8815_Config.SC8815_VBUS;  // 保存VBUS值
+            key2PressStartTime = HAL_GetTick();
         }
-        // __set_FAULTMASK(0); //开启所有中断
         break;
     case KEY3_Pin:
         BUZZER_OPEN(100);
@@ -121,17 +120,15 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
             }
             SC8815_Config.SC8815_IBUS_Limit = SC8815_Config.SC8815_IBUS_Limit_Old;
             SC8815_Config.SC8815_VBUS = SC8815_Config.SC8815_VBUS_Old;
-        }else if (APP_config.Sys_Mode == normalMode) 
+        }
+        else if (APP_config.Sys_Mode == normalMode)
         {
             if (HAL_GPIO_ReadPin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin) == RESET)
             {
                 Application_SC8815_Standby();
-                SC8815_Config.SC8815_Status = SC8815_Standby;
             }
             else {
                 SC8815_Config.SC8815_Status = SC8815_LoadStart;
-                // Application_SC8815_Run();
-                // Application_SC8815_loadStart();
             }
         }
         break;
@@ -160,7 +157,8 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
                         else {
                             SC8815_Config.SC8815_IBUS_Limit = SC8815_Config.SC8815_IBUS_Limit - SC8815_Config.SC8815_VBUS_IBUS_Step;
                         }
-                    }else if (APP_config.Sys_Mode == setVBUSMode)
+                    }
+                    else if (APP_config.Sys_Mode == setVBUSMode)
                     {
                         if (SC8815_Config.SC8815_VBUS - SC8815_Config.SC8815_VBUS_IBUS_Step <= 0)
                         {
@@ -168,6 +166,18 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
                         }
                         else {
                             SC8815_Config.SC8815_VBUS = SC8815_Config.SC8815_VBUS - SC8815_Config.SC8815_VBUS_IBUS_Step;
+                        }
+                    }
+                    else if (APP_config.Sys_Mode == fastChargeMode)
+                    {
+                        if (APP_config.fastCharge_InVoltage == 5)  return;
+                        for (int i = 0; i < 5; i++)
+                        {
+                            if (APP_config.fastCharge_InVoltage == fastCharge_list[i])
+                            {
+                                APP_config.fastCharge_InVoltage = fastCharge_list[i - 1];
+                                break;
+                            }
                         }
                     }
                     BUZZER_OPEN(100);
@@ -189,6 +199,18 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
                         if (SC8815_Config.SC8815_VBUS >= 36000)
                         {
                             SC8815_Config.SC8815_VBUS = 36000;
+                        }
+                    }
+                    else if (APP_config.Sys_Mode == fastChargeMode)
+                    {
+                        if (APP_config.fastCharge_InVoltage == 20) return;
+                        for (int i = 0; i < 5; i++)
+                        {
+                            if (APP_config.fastCharge_InVoltage == fastCharge_list[i])
+                            {
+                                APP_config.fastCharge_InVoltage = fastCharge_list[i + 1];
+                                break;
+                            }
                         }
                     }
                     BUZZER_OPEN(100);

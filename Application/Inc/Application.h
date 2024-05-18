@@ -14,13 +14,14 @@
 #include "main.h"
 #include "UART_Debug.h"
 
-#define KEY4_LONG_PRESS_THRESHOLD 2000 // 定义KEY4长按阈值，单位为毫秒
+#define KEY4_LONG_PRESS_THRESHOLD 1000 // 定义KEY4长按阈值，单位为毫秒
 
 void Application_main(void);
 void Application_Error_Handler(void);
 void Application_Assert_Failed(void);
 void Application_SoftwareDelay(uint16_t time);
-void KEY4_Button(void);
+void key4_button_process(void);
+void key2_button_process(void);
 void SET_LED1_Status(void);
 
 typedef enum

@@ -13,6 +13,7 @@
 #include "Application_SC8815.h"
 #include "Application_BUZZER.h"
 #include "APPlication_LCD.h"
+#include "CH224K.h"
 
 Application_Config APP_config;
 
@@ -25,14 +26,11 @@ void Application_main()
     while (1)
     {
         Application_SC8815_loadStart();
-        KEY4_Button();
+        key4_button_process();
+        key2_button_process();
         // SC8815_Soft_Protect();
         SET_LED1_Status();
         APP_LCD_Show();
-        // printf("FADC-->VBAT:%fV, VBUS:%fV, IBUS:%fmA\r\n", App_getVBAT_V(), App_getVBUS_V(), App_getIBUS_mA());
-        // printf("SC8815-->VBAT:%dmV, VBUS:%dmV, IBUS:%dmA\r\n", SC8815_Read_BATT_Voltage(), SC8815_Read_VBUS_Voltage(), SC8815_Read_BATT_Current());
-        // printf("ADC-->VBAT:%fV, VBUS:%fV, IBUS:%fmA\r\n", App_getVBAT_average_V(), App_getVBUS_average_V(), App_getIBUS_average_mA());
-        // printf("SC8815-->VBAT:%dmV, VBUS:%dmV, IBUS:%dmA\r\n", SC8815_Read_BATT_Voltage(), SC8815_Read_VBUS_Voltage(), SC8815_Read_BATT_Current());
     }
 }
 
@@ -72,30 +70,13 @@ void Application_SoftwareDelay(uint16_t time)
 }
 
 /**
- *@brief 识别按键4单击和长按，并执行相应操作
+ *@brief 识别按键4单击并执行相应操作
  *
  */
-uint32_t buttonPressStartTime = 0;
-void KEY4_Button(void)
+void key4_button_process(void)
 {
-    if (APP_config.Sys_Mode == normalMode)
+    if (APP_config.Sys_Mode != normalMode)
     {
-        if (HAL_GPIO_ReadPin(KEY4_GPIO_Port, KEY4_Pin) == GPIO_PIN_SET) {
-            if (buttonPressStartTime == 0) {
-                buttonPressStartTime = HAL_GetTick();
-            }
-            uint32_t currentTime = HAL_GetTick();
-            if (currentTime - buttonPressStartTime >= KEY4_LONG_PRESS_THRESHOLD) {
-                // 检测到长按
-                APP_config.Sys_Mode = fastChargeMode;
-                printf("fastChargeMode\r\n");
-            }
-        }
-        else {
-            buttonPressStartTime = 0; // 重置计时器
-        }
-    }
-    else {
         // KEY4单击设置电压/电流/快充输入电压
         if (HAL_GPIO_ReadPin(KEY4_GPIO_Port, KEY4_Pin) == GPIO_PIN_SET)
         {
@@ -115,8 +96,74 @@ void KEY4_Button(void)
                 SC8815_Config.SC8815_IBUS_Limit_Old = SC8815_Config.SC8815_IBUS_Limit;
             }
             else if (APP_config.Sys_Mode == fastChargeMode) {
-
+                switch (APP_config.fastCharge_InVoltage)
+                {
+                case 5:
+                    CH224K_5V();
+                    break;
+                case 9:
+                    CH224K_9V();
+                    break;
+                case 12:
+                    CH224K_12V();
+                    break;
+                case 15:
+                    CH224K_15V();
+                    break;
+                case 20:
+                    CH224K_20V();
+                    break;
+                default:
+                    break;
+                }
+                APP_config.Sys_Mode = normalMode;
             }
+        }
+    }
+}
+
+uint32_t key2PressStartTime = 0;    //key2按下时间
+uint8_t key2_press = 0; //ket2是否按下标志位
+/**
+ *@brief 识别按键2单击和长按并执行相应操作
+ * 
+ */
+void key2_button_process(void)
+{
+    if (key2_press)
+    {
+        if (APP_config.Sys_Mode == normalMode)
+        {
+            if (HAL_GPIO_ReadPin(KEY2_GPIO_Port, KEY2_Pin) == SET)
+            {
+                //key2检测到单击
+                APP_config.Sys_Mode = setVBUSMode;    // 设置调节输出电压模式
+                SC8815_Config.SC8815_VBUS_Old = SC8815_Config.SC8815_VBUS;  // 保存VBUS值
+                APP_config.LCD_Clear = 1;
+                key2PressStartTime = 0; // 重置计时器
+                key2_press = 0;
+                BUZZER_OPEN(100);
+                return;
+            }
+            else if (HAL_GetTick() - key2PressStartTime >= KEY4_LONG_PRESS_THRESHOLD)
+            {
+                //key2检测到长按
+                APP_config.Sys_Mode = fastChargeMode;
+                APP_config.LCD_Clear = 1;
+                key2PressStartTime = 0; // 重置计时器
+                key2_press = 0;
+                BUZZER_OPEN(100);
+                return;
+            }
+        }
+        else if ((APP_config.Sys_Mode == setVBUSMode || APP_config.Sys_Mode == setIBUSMode) && SC8815_Config.SC8815_VBUS_IBUS_Step == 100)
+        {
+            // 步进乘10
+            SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
+            key2PressStartTime = 0; // 重置计时器
+            key2_press = 0;
+            BUZZER_OPEN(100);
+            APP_config.LCD_Clear = 1;
         }
     }
 }

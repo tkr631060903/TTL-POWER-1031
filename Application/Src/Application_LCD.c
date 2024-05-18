@@ -61,7 +61,7 @@ void APP_LCD_ShowISET()
 void APP_LCD_ShowVOUT()
 {
     LCD_ShowString(0, 66, "VOUT:", RED, BLACK, 32, 0);
-    float temp = App_getVBUS_mV() / 1000;
+    float temp = App_getVBUS_V();
     if (temp < 10)
     {
         LCD_ShowFloatNum(80, 66, temp, 3, RED, BLACK, 32);
@@ -76,7 +76,7 @@ void APP_LCD_ShowVOUT()
 void APP_LCD_ShowIOUT()
 {
     LCD_ShowString(0, 99, "IOUT:", RED, BLACK, 32, 0);
-    float temp = SC8815_Read_VBUS_Current() / 1000;
+    float temp = App_getIBUS_A();
     if (temp < 10)
     {
         LCD_ShowFloatNum(80, 99, temp, 3, RED, BLACK, 32);
@@ -131,9 +131,17 @@ void APP_LCD_Show_VOUTProtectMode(void)
 void APP_LCD_Show_fastChargeMod(void)
 {
     LCD_ShowString(0, 0, "fastCharge:", RED, BLACK, 32, 0);
+    if (APP_config.fastCharge_InVoltage < 10)
+    {
+        LCD_ShowIntNum(80, 33, APP_config.fastCharge_InVoltage, 3, RED, BLACK, 32);
+        LCD_ShowChar(150, 33, 'V', RED, BLACK, 32, 0);
+    }
+    else {
+        LCD_ShowIntNum(80, 33, APP_config.fastCharge_InVoltage, 4, RED, BLACK, 32);
+        LCD_ShowChar(160, 33, 'V', RED, BLACK, 32, 0);
+    }
 }
 
-static uint16_t LCDFlushTime = 0;
 void APP_LCD_Show(void)
 {
     if (APP_config.LCD_Clear)
@@ -145,18 +153,6 @@ void APP_LCD_Show(void)
     switch (APP_config.Sys_Mode)
     {
     case normalMode:
-        // if (LCDFlushTime == 0)
-        // {
-        //     LCDFlushTime = HAL_GetTick();
-        // }
-        // else if (HAL_GetTick() - LCDFlushTime >= 300)
-        // {
-        //     LCDFlushTime = 0;
-        //     APP_LCD_ShowVSET();
-        //     APP_LCD_ShowISET();
-        //     APP_LCD_ShowVOUT();
-        //     APP_LCD_ShowIOUT();
-        // }
         APP_LCD_ShowVSET();
         APP_LCD_ShowISET();
         APP_LCD_ShowVOUT();

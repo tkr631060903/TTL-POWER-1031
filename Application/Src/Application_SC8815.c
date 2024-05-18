@@ -159,6 +159,12 @@ void I2C_WriteRegByte(uint8_t SlaveAddress, uint8_t RegAddress, uint8_t ByteData
 		i2c_WaitAck();
 		i2c_Stop();
     } while (I2C_ReadRegByte(SlaveAddress, RegAddress) != ByteData && check_timeout++ < 1000);
+    if (check_timeout >= 1000)
+    {
+        printf("SysRest-->SC8815 Write Reg Error!\r\n");
+        // __set_FAULTMASK(1); //关闭所有中断
+        // NVIC_SystemReset(); //进行软件复位
+    }
 }
 
 
@@ -193,7 +199,7 @@ void Application_SC8815_Init(void)
 	SC8815_BatteryConfigStruct.IRCOMP = SCBAT_IRCOMP_20mR;
 	// SCBAT_VBAT_SEL_Internal 内部反馈
 	// SCBAT_VBAT_SEL_External 外部反馈
-	SC8815_BatteryConfigStruct.VBAT_SEL = SCBAT_VBAT_SEL_Internal;
+	SC8815_BatteryConfigStruct.VBAT_SEL = SCBAT_VBAT_SEL_External;
 	SC8815_BatteryConfigStruct.CSEL = SCBAT_CSEL_3S;
 	SC8815_BatteryConfigStruct.VCELL = SCBAT_VCELL_4v10;
 	SC8815_BatteryConfig(&SC8815_BatteryConfigStruct);
@@ -212,7 +218,7 @@ void Application_SC8815_Init(void)
 	// VBUS电压反馈模式: 
 	//   SCHWI_FB_Internal 内部反馈(最高电压25.6V)
 	//   SCHWI_FB_External 外部分压电阻反馈(最大输出不建议超过36V[手册上最大输出电压且需考虑外围元件耐压值]) 
-	SC8815_HardwareInitStruct.FB_Mode = SCHWI_FB_Internal;
+	SC8815_HardwareInitStruct.FB_Mode = SCHWI_FB_External;
 	SC8815_HardwareInitStruct.TRICKLE_SET = SCHWI_TRICKLE_SET_60;
 	SC8815_HardwareInitStruct.OVP = SCHWI_OVP_Enable;
 	SC8815_HardwareInitStruct.DITHER = SCHWI_DITHER_Disable;
@@ -368,6 +374,7 @@ void Application_SC8815_Shutdown(void)
  */
 void Application_SC8815_Standby(void)
 {
+    SC8815_Config.SC8815_Status = SC8815_Standby;
 	HAL_GPIO_WritePin(SC8815_CE_GPIO_Port, SC8815_CE_Pin, GPIO_PIN_RESET);
 	HAL_GPIO_WritePin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin, GPIO_PIN_SET);
 	HAL_GPIO_WritePin(POWER_RELEASE_GPIO_Port, POWER_RELEASE_Pin, GPIO_PIN_SET);	//放电

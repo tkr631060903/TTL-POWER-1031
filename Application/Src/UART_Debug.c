@@ -57,11 +57,11 @@ int setVBUS_handler(CmdStr param, short param_cnt)
     {
         return 0;
     }
-    int val;
-    sscanf(param[1], "%d", &val);
-    SC8815_Config.SC8815_VBUS = val;
-    SC8815_Config.SC8815_VBUS_Old = val;
-    SC8815_SetOutputVoltage(val);
+    int value;
+    sscanf(param[1], "%d", &value);
+    SC8815_Config.SC8815_VBUS = value;
+    SC8815_Config.SC8815_VBUS_Old = value;
+    SC8815_SetOutputVoltage(value);
     return 1;
 }
 
@@ -71,11 +71,11 @@ int setIBUS_handler(CmdStr param, short param_cnt)
     {
         return 0;
     }
-    int val;
-    sscanf(param[1], "%d", &val);
-    SC8815_Config.SC8815_VBUS = val;
-    SC8815_Config.SC8815_VBUS_Old = val;
-    SC8815_SetBusCurrentLimit(val);
+    int value;
+    sscanf(param[1], "%d", &value);
+    SC8815_Config.SC8815_IBUS_Limit = value;
+    SC8815_Config.SC8815_IBUS_Limit_Old = value;
+    SC8815_SetBusCurrentLimit(value);
     return 1;
 }
 
@@ -86,12 +86,10 @@ int setIBAT_handler(CmdStr param, short param_cnt)
         return 0;
     }
     Application_SC8815_Standby();
-    int val;
-    sscanf(param[1], "%d", &val);
-    SC8815_Config.SC8815_VBUS = val;
-    SC8815_Config.SC8815_VBUS_Old = val;
-    SC8815_SetBusCurrentLimit(val);
-    SC8815_SetBatteryCurrLimit((*(char*)param[1]) - '0');
+    int value;
+    sscanf(param[1], "%d", &value);
+    SC8815_Config.SC8815_IBAT_Limit = value;
+    SC8815_SetBatteryCurrLimit(value);
     return 1;
 }
 
@@ -102,8 +100,10 @@ int setIRCOMP_handler(CmdStr param, short param_cnt)
         return 0;
     }
     Application_SC8815_Standby();
+    int value;
+    sscanf(param[1], "%x", &value);
     extern SC8815_BatteryConfigTypeDef SC8815_BatteryConfigStruct;
-	SC8815_BatteryConfigStruct.IRCOMP = (*(char *)param[1]) - '0';
+	SC8815_BatteryConfigStruct.IRCOMP = value;
 	SC8815_BatteryConfig(&SC8815_BatteryConfigStruct);
     return 1;
 }
@@ -115,8 +115,10 @@ int setVBAT_SEL_handler(CmdStr param, short param_cnt)
         return 0;
     }
     Application_SC8815_Standby();
+    int value;
+    sscanf(param[1], "%x", &value);
     extern SC8815_BatteryConfigTypeDef SC8815_BatteryConfigStruct;
-	SC8815_BatteryConfigStruct.VBAT_SEL = (*(char *)param[1]) - '0';
+	SC8815_BatteryConfigStruct.VBAT_SEL = value;
 	SC8815_BatteryConfig(&SC8815_BatteryConfigStruct);
     return 1;
 }
@@ -128,7 +130,9 @@ int setCSEL_handler(CmdStr param, short param_cnt)
         return 0;
     }
     Application_SC8815_Standby();
-    SC8815_SetBatteryCell((*(char *)param[1]) - '0');
+    int value;
+    sscanf(param[1], "%x", &value);
+    SC8815_SetBatteryCell(value);
     return 1;
 }
 
@@ -139,8 +143,10 @@ int setVCELL_handler(CmdStr param, short param_cnt)
         return 0;
     }
     Application_SC8815_Standby();
+    int value;
+    sscanf(param[1], "%x", &value);
     extern SC8815_BatteryConfigTypeDef SC8815_BatteryConfigStruct;
-	SC8815_BatteryConfigStruct.VCELL = (*(char *)param[1]) - '0';
+	SC8815_BatteryConfigStruct.VCELL = value;
 	SC8815_BatteryConfig(&SC8815_BatteryConfigStruct);
     return 1;
 }
@@ -152,7 +158,9 @@ int setSW_FREQ_handler(CmdStr param, short param_cnt)
         return 0;
     }
     Application_SC8815_Standby();
-    SC8815_SetSWFreq((*(char *)param[1]) - '0');
+    int value;
+    sscanf(param[1], "%x", &value);
+    SC8815_SetSWFreq(value);
     return 1;
 }
 
@@ -163,7 +171,9 @@ int setDeadTime_handler(CmdStr param, short param_cnt)
         return 0;
     }
     Application_SC8815_Standby();
-    SC8815_SetDeadTime((*(char *)param[1]) - '0');
+    int value;
+    sscanf(param[1], "%x", &value);
+    SC8815_SetDeadTime(value);
     return 1;
 }
 
@@ -174,7 +184,9 @@ int setFB_Mode_handler(CmdStr param, short param_cnt)
         return 0;
     }
     Application_SC8815_Standby();
-    SC8815_SetVBUSFBMode((*(char *)param[1]) - '0');
+    int value;
+    sscanf(param[1], "%x", &value);
+    SC8815_SetVBUSFBMode(value);
     return 1;
 }
 
@@ -185,8 +197,10 @@ int setDITHER_handler(CmdStr param, short param_cnt)
         return 0;
     }
     Application_SC8815_Standby();
+    int value;
+    sscanf(param[1], "%x", &value);
     extern SC8815_HardwareInitTypeDef SC8815_HardwareInitStruct;
-    SC8815_HardwareInitStruct.DITHER = SCHWI_DITHER_Disable;
+    SC8815_HardwareInitStruct.DITHER = value;
     SC8815_HardwareInit(&SC8815_HardwareInitStruct);
     return 1;
 }
@@ -198,8 +212,10 @@ int setSLEW_SET_handler(CmdStr param, short param_cnt)
         return 0;
     }
     Application_SC8815_Standby();
+    int value;
+    sscanf(param[1], "%x", &value);
     extern SC8815_HardwareInitTypeDef SC8815_HardwareInitStruct;
-    SC8815_HardwareInitStruct.SLEW_SET = SCHWI_DITHER_Disable;
+    SC8815_HardwareInitStruct.SLEW_SET = value;
     SC8815_HardwareInit(&SC8815_HardwareInitStruct);
     return 1;
 }
@@ -211,43 +227,22 @@ int setILIM_BW_handler(CmdStr param, short param_cnt)
         return 0;
     }
     Application_SC8815_Standby();
-    SC8815_SetILIMBW((*(char *)param[1]) - '0');
+    int value;
+    sscanf(param[1], "%x", &value);
+    SC8815_SetILIMBW(value);
     return 1;
 }
 
 /**
- *@brief 解析命令字符串
+ * @brief 解析命令字符串
+ * 
+ * @param input 命令字符串
+ * @param delimiter 分隔符
+ * @param tokens 解析后的参数数组
+ * @param max_tokens 最大参数个数
  * @param param 解析后的参数数组
- * @param cmdstr 命令字符串
- * @param split_char 分隔符
- * @return 解析参数的个数
+ * @return 解析参数的个数 
  */
-int ascii_getparam(CmdStr param, unsigned char *cmdstr, char split_char)
-{
-    // char *p;
-    // short i = 0;
-    // short j = 0;
-    // p = (char *)cmdstr;
-    // while (cmdstr[j])
-    // {
-    //     if (cmdstr[j] == split_char || (cmdstr[j] == ':'))
-    //     {
-    //         if (i < CMD_STR_CNT)
-    //         {
-    //             param[i++] = p;
-    //         }
-    //         p = (char *)cmdstr + j + 1;
-    //         cmdstr[j] = '\0';
-    //         // i++;
-    //     }
-    //     j++;
-    // }
-    // if (i < CMD_STR_CNT)
-    //     param[i++] = p;
-    // return i;
-	return 1;
-}
-
 int splitString(char* input, char delimiter, char** tokens, int max_tokens, CmdStr param) {
     int token_count = 0;
     char* token = strtok(input, &delimiter);
@@ -268,7 +263,6 @@ int ascii_process(char *cmd)
     int ret = -1;
     int i;
     int map_cnt = sizeof(handler_map_static) / sizeof(lookup_table_t);
-    // param_cnt = ascii_getparam(param, cmd, ',');
     char* tokens[10];
     param_cnt = splitString(cmd, ':', tokens, 10, param);
     for (i = 0; i < map_cnt; i++)

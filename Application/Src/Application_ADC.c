@@ -39,7 +39,7 @@ float App_getVBUS_V(void)
  */
 float App_getIBUS_mA(void)
 {
-    return (((float)ADC_Value[2] * SAMPLING_RATE) / 0.5 * 1000) * 0.92;
+    return (((float)ADC_Value[2] * SAMPLING_RATE) / 0.5 * 1000) * 0.932;
 }
 
 /**
@@ -49,7 +49,7 @@ float App_getIBUS_mA(void)
  */
 float App_getIBUS_A(void)
 {
-    return (((float)ADC_Value[2] * SAMPLING_RATE) / 0.5) * 0.92;
+    return (((float)ADC_Value[2] * SAMPLING_RATE) / 0.5) * 0.932;
 }
 
 /**
