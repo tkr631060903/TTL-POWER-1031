@@ -26,10 +26,12 @@ void Application_Init(void)
     // 初始化串口中断输入
     extern uint8_t uart1_Receive_Data;  //串口1接收缓冲区
     HAL_UART_Receive_IT(&huart1, &uart1_Receive_Data, 1);
+    CH224K_12V();
     HAL_Delay(1000);
     extern ADC_HandleTypeDef hadc1;
     HAL_ADCEx_Calibration_Start(&hadc1);    // 校准ADC
     HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&ADC_Value, 4);    // 开始ADC DMA
+    HAL_Delay(1000);
     APP_config.Sys_Mode = normalMode;    // 设置默认模式
     Application_CH224K_init();
     Application_SC8815_Init();

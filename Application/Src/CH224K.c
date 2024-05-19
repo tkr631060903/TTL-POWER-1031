@@ -66,36 +66,36 @@ void CH224K_20V(void)
 void Application_CH224K_init(void)
 {
     CH224K_20V();
-    HAL_Delay(100);
-    if (fabsf(App_getVBAT_mV() - 20000) < 500)
+    HAL_Delay(1000);
+    if (fabsf(App_getVBAT_mV() - 20000) < 1000)
     {
         APP_config.fastCharge_InVoltage = 20;
         return;
     }
     CH224K_15V();
-    HAL_Delay(100);
-    if (fabsf(App_getVBAT_mV() - 15000) < 500)
+    HAL_Delay(1000);
+    if (fabsf(App_getVBAT_mV() - 15000) < 1000)
     {
         APP_config.fastCharge_InVoltage = 15;
         return;
     }
     CH224K_12V();
-    HAL_Delay(100);
-    if (fabsf(App_getVBAT_mV() - 12000) < 500)
+    HAL_Delay(1000);
+    if (fabsf(App_getVBAT_mV() - 12000) < 1000)
     {
         APP_config.fastCharge_InVoltage = 12;
         return;
     }
     CH224K_9V();
-    HAL_Delay(100);
-    if (fabsf(App_getVBAT_mV() - 9000) < 500)
+    HAL_Delay(1000);
+    if (fabsf(App_getVBAT_mV() - 9000) < 1000)
     {
         APP_config.fastCharge_InVoltage = 9;
         return;
     }
     CH224K_5V();
-    HAL_Delay(100);
-    if (fabsf(App_getVBAT_mV() - 5000) < 500)
+    HAL_Delay(1000);
+    if (fabsf(App_getVBAT_mV() - 5000) < 1000)
     {
         APP_config.fastCharge_InVoltage = 5;
         return;
