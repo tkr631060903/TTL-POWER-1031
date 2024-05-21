@@ -107,6 +107,9 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
         }
         break;
     case KEY3_Pin:
+        SoftwareDelay(50);
+        if (HAL_GPIO_ReadPin(KEY3_GPIO_Port, KEY3_Pin) == RESET)
+            return;
         BUZZER_OPEN(100);
         if (APP_config.Sys_Mode == setIBUSMode || APP_config.Sys_Mode == setVBUSMode)
         {
@@ -125,6 +128,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
         {
             if (HAL_GPIO_ReadPin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin) == RESET)
             {
+                SC8815_Config.SC8815_Status = SC8815_Standby;
                 Application_SC8815_Standby();
             }
             else {

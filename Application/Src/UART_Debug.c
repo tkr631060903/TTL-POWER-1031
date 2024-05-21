@@ -85,6 +85,7 @@ int setIBAT_handler(CmdStr param, short param_cnt)
     {
         return 0;
     }
+    SC8815_Config.SC8815_Status = SC8815_Standby;
     Application_SC8815_Standby();
     int value;
     sscanf(param[1], "%d", &value);
@@ -99,6 +100,7 @@ int setIRCOMP_handler(CmdStr param, short param_cnt)
     {
         return 0;
     }
+    SC8815_Config.SC8815_Status = SC8815_Standby;
     Application_SC8815_Standby();
     int value;
     sscanf(param[1], "%x", &value);
@@ -114,6 +116,7 @@ int setVBAT_SEL_handler(CmdStr param, short param_cnt)
     {
         return 0;
     }
+    SC8815_Config.SC8815_Status = SC8815_Standby;
     Application_SC8815_Standby();
     int value;
     sscanf(param[1], "%x", &value);
@@ -129,6 +132,7 @@ int setCSEL_handler(CmdStr param, short param_cnt)
     {
         return 0;
     }
+    SC8815_Config.SC8815_Status = SC8815_Standby;
     Application_SC8815_Standby();
     int value;
     sscanf(param[1], "%x", &value);
@@ -142,6 +146,7 @@ int setVCELL_handler(CmdStr param, short param_cnt)
     {
         return 0;
     }
+    SC8815_Config.SC8815_Status = SC8815_Standby;
     Application_SC8815_Standby();
     int value;
     sscanf(param[1], "%x", &value);
@@ -157,6 +162,7 @@ int setSW_FREQ_handler(CmdStr param, short param_cnt)
     {
         return 0;
     }
+    SC8815_Config.SC8815_Status = SC8815_Standby;
     Application_SC8815_Standby();
     int value;
     sscanf(param[1], "%x", &value);
@@ -170,6 +176,7 @@ int setDeadTime_handler(CmdStr param, short param_cnt)
     {
         return 0;
     }
+    SC8815_Config.SC8815_Status = SC8815_Standby;
     Application_SC8815_Standby();
     int value;
     sscanf(param[1], "%x", &value);
@@ -183,6 +190,7 @@ int setFB_Mode_handler(CmdStr param, short param_cnt)
     {
         return 0;
     }
+    SC8815_Config.SC8815_Status = SC8815_Standby;
     Application_SC8815_Standby();
     int value;
     sscanf(param[1], "%x", &value);
@@ -196,6 +204,7 @@ int setDITHER_handler(CmdStr param, short param_cnt)
     {
         return 0;
     }
+    SC8815_Config.SC8815_Status = SC8815_Standby;
     Application_SC8815_Standby();
     int value;
     sscanf(param[1], "%x", &value);
@@ -211,6 +220,7 @@ int setSLEW_SET_handler(CmdStr param, short param_cnt)
     {
         return 0;
     }
+    SC8815_Config.SC8815_Status = SC8815_Standby;
     Application_SC8815_Standby();
     int value;
     sscanf(param[1], "%x", &value);
@@ -226,6 +236,7 @@ int setILIM_BW_handler(CmdStr param, short param_cnt)
     {
         return 0;
     }
+    SC8815_Config.SC8815_Status = SC8815_Standby;
     Application_SC8815_Standby();
     int value;
     sscanf(param[1], "%x", &value);
