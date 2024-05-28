@@ -51,6 +51,13 @@ int fputc(int ch, FILE *f)
     return ch;
 }
 
+/**
+ * @brief 设置 SC8815 在 OTG 反向输出时的输出电压
+ * 
+ * @param param 命令参数
+ * @param param_cnt 命令参数个数
+ * @return 1-命令执行成功，0-命令执行失败 
+ */
 int setVBUS_handler(CmdStr param, short param_cnt)
 {
     if (param_cnt == 1)
@@ -65,6 +72,13 @@ int setVBUS_handler(CmdStr param, short param_cnt)
     return 1;
 }
 
+/**
+ * @brief 设置 SC8815 VBUS 路径上的限流值,双向通用
+ * 
+ * @param param 命令参数
+ * @param param_cnt 命令参数个数
+ * @return 1-命令执行成功，0-命令执行失败 
+ */
 int setIBUS_handler(CmdStr param, short param_cnt)
 {
     if (param_cnt == 1)
@@ -79,6 +93,13 @@ int setIBUS_handler(CmdStr param, short param_cnt)
     return 1;
 }
 
+/**
+ * @brief 设置 SC8815 电池路径上的限流值,双向通用
+ * 
+ * @param param 命令参数
+ * @param param_cnt 命令参数个数
+ * @return 1-命令执行成功，0-命令执行失败 
+ */
 int setIBAT_handler(CmdStr param, short param_cnt)
 {
     if (param_cnt == 1)
@@ -94,6 +115,13 @@ int setIBAT_handler(CmdStr param, short param_cnt)
     return 1;
 }
 
+/**
+ * @brief 配置 SC8815 电池内阻参数
+ * 
+ * @param param 命令参数
+ * @param param_cnt 命令参数个数
+ * @return 1-命令执行成功，0-命令执行失败 
+ */
 int setIRCOMP_handler(CmdStr param, short param_cnt)
 {
     if (param_cnt == 1)
@@ -110,6 +138,13 @@ int setIRCOMP_handler(CmdStr param, short param_cnt)
     return 1;
 }
 
+/**
+ * @brief 配置 SC8815 电池反馈模式
+ * 
+ * @param param 命令参数
+ * @param param_cnt 命令参数个数
+ * @return 1-命令执行成功，0-命令执行失败 
+ */
 int setVBAT_SEL_handler(CmdStr param, short param_cnt)
 {
     if (param_cnt == 1)
@@ -126,6 +161,13 @@ int setVBAT_SEL_handler(CmdStr param, short param_cnt)
     return 1;
 }
 
+/**
+ * @brief 配置 SC8815 电池个数参数
+ * 
+ * @param param 命令参数
+ * @param param_cnt 命令参数个数
+ * @return 1-命令执行成功，0-命令执行失败 
+ */
 int setCSEL_handler(CmdStr param, short param_cnt)
 {
     if (param_cnt == 1)
@@ -135,11 +177,18 @@ int setCSEL_handler(CmdStr param, short param_cnt)
     SC8815_Config.SC8815_Status = SC8815_Standby;
     Application_SC8815_Standby();
     int value;
-    sscanf(param[1], "%x", &value);
+    sscanf(param[1], "%d", &value);
     SC8815_SetBatteryCell(value);
     return 1;
 }
 
+/**
+ * @brief 配置 SC8815 电池电压参数
+ * 
+ * @param param 命令参数
+ * @param param_cnt 命令参数个数
+ * @return 1-命令执行成功，0-命令执行失败 
+ */
 int setVCELL_handler(CmdStr param, short param_cnt)
 {
     if (param_cnt == 1)
@@ -156,6 +205,13 @@ int setVCELL_handler(CmdStr param, short param_cnt)
     return 1;
 }
 
+/**
+ * @brief 设置 SC8815 开关切换频率
+ * 
+ * @param param 命令参数
+ * @param param_cnt 命令参数个数
+ * @return 1-命令执行成功，0-命令执行失败 
+ */
 int setSW_FREQ_handler(CmdStr param, short param_cnt)
 {
     if (param_cnt == 1)
@@ -166,10 +222,20 @@ int setSW_FREQ_handler(CmdStr param, short param_cnt)
     Application_SC8815_Standby();
     int value;
     sscanf(param[1], "%x", &value);
-    SC8815_SetSWFreq(value);
+    extern SC8815_HardwareInitTypeDef SC8815_HardwareInitStruct;
+    SC8815_HardwareInitStruct.SW_FREQ = value;
+    SC8815_HardwareInit(&SC8815_HardwareInitStruct);
+    // SC8815_SetSWFreq(value);
     return 1;
 }
 
+/**
+ * @brief 设置 SC8815 死区时间
+ * 
+ * @param param 命令参数
+ * @param param_cnt 命令参数个数
+ * @return 1-命令执行成功，0-命令执行失败 
+ */
 int setDeadTime_handler(CmdStr param, short param_cnt)
 {
     if (param_cnt == 1)
@@ -179,11 +245,18 @@ int setDeadTime_handler(CmdStr param, short param_cnt)
     SC8815_Config.SC8815_Status = SC8815_Standby;
     Application_SC8815_Standby();
     int value;
-    sscanf(param[1], "%x", &value);
+    sscanf(param[1], "%d", &value);
     SC8815_SetDeadTime(value);
     return 1;
 }
 
+/**
+ * @brief 设置 SC8815 VBUS电压反馈模式
+ * 
+ * @param param 命令参数
+ * @param param_cnt 命令参数个数
+ * @return 1-命令执行成功，0-命令执行失败 
+ */
 int setFB_Mode_handler(CmdStr param, short param_cnt)
 {
     if (param_cnt == 1)
@@ -193,11 +266,18 @@ int setFB_Mode_handler(CmdStr param, short param_cnt)
     SC8815_Config.SC8815_Status = SC8815_Standby;
     Application_SC8815_Standby();
     int value;
-    sscanf(param[1], "%x", &value);
+    sscanf(param[1], "%d", &value);
     SC8815_SetVBUSFBMode(value);
     return 1;
 }
 
+/**
+ * @brief 打开或关闭 SC8815 频率抖动功能
+ * 
+ * @param param 命令参数
+ * @param param_cnt 命令参数个数
+ * @return 1-命令执行成功，0-命令执行失败 
+ */
 int setDITHER_handler(CmdStr param, short param_cnt)
 {
     if (param_cnt == 1)
@@ -214,6 +294,13 @@ int setDITHER_handler(CmdStr param, short param_cnt)
     return 1;
 }
 
+/**
+ * @brief 设置 SC8815 反向放电模式下VBUS动态变化的速率
+ * 
+ * @param param 命令参数
+ * @param param_cnt 命令参数个数
+ * @return 1-命令执行成功，0-命令执行失败 
+ */
 int setSLEW_SET_handler(CmdStr param, short param_cnt)
 {
     if (param_cnt == 1)
@@ -230,6 +317,13 @@ int setSLEW_SET_handler(CmdStr param, short param_cnt)
     return 1;
 }
 
+/**
+ * @brief 设置 SC8815 电流环路响应带宽
+ * 
+ * @param param 命令参数
+ * @param param_cnt 命令参数个数
+ * @return 1-命令执行成功，0-命令执行失败 
+ */
 int setILIM_BW_handler(CmdStr param, short param_cnt)
 {
     if (param_cnt == 1)
@@ -239,7 +333,7 @@ int setILIM_BW_handler(CmdStr param, short param_cnt)
     SC8815_Config.SC8815_Status = SC8815_Standby;
     Application_SC8815_Standby();
     int value;
-    sscanf(param[1], "%x", &value);
+    sscanf(param[1], "%d", &value);
     SC8815_SetILIMBW(value);
     return 1;
 }
@@ -267,6 +361,12 @@ int splitString(char* input, char delimiter, char** tokens, int max_tokens, CmdS
     return token_count;
 }
 
+/**
+ * @brief ASCII命令处理函数
+ * 
+ * @param cmd 命令字符串
+ * @return 1-成功 0-失败
+ */
 int ascii_process(char *cmd)
 {
     CmdStr param;

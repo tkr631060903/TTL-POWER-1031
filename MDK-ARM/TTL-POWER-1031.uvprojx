@@ -960,6 +960,11 @@
               <FileType>1</FileType>
               <FilePath>..\Application\Src\Application_LCD.c</FilePath>
             </File>
+            <File>
+              <FileName>stmflash.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Application\Src\stmflash.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

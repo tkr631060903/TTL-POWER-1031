@@ -12,8 +12,11 @@
 #include "Application.h"
 #include "Application_BUZZER.h"
 #include "Application_ADC.h"
+#include "stmflash.h"
 
 SC8815_ConfigTypeDef SC8815_Config;
+static SC8815_PresetTypeDef SC8815_Preset[10];
+static SC8815_TIM_WorkTypeDef SC8815_TIM_Work[10];
 
 /**
  *@brief 软件延时
@@ -147,10 +150,10 @@ uint8_t I2C_ReadRegByte(uint8_t SlaveAddress, uint8_t RegAddress)
 
 void I2C_WriteRegByte(uint8_t SlaveAddress, uint8_t RegAddress, uint8_t ByteData)
 {
-    uint16_t check_timeout = 0;
-    do
-    {
-        i2c_Start();
+	uint16_t check_timeout = 0;
+	do
+	{
+		i2c_Start();
 		i2c_SendByte(SC8815_WRITE_ADDR);
 		i2c_WaitAck();
 		i2c_SendByte(RegAddress);
@@ -158,13 +161,13 @@ void I2C_WriteRegByte(uint8_t SlaveAddress, uint8_t RegAddress, uint8_t ByteData
 		i2c_SendByte(ByteData);
 		i2c_WaitAck();
 		i2c_Stop();
-    } while (I2C_ReadRegByte(SlaveAddress, RegAddress) != ByteData && check_timeout++ < 1000);
-    if (check_timeout >= 1000)
-    {
-        printf("SysRest-->SC8815 Write Reg Error!\r\n");
-        // __set_FAULTMASK(1); //关闭所有中断
-        // NVIC_SystemReset(); //进行软件复位
-    }
+	} while (I2C_ReadRegByte(SlaveAddress, RegAddress) != ByteData && check_timeout++ < 1000);
+	if (check_timeout >= 1000)
+	{
+		printf("SysRest-->SC8815 Write Reg Error!\r\n");
+		// __set_FAULTMASK(1); //关闭所有中断
+		// NVIC_SystemReset(); //进行软件复位
+	}
 }
 
 
@@ -174,15 +177,15 @@ void I2C_WriteRegByte(uint8_t SlaveAddress, uint8_t RegAddress, uint8_t ByteData
  */
 void Application_SC8815_loadStart(void)
 {
-    if (SC8815_Config.SC8815_Status == SC8815_LoadStart)
-    {
-        Application_SC8815_Run();
-        SC8815_SFB_Disable();
-        HAL_Delay(50);
-        // Application_SoftwareDelay(50);
-        SC8815_SFB_Enable();
-        SC8815_Config.VOUT_Open_Time = HAL_GetTick();
-    }
+	if (SC8815_Config.SC8815_Status == SC8815_LoadStart)
+	{
+		Application_SC8815_Run();
+		SC8815_SFB_Disable();
+		HAL_Delay(50);
+		// Application_SoftwareDelay(50);
+		SC8815_SFB_Enable();
+		SC8815_Config.VOUT_Open_Time = HAL_GetTick();
+	}
 }
 
 void Application_SC8815_Init(void)
@@ -210,8 +213,8 @@ void Application_SC8815_Init(void)
 	SC8815_HardwareInitStruct.VBAT_RATIO = SCHWI_VBAT_RATIO_12_5x;
 	SC8815_HardwareInitStruct.VBUS_RATIO = SCHWI_VBUS_RATIO_12_5x;
 	SC8815_HardwareInitStruct.VINREG_Ratio = SCHWI_VINREG_RATIO_100x;
-	SC8815_HardwareInitStruct.SW_FREQ = SCHWI_FREQ_150KHz;
-	SC8815_HardwareInitStruct.DeadTime = SCHWI_DT_80ns;
+	SC8815_HardwareInitStruct.SW_FREQ = SCHWI_FREQ_300KHz_2;
+	SC8815_HardwareInitStruct.DeadTime = SCHWI_DT_60ns;
 	SC8815_HardwareInitStruct.ICHAR = SCHWI_ICHAR_IBAT;
 	SC8815_HardwareInitStruct.TRICKLE = SCHWI_TRICKLE_Disable;
 	SC8815_HardwareInitStruct.TERM = SCHWI_TERM_Enable;
@@ -261,9 +264,9 @@ void Application_SC8815_Init(void)
 	// SC8815_SetBatteryCurrLimit(5000);
 	// SC8815_SetBusCurrentLimit(3000);
 	// SC8815_SetOutputVoltage(12000);
-    SC8815_Config.SC8815_IBAT_Limit = 12000;
-    SC8815_Config.SC8815_IBUS_Limit = 1000;
-    SC8815_Config.SC8815_VBUS = 5000;
+	SC8815_Config.SC8815_IBAT_Limit = 12000;
+	SC8815_Config.SC8815_IBUS_Limit = 1000;
+	SC8815_Config.SC8815_VBUS = 5000;
 	SC8815_SetBatteryCurrLimit(SC8815_Config.SC8815_IBAT_Limit);
 	SC8815_SetBusCurrentLimit(SC8815_Config.SC8815_IBUS_Limit);
 	SC8815_SetOutputVoltage(SC8815_Config.SC8815_VBUS);
@@ -305,64 +308,64 @@ void SC8815_Soft_Protect(void)
 	{
 		return;
 	}
-    if ((App_getVBAT_mV() <= APP_config.fastCharge_InVoltage - (APP_config.fastCharge_InVoltage * 0.1))) // 输入保护
-    {
-        // uint16_t VBAT = 0;
-        // for (uint8_t i = 0; i < 5; i++)
-        // {
-        //     if (VBAT == 0)
-        //     {
-        //         VBAT = App_getVBAT_mV();
-        //     }
-        //     else {
-        //         VBAT = (VBAT + App_getVBAT_mV()) / 2;
-        //     }
-        //     HAL_Delay(10);
-        // }
-        // if ((VBAT <= APP_config.fastCharge_InVoltage - (APP_config.fastCharge_InVoltage * 0.1)))
-        // {
-        //     Application_SC8815_Standby();
-        //     APP_config.Sys_Mode = VINProtectMode;
-        //     BUZZER_OPEN(200);
+	if ((App_getVBAT_mV() <= APP_config.fastCharge_InVoltage - (APP_config.fastCharge_InVoltage * 0.1))) // 输入保护
+	{
+		// uint16_t VBAT = 0;
+		// for (uint8_t i = 0; i < 5; i++)
+		// {
+		//     if (VBAT == 0)
+		//     {
+		//         VBAT = App_getVBAT_mV();
+		//     }
+		//     else {
+		//         VBAT = (VBAT + App_getVBAT_mV()) / 2;
+		//     }
+		//     HAL_Delay(10);
+		// }
+		// if ((VBAT <= APP_config.fastCharge_InVoltage - (APP_config.fastCharge_InVoltage * 0.1)))
+		// {
+		//     Application_SC8815_Standby();
+		//     APP_config.Sys_Mode = VINProtectMode;
+		//     BUZZER_OPEN(200);
 		// }
 		SC8815_Config.SC8815_Status = SC8815_Standby;
 		Application_SC8815_Standby();
 		APP_config.Sys_Mode = VINProtectMode;
 		BUZZER_OPEN(500);
 	}
-    if (HAL_GetTick() - SC8815_Config.VOUT_Open_Time >= 100)
-    {
-        if (App_getIBUS_mA() >= SC8815_Config.SC8815_IBUS_Limit || App_getVBUS_mV() <= SC8815_Config.SC8815_VBUS - (SC8815_Config.SC8815_VBUS * 0.1)) // 输出保护
-        {
-            // uint16_t VBUS = 0, IBUS = 0;
-            // for (uint8_t i = 0; i < 5; i++)
-            // {
-            //     if (VBUS == 0)
-            //     {
-            //         VBUS = App_getVBUS_mV();
-            //         IBUS = SC8815_Read_VBUS_Current();
-            //     }
-            //     else {
-            //         VBUS = (VBUS + App_getVBUS_mV()) / 2;
-            //         IBUS = (IBUS + SC8815_Read_VBUS_Current()) / 2;
-            //     }
-            //     printf("VBUS:%dmV, IBUS:%dmA\r\n", VBUS, IBUS);
-            //     HAL_Delay(10);
-            // }
-            // if (IBUS >= SC8815_Config.SC8815_IBUS_Limit || VBUS <= SC8815_Config.SC8815_VBUS - (SC8815_Config.SC8815_VBUS * 0.1))
-            // {
-            //     printf("VBUS/5:%dmV, IBUS/5:%dmA\r\n", VBUS, IBUS);
-            //     // printf("触发限流保护\r\n");
-            //     Application_SC8815_Standby();
-            //     APP_config.Sys_Mode = VOUTProtectMode;
-            //     BUZZER_OPEN(200);
+	if (HAL_GetTick() - SC8815_Config.VOUT_Open_Time >= 100)
+	{
+		if (App_getIBUS_mA() >= SC8815_Config.SC8815_IBUS_Limit || App_getVBUS_mV() <= SC8815_Config.SC8815_VBUS - (SC8815_Config.SC8815_VBUS * 0.1)) // 输出保护
+		{
+			// uint16_t VBUS = 0, IBUS = 0;
+			// for (uint8_t i = 0; i < 5; i++)
+			// {
+			//     if (VBUS == 0)
+			//     {
+			//         VBUS = App_getVBUS_mV();
+			//         IBUS = SC8815_Read_VBUS_Current();
+			//     }
+			//     else {
+			//         VBUS = (VBUS + App_getVBUS_mV()) / 2;
+			//         IBUS = (IBUS + SC8815_Read_VBUS_Current()) / 2;
+			//     }
+			//     printf("VBUS:%dmV, IBUS:%dmA\r\n", VBUS, IBUS);
+			//     HAL_Delay(10);
+			// }
+			// if (IBUS >= SC8815_Config.SC8815_IBUS_Limit || VBUS <= SC8815_Config.SC8815_VBUS - (SC8815_Config.SC8815_VBUS * 0.1))
+			// {
+			//     printf("VBUS/5:%dmV, IBUS/5:%dmA\r\n", VBUS, IBUS);
+			//     // printf("触发限流保护\r\n");
+			//     Application_SC8815_Standby();
+			//     APP_config.Sys_Mode = VOUTProtectMode;
+			//     BUZZER_OPEN(200);
 			// }
 			SC8815_Config.SC8815_Status = SC8815_Standby;
 			Application_SC8815_Standby();
 			APP_config.Sys_Mode = VOUTProtectMode;
 			BUZZER_OPEN(500);
 		}
-    }
+	}
 }
 
 /**
@@ -373,6 +376,7 @@ void Application_SC8815_Shutdown(void)
 {
 	HAL_GPIO_WritePin(SC8815_CE_GPIO_Port, SC8815_CE_Pin, GPIO_PIN_SET);
 	// HAL_GPIO_WritePin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(POWER_RELEASE_GPIO_Port, POWER_RELEASE_Pin, GPIO_PIN_SET);	//放电
 }
 
 /**
@@ -395,4 +399,12 @@ void Application_SC8815_Run(void)
 	HAL_GPIO_WritePin(POWER_RELEASE_GPIO_Port, POWER_RELEASE_Pin, GPIO_PIN_RESET);
 	HAL_GPIO_WritePin(SC8815_CE_GPIO_Port, SC8815_CE_Pin, GPIO_PIN_RESET);
 	HAL_GPIO_WritePin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin, GPIO_PIN_RESET);
+}
+
+SC8815_PresetTypeDef SC8815_Preset2;
+void SC8815_Preset_Save(SC8815_PresetTypeDef* SC8815_Preset)
+{
+	SC8815_PresetTypeDef SC8815_Preset3;
+	STMFLASH_Write(FLASH_SAVE_ADDR, (uint16_t*)SC8815_Preset, sizeof(SC8815_PresetTypeDef));
+	STMFLASH_Read(FLASH_SAVE_ADDR, (uint16_t*)&SC8815_Preset2, sizeof(SC8815_PresetTypeDef));
 }

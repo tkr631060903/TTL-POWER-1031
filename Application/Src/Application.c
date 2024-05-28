@@ -23,6 +23,13 @@ Application_Config APP_config;
  */
 void Application_main()
 {
+    SC8815_PresetTypeDef SC8815_Preset;
+    SC8815_Preset.SC8815_Preset_Num = 1;
+    SC8815_Preset.SC8815_IBAT_Limit = 2;
+    SC8815_Preset.SC8815_IBUS_Limit = 3;
+    SC8815_Preset.SC8815_VBUS = 4;
+    SC8815_Preset.SC8815_VBUS_IBUS_Step = 5;
+    SC8815_Preset_Save(&SC8815_Preset);
     while (1)
     {
         Application_SC8815_loadStart();
