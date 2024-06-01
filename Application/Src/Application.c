@@ -23,23 +23,52 @@ Application_Config APP_config;
  */
 void Application_main()
 {
-    SC8815_PresetTypeDef SC8815_Preset;
-    SC8815_Preset.SC8815_Preset_Num = 1;
-    SC8815_Preset.SC8815_IBAT_Limit = 2;
-    SC8815_Preset.SC8815_IBUS_Limit = 3;
-    SC8815_Preset.SC8815_VBUS = 4;
-    SC8815_Preset.SC8815_VBUS_IBUS_Step = 5;
-    SC8815_Preset_Save(&SC8815_Preset);
+    // SC8815_PresetTypeDef SC8815_Preset;
+    // SC8815_Preset.SC8815_Preset_Num = 1;
+    // SC8815_Preset.SC8815_IBAT_Limit = 2;
+    // SC8815_Preset.SC8815_IBUS_Limit = 3;
+    // SC8815_Preset.SC8815_VBUS = 4;
+    // SC8815_Preset.SC8815_VBUS_IBUS_Step = 5;
+    // SC8815_Preset_Save(&SC8815_Preset);
+    uint32_t starttick = 0;
     while (1)
     {
+        starttick = HAL_GetTick();
         Application_SC8815_loadStart();
         key4_button_process();
         key2_button_process();
         // SC8815_Soft_Protect();
         SET_LED1_Status();
         APP_LCD_Show();
+        printf("tick: %d\n", HAL_GetTick() - starttick);
     }
 }
+
+/**
+ *@brief 系统运行
+ *
+ */
+// void Application_main()
+// {
+//     uint32_t starttick = 0;
+//     uint8_t i = 0;
+//     while (1)
+//     {
+//         starttick = HAL_GetTick();
+//         APP_LCD_Show();
+//         // if (i)
+//         // {
+//         //     LCD_Fill_DMA(0, 0, LCD_W, LCD_H, WHITE);
+//         //     i = 0;
+//         // }
+//         // else
+//         // {
+//         //     LCD_Fill_DMA(0, 0, LCD_W, LCD_H, BLACK);
+//         //     i = 1;
+//         // }
+//         printf("tick: %d\n", HAL_GetTick() - starttick);
+//     }
+// }
 
 /**
  *@brief 错误处理

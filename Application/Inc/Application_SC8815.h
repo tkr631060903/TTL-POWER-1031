@@ -52,7 +52,7 @@ typedef enum
 typedef struct
 {
     SC8815_StatusTypeDef SC8815_Status; // 8815状态
-    uint16_t SC8815_IBAT_Limit;         // 8815电池(输入)限流mA
+    float SC8815_IBAT_Limit;         // 8815电池(输入)限流mA
     float SC8815_IBUS_Limit;            // 8815 VBUS(输出)限流mA
     float SC8815_IBUS_Limit_Old;        // 8815 VBUS(输出)限流mA旧值
     float SC8815_VBUS;                  // 8815 VBUS输出电压mv
@@ -64,7 +64,7 @@ typedef struct
 typedef struct
 {
     uint8_t SC8815_Preset_Num;   // 8815预设号
-    uint16_t SC8815_IBAT_Limit;  // 8815电池(输入)限流mA
+    float SC8815_IBAT_Limit;  // 8815电池(输入)限流mA
     float SC8815_IBUS_Limit;     // 8815 VBUS(输出)限流mA
     float SC8815_VBUS;           // 8815 VBUS输出电压mv
     float SC8815_VBUS_IBUS_Step; // 8815 VBUS输出电压/电流步进值
@@ -74,10 +74,11 @@ typedef struct
 {
     uint8_t SC8815_TIM_Work_Num;     // 8815定时工作号
     // uint8_t SC8815_TIM_Work_Length;  // 8815定时工作长度,考虑使用保持时间来判断是否结束
+    uint8_t circular;   // 循环次数
     uint16_t SC8815_TIM_Work_second; // 8815定时工作保持时间单位s
-    uint16_t SC8815_IBAT_Limit;      // 8815电池(输入)限流mA
-    float SC8815_IBUS_Limit[40];     // 8815 VBUS(输出)限流mA
-    float SC8815_VBUS[40];           // 8815 VBUS输出电压mv
+    float SC8815_IBAT_Limit;      // 8815电池(输入)限流mA
+    float SC8815_IBUS_Limit[20];     // 8815 VBUS(输出)限流mA
+    float SC8815_VBUS[20];           // 8815 VBUS输出电压mv
 } SC8815_TIM_WorkTypeDef;            // SC8815定时工作结构体
 
 extern SC8815_ConfigTypeDef SC8815_Config;
@@ -88,6 +89,6 @@ void Application_SC8815_Standby(void);
 void Application_SC8815_Run(void);
 void Application_SC8815_loadStart(void);
 void SC8815_Soft_Protect(void);
-void SC8815_Preset_Save(SC8815_PresetTypeDef* SC8815_Preset);
+void SC8815_Preset_Save(void);
 
 #endif

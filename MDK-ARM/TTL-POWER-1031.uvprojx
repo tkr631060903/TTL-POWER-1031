@@ -965,6 +965,21 @@
               <FileType>1</FileType>
               <FilePath>..\Application\Src\stmflash.c</FilePath>
             </File>
+            <File>
+              <FileName>menu.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Application\Src\menu.c</FilePath>
+            </File>
+            <File>
+              <FileName>menu_ui.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Application\Src\menu_ui.c</FilePath>
+            </File>
+            <File>
+              <FileName>Hardware_setting.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Application\Src\Hardware_setting.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

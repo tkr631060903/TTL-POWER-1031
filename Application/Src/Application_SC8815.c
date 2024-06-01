@@ -16,7 +16,7 @@
 
 SC8815_ConfigTypeDef SC8815_Config;
 static SC8815_PresetTypeDef SC8815_Preset[10];
-static SC8815_TIM_WorkTypeDef SC8815_TIM_Work[10];
+static SC8815_TIM_WorkTypeDef SC8815_TIM_Work[5];
 
 /**
  *@brief 软件延时
@@ -294,6 +294,8 @@ void Application_SC8815_Init(void)
 	SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
 	SC8815_Config.SC8815_Status = SC8815_Standby;
 	Application_SC8815_Standby();
+	STMFLASH_Read(SC8815_PRESET_FLASH_SAVE_ADDR, (uint16_t*)&SC8815_Preset, sizeof(SC8815_PresetTypeDef) * 10);
+	STMFLASH_Read(SC8815_TIM_WORK_FLASH_SAVE_ADDR, (uint16_t*)&SC8815_TIM_Work, sizeof(SC8815_TIM_WorkTypeDef) * 5);
 	printf("SC8815 Init.\n");
 }
 
@@ -401,10 +403,25 @@ void Application_SC8815_Run(void)
 	HAL_GPIO_WritePin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin, GPIO_PIN_RESET);
 }
 
-SC8815_PresetTypeDef SC8815_Preset2;
-void SC8815_Preset_Save(SC8815_PresetTypeDef* SC8815_Preset)
+// static SC8815_PresetTypeDef SC8815_Preset1[10];
+// static SC8815_TIM_WorkTypeDef SC8815_TIM_Work1[6];
+void SC8815_Preset_Save(void)
 {
-	SC8815_PresetTypeDef SC8815_Preset3;
-	STMFLASH_Write(FLASH_SAVE_ADDR, (uint16_t*)SC8815_Preset, sizeof(SC8815_PresetTypeDef));
-	STMFLASH_Read(FLASH_SAVE_ADDR, (uint16_t*)&SC8815_Preset2, sizeof(SC8815_PresetTypeDef));
+	// SC8815_Preset[1].SC8815_IBAT_Limit = 1;
+	// SC8815_Preset[1].SC8815_IBUS_Limit = 2;
+	// SC8815_Preset[1].SC8815_Preset_Num = 3;
+	// SC8815_Preset[1].SC8815_VBUS = 4;
+	// SC8815_Preset[1].SC8815_VBUS_IBUS_Step = 5;
+	// SC8815_TIM_Work[1].circular = 1;
+	// SC8815_TIM_Work[1].SC8815_IBAT_Limit = 1;
+	// SC8815_TIM_Work[1].SC8815_IBUS_Limit[0] = 2;
+	// SC8815_TIM_Work[1].SC8815_IBUS_Limit[1] = 3;
+	// SC8815_TIM_Work[1].SC8815_TIM_Work_Num = 3;
+	// SC8815_TIM_Work[1].SC8815_TIM_Work_second = 4;
+	// SC8815_TIM_Work[1].SC8815_VBUS[0] = 5;
+	// SC8815_TIM_Work[1].SC8815_VBUS[1] = 6;
+	STMFLASH_Write(SC8815_PRESET_FLASH_SAVE_ADDR, (uint16_t*)SC8815_Preset, sizeof(SC8815_PresetTypeDef) * 10);
+	// STMFLASH_Read(SC8815_PRESET_FLASH_SAVE_ADDR, (uint16_t*)&SC8815_Preset1, sizeof(SC8815_PresetTypeDef) * 10);
+	// STMFLASH_Write(SC8815_TIM_WORK_FLASH_SAVE_ADDR, (uint16_t*)SC8815_TIM_Work, sizeof(SC8815_TIM_WorkTypeDef) * 6);
+	// STMFLASH_Read(SC8815_TIM_WORK_FLASH_SAVE_ADDR, (uint16_t*)&SC8815_TIM_Work1, sizeof(SC8815_TIM_WorkTypeDef) * 6);
 }

@@ -30,7 +30,7 @@ void Application_Init(void)
     HAL_Delay(500);
     extern ADC_HandleTypeDef hadc1;
     HAL_ADCEx_Calibration_Start(&hadc1);    // 校准ADC
-    // HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&ADC_Value, 4);    // 开始ADC DMA，会导致仿真报错
+    HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&ADC_Value, 4);    // 开始ADC DMA，会导致仿真报错
     HAL_Delay(500);
     APP_config.Sys_Mode = normalMode;    // 设置默认模式
     Application_CH224K_init();

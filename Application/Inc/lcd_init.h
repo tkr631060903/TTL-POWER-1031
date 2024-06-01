@@ -37,7 +37,9 @@
 #define LCD_BLK_Clr()  GPIO_ResetBits(GPIOA,GPIO_Pin_5)//BLK
 #define LCD_BLK_Set()  GPIO_SetBits(GPIOA,GPIO_Pin_5)
 
+#define LCD_BUFF_SIZE 128
 
+extern uint8_t isData;
 
 
 void LCD_GPIO_Init(void);//≥ı ºªØGPIO

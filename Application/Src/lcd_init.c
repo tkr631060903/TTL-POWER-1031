@@ -1,10 +1,12 @@
 #include "lcd_init.h"
 #include "Application.h"
 #include "UART_Debug.h"
+#include <string.h>
 
 extern SPI_HandleTypeDef hspi2;
-// static uint8_t LCD_Buff[128];
-// static uint16_t LCD_Buff_Point = 0;
+static uint8_t LCD_Buff[LCD_BUFF_SIZE];
+static uint16_t LCD_Buff_Point = 0;
+uint8_t isData = 0;  // 0:命令  1:数据
 
 void delay(uint16_t time)
 {
@@ -22,19 +24,30 @@ void delay(uint16_t time)
 ******************************************************************************/
 void LCD_Writ_Bus(uint8_t dat)
 {
-	while (HAL_SPI_GetState(&hspi2) == HAL_SPI_STATE_RESET);//检查接收标志位
-	HAL_SPI_Transmit(&hspi2, &dat, 1, 10);//发送
-	// HAL_SPI_Transmit_DMA(&hspi2, &dat, 1);
-
-    // if(LCD_Buff_Point == 127)
-    // {
-    //     while (HAL_SPI_GetState(&hspi2) == HAL_SPI_STATE_RESET);//检查接收标志位
-    //     HAL_SPI_Transmit_DMA(&hspi2, LCD_Buff, 128);
-    //     LCD_Buff_Point = 0;
-    // }else{
-    //     LCD_Buff[LCD_Buff_Point] = dat;
-    //     LCD_Buff_Point++;
-    // }
+	extern DMA_HandleTypeDef hdma_spi2_tx;
+	if (isData)
+    {
+        if(LCD_Buff_Point == LCD_BUFF_SIZE - 1)
+        {
+			HAL_SPI_Transmit_DMA(&hspi2, LCD_Buff, LCD_BUFF_SIZE);
+            while (HAL_DMA_GetState(&hdma_spi2_tx) != HAL_DMA_STATE_READY);
+			memset(LCD_Buff, 0, LCD_BUFF_SIZE);
+            LCD_Buff_Point = 0;
+        }else{
+            LCD_Buff[LCD_Buff_Point] = dat;
+            LCD_Buff_Point++;
+        }
+    }else{
+        if (LCD_Buff_Point != 0)
+        {
+			HAL_SPI_Transmit_DMA(&hspi2, LCD_Buff, LCD_Buff_Point);
+            while (HAL_DMA_GetState(&hdma_spi2_tx) != HAL_DMA_STATE_READY);
+			memset(LCD_Buff, 0, LCD_Buff_Point);
+            LCD_Buff_Point = 0;
+        }
+		HAL_SPI_Transmit(&hspi2, &dat, 1, 10);//发送
+		while (HAL_SPI_GetState(&hspi2) != HAL_SPI_STATE_READY);//检查接收标志位
+    }
 }
 
 /******************************************************************************
@@ -68,7 +81,9 @@ void LCD_WR_DATA(uint16_t dat)
 void LCD_WR_REG(uint8_t dat)
 {
 	LCD_DC_Clr();//写命令
-	LCD_Writ_Bus(dat);
+	// LCD_Writ_Bus(dat);
+	while (HAL_SPI_GetState(&hspi2) == HAL_SPI_STATE_RESET);//检查接收标志位
+	HAL_SPI_Transmit(&hspi2, &dat, 1, 10);//发送
 	LCD_DC_Set();//写数据
 }
 

@@ -12,7 +12,9 @@
 void LCD_Fill(uint16_t xsta, uint16_t ysta, uint16_t xend, uint16_t yend, uint16_t color)
 {
 	uint16_t i, j;
+	isData = 0;
 	LCD_Address_Set(xsta, ysta, xend - 1, yend - 1);
+	isData = 1;
 	for (i = ysta;i < yend;i++)
 	{
 		for (j = xsta;j < xend;j++)
@@ -37,7 +39,9 @@ void LCD_Fill_DMA(uint16_t xsta, uint16_t ysta, uint16_t xend, uint16_t yend, ui
 	}
 
 	// uint16_t num = ((xend - xsta) * (yend - ysta));
+	isData = 0;
 	LCD_Address_Set(xsta, ysta, xend - 1, yend - 1);//设置显示范围
+	isData = 1;
 	// hspi2.Init.DataSize = SPI_DATASIZE_16BIT;
 	// if (HAL_SPI_Init(&hspi2) != HAL_OK)
 	// {
@@ -82,7 +86,9 @@ void LCD_Fill_DMA(uint16_t xsta, uint16_t ysta, uint16_t xend, uint16_t yend, ui
 ******************************************************************************/
 void LCD_DrawPoint(uint16_t x, uint16_t y, uint16_t color)
 {
+	isData = 0;
 	LCD_Address_Set(x, y, x, y);//设置光标位置 
+	isData = 1;
 	LCD_WR_DATA(color);
 }
 
@@ -223,7 +229,9 @@ void LCD_ShowChinese12x12(uint16_t x, uint16_t y, uint8_t* s, uint16_t fc, uint1
 	{
 		if ((tfont12[k].Index[0] == *(s)) && (tfont12[k].Index[1] == *(s + 1)))
 		{
+			isData = 0;
 			LCD_Address_Set(x, y, x + sizey - 1, y + sizey - 1);
+			isData = 1;
 			for (i = 0;i < TypefaceNum;i++)
 			{
 				for (j = 0;j < 8;j++)
@@ -281,7 +289,9 @@ void LCD_ShowChinese16x16(uint16_t x, uint16_t y, uint8_t* s, uint16_t fc, uint1
 	{
 		if ((tfont16[k].Index[0] == *(s)) && (tfont16[k].Index[1] == *(s + 1)))
 		{
+			isData = 0;
 			LCD_Address_Set(x, y, x + sizey - 1, y + sizey - 1);
+			isData = 1;
 			for (i = 0;i < TypefaceNum;i++)
 			{
 				for (j = 0;j < 8;j++)
@@ -339,7 +349,9 @@ void LCD_ShowChinese24x24(uint16_t x, uint16_t y, uint8_t* s, uint16_t fc, uint1
 	{
 		if ((tfont24[k].Index[0] == *(s)) && (tfont24[k].Index[1] == *(s + 1)))
 		{
+			isData = 0;
 			LCD_Address_Set(x, y, x + sizey - 1, y + sizey - 1);
+			isData = 1;
 			for (i = 0;i < TypefaceNum;i++)
 			{
 				for (j = 0;j < 8;j++)
@@ -396,7 +408,9 @@ void LCD_ShowChinese32x32(uint16_t x, uint16_t y, uint8_t* s, uint16_t fc, uint1
 	{
 		if ((tfont32[k].Index[0] == *(s)) && (tfont32[k].Index[1] == *(s + 1)))
 		{
+			isData = 0;
 			LCD_Address_Set(x, y, x + sizey - 1, y + sizey - 1);
+			isData = 1;
 			for (i = 0;i < TypefaceNum;i++)
 			{
 				for (j = 0;j < 8;j++)
@@ -449,7 +463,9 @@ void LCD_ShowChar(uint16_t x, uint16_t y, uint8_t num, uint16_t fc, uint16_t bc,
 	sizex = sizey / 2;
 	TypefaceNum = (sizex / 8 + ((sizex % 8) ? 1 : 0)) * sizey;
 	num = num - ' ';    //得到偏移后的值
+	isData = 0;
 	LCD_Address_Set(x, y, x + sizex - 1, y + sizey - 1);  //设置光标位置 
+	isData = 1;
 	for (i = 0;i < TypefaceNum;i++)
 	{
 		if (sizey == 12)temp = ascii_1206[num][i];		       //调用6x12字体
@@ -595,7 +611,9 @@ void LCD_ShowPicture(uint16_t x, uint16_t y, uint16_t length, uint16_t width, co
 {
 	uint16_t i, j;
 	uint32_t k = 0;
+	isData = 0;
 	LCD_Address_Set(x, y, x + length - 1, y + width - 1);
+	isData = 1;
 	for (i = 0;i < length;i++)
 	{
 		for (j = 0;j < width;j++)
