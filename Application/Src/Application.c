@@ -14,6 +14,7 @@
 #include "Application_BUZZER.h"
 #include "APPlication_LCD.h"
 #include "CH224K.h"
+#include "usbd_cdc_if.h"
 
 Application_Config APP_config;
 
@@ -23,13 +24,6 @@ Application_Config APP_config;
  */
 void Application_main()
 {
-    // SC8815_PresetTypeDef SC8815_Preset;
-    // SC8815_Preset.SC8815_Preset_Num = 1;
-    // SC8815_Preset.SC8815_IBAT_Limit = 2;
-    // SC8815_Preset.SC8815_IBUS_Limit = 3;
-    // SC8815_Preset.SC8815_VBUS = 4;
-    // SC8815_Preset.SC8815_VBUS_IBUS_Step = 5;
-    // SC8815_Preset_Save(&SC8815_Preset);
     uint32_t starttick = 0;
     while (1)
     {
@@ -40,6 +34,7 @@ void Application_main()
         // SC8815_Soft_Protect();
         SET_LED1_Status();
         APP_LCD_Show();
+        //CDC_Transmit_FS((uint8_t*)starttick, 4); //CDC_Receive_FS中断接收
         printf("tick: %d\n", HAL_GetTick() - starttick);
     }
 }

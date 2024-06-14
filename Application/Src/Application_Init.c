@@ -33,7 +33,7 @@ void Application_Init(void)
     HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&ADC_Value, 4);    // 开始ADC DMA，会导致仿真报错
     HAL_Delay(500);
     APP_config.Sys_Mode = normalMode;    // 设置默认模式
-    Application_CH224K_init();
+    // Application_CH224K_init();
     Application_SC8815_Init();
     LCD_Init();
     LCD_Fill_DMA(0, 0, LCD_W, LCD_H, BLACK);

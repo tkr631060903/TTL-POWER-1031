@@ -15,8 +15,8 @@
 #include "stmflash.h"
 
 SC8815_ConfigTypeDef SC8815_Config;
-static SC8815_PresetTypeDef SC8815_Preset[10];
-static SC8815_TIM_WorkTypeDef SC8815_TIM_Work[5];
+static SC8815_PresetTypeDef SC8815_Preset[10] = {0};
+static SC8815_TIM_WorkTypeDef SC8815_TIM_Work[6] = {0};
 
 /**
  *@brief 软件延时
@@ -295,7 +295,7 @@ void Application_SC8815_Init(void)
 	SC8815_Config.SC8815_Status = SC8815_Standby;
 	Application_SC8815_Standby();
 	STMFLASH_Read(SC8815_PRESET_FLASH_SAVE_ADDR, (uint16_t*)&SC8815_Preset, sizeof(SC8815_PresetTypeDef) * 10);
-	STMFLASH_Read(SC8815_TIM_WORK_FLASH_SAVE_ADDR, (uint16_t*)&SC8815_TIM_Work, sizeof(SC8815_TIM_WorkTypeDef) * 5);
+	STMFLASH_Read(SC8815_TIM_WORK_FLASH_SAVE_ADDR, (uint16_t*)&SC8815_TIM_Work, sizeof(SC8815_TIM_WorkTypeDef) * 5);	//会导致USB连接不上
 	printf("SC8815 Init.\n");
 }
 
