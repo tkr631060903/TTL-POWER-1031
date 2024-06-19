@@ -12,7 +12,13 @@ typedef char menu_s8;
 // 菜单按键键值定义
 #define LEFT 1
 #define RIGHT 2
-#define ENTER_SHORT 3
-#define ENTER_LONG 4
+#define KEY2_LONG 3
+#define KEY2_SHORT 4
+#define KEY4_SHORT 5
+#define KEY1_SHORT 6
+#define KEY3_SHORT 7
+
+#define ENTER_SHORT 6
+#define ENTER_LONG 7
 
 #endif //__MENU_CONF_H

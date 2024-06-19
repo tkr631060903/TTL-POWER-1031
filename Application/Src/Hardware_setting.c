@@ -1,6 +1,34 @@
 #include "Hardware_setting.h"
+#include "Application_SC8815.h"
 
 Current_Select_Mode current_mode;
+
+// 设置音量
+void set_vout(menu_u8 KeyValue)
+{
+    switch (KeyValue)
+    {
+    case LEFT:
+        SC8815_Config.SC8815_VBUS = SC8815_Config.SC8815_VBUS - SC8815_Config.SC8815_VBUS_IBUS_Step;
+        if (SC8815_Config.SC8815_VBUS <= 0)
+        {
+            SC8815_Config.SC8815_VBUS = 0;
+        }
+        break;
+    case RIGHT:
+        SC8815_Config.SC8815_VBUS = SC8815_Config.SC8815_VBUS + SC8815_Config.SC8815_VBUS_IBUS_Step;
+        if (SC8815_Config.SC8815_VBUS >= 36000)
+        {
+            SC8815_Config.SC8815_VBUS = 36000;
+        }
+        break;
+    case KEY4_SHORT:
+        SC8815_Config.SC8815_VBUS_Old = SC8815_Config.SC8815_VBUS;
+        break;
+    default:
+        break;
+    }
+}
 
 // 设置音量
 void setting_volume(menu_u32 index)

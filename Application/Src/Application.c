@@ -15,6 +15,7 @@
 #include "APPlication_LCD.h"
 #include "CH224K.h"
 #include "usbd_cdc_if.h"
+#include "menu.h"
 
 Application_Config APP_config;
 
@@ -25,15 +26,20 @@ Application_Config APP_config;
 void Application_main()
 {
     uint32_t starttick = 0;
+    extern menu_i32 current_menu_index;
     while (1)
     {
         starttick = HAL_GetTick();
         Application_SC8815_loadStart();
         key4_button_process();
         key2_button_process();
+        rotary_knob_process();
         // SC8815_Soft_Protect();
         SET_LED1_Status();
-        APP_LCD_Show();
+        if (current_menu_index == MAIN_PAGE)
+        {
+            main_page_init();
+        }
         //CDC_Transmit_FS((uint8_t*)starttick, 4); //CDC_Receive_FS中断接收
         printf("tick: %d\n", HAL_GetTick() - starttick);
     }
@@ -43,32 +49,32 @@ void Application_main()
  *@brief 系统运行
  *
  */
-// void Application_main()
-// {
-//     uint32_t starttick = 0;
-//     uint8_t i = 0;
-//     while (1)
-//     {
-//         starttick = HAL_GetTick();
-//         APP_LCD_Show();
-//         // if (i)
-//         // {
-//         //     LCD_Fill_DMA(0, 0, LCD_W, LCD_H, WHITE);
-//         //     i = 0;
-//         // }
-//         // else
-//         // {
-//         //     LCD_Fill_DMA(0, 0, LCD_W, LCD_H, BLACK);
-//         //     i = 1;
-//         // }
-//         printf("tick: %d\n", HAL_GetTick() - starttick);
-//     }
-// }
+ // void Application_main()
+ // {
+ //     uint32_t starttick = 0;
+ //     uint8_t i = 0;
+ //     while (1)
+ //     {
+ //         starttick = HAL_GetTick();
+ //         APP_LCD_Show();
+ //         // if (i)
+ //         // {
+ //         //     LCD_Clear();
+ //         //     i = 0;
+ //         // }
+ //         // else
+ //         // {
+ //         //     LCD_Clear();
+ //         //     i = 1;
+ //         // }
+ //         printf("tick: %d\n", HAL_GetTick() - starttick);
+ //     }
+ // }
 
-/**
- *@brief 错误处理
- *
- */
+ /**
+  *@brief 错误处理
+  *
+  */
 void Application_Error_Handler()
 {
     /* User can add his own implementation to report the HAL error return state */
@@ -106,95 +112,43 @@ void Application_SoftwareDelay(uint16_t time)
  */
 void key4_button_process(void)
 {
-    if (APP_config.Sys_Mode != normalMode)
-    {
-        // KEY4单击设置电压/电流/快充输入电压
-        if (HAL_GPIO_ReadPin(KEY4_GPIO_Port, KEY4_Pin) == GPIO_PIN_SET)
-        {
-            BUZZER_OPEN(100);
-            APP_config.LCD_Clear = 1;
-            if (APP_config.Sys_Mode == setVBUSMode)
-            {
-                SC8815_SetOutputVoltage(SC8815_Config.SC8815_VBUS);
-                APP_config.Sys_Mode = normalMode;
-                SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
-                SC8815_Config.SC8815_VBUS_Old = SC8815_Config.SC8815_VBUS;
-            }
-            else if (APP_config.Sys_Mode == setIBUSMode) {
-                SC8815_SetBusCurrentLimit(SC8815_Config.SC8815_IBUS_Limit);
-                APP_config.Sys_Mode = normalMode;
-                SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
-                SC8815_Config.SC8815_IBUS_Limit_Old = SC8815_Config.SC8815_IBUS_Limit;
-            }
-            else if (APP_config.Sys_Mode == fastChargeMode) {
-                switch (APP_config.fastCharge_InVoltage)
-                {
-                case 5:
-                    CH224K_5V();
-                    break;
-                case 9:
-                    CH224K_9V();
-                    break;
-                case 12:
-                    CH224K_12V();
-                    break;
-                case 15:
-                    CH224K_15V();
-                    break;
-                case 20:
-                    CH224K_20V();
-                    break;
-                default:
-                    break;
-                }
-                APP_config.Sys_Mode = normalMode;
-            }
-        }
-    }
+    HAL_Delay(50);
+    if (HAL_GPIO_ReadPin(KEY4_GPIO_Port, KEY4_Pin) == RESET)
+        return;
+    Menu_Select_Item(KEY4_SHORT);
+    BUZZER_OPEN(100);
 }
 
 uint32_t key2PressStartTime = 0;    //key2按下时间
 uint8_t key2_press = 0; //ket2是否按下标志位
 /**
  *@brief 识别按键2单击和长按并执行相应操作
- * 
+ *
  */
 void key2_button_process(void)
 {
     if (key2_press)
     {
-        if (APP_config.Sys_Mode == normalMode)
+        if (HAL_GPIO_ReadPin(KEY2_GPIO_Port, KEY2_Pin) == SET)
         {
-            if (HAL_GPIO_ReadPin(KEY2_GPIO_Port, KEY2_Pin) == SET)
-            {
-                //key2检测到单击
-                APP_config.Sys_Mode = setVBUSMode;    // 设置调节输出电压模式
-                SC8815_Config.SC8815_VBUS_Old = SC8815_Config.SC8815_VBUS;  // 保存VBUS值
-                APP_config.LCD_Clear = 1;
-                key2PressStartTime = 0; // 重置计时器
-                key2_press = 0;
-                BUZZER_OPEN(100);
-                return;
-            }
-            else if (HAL_GetTick() - key2PressStartTime >= KEY4_LONG_PRESS_THRESHOLD)
-            {
-                //key2检测到长按
-                APP_config.Sys_Mode = fastChargeMode;
-                APP_config.LCD_Clear = 1;
-                key2PressStartTime = 0; // 重置计时器
-                key2_press = 0;
-                BUZZER_OPEN(100);
-                return;
-            }
-        }
-        else if ((APP_config.Sys_Mode == setVBUSMode || APP_config.Sys_Mode == setIBUSMode) && SC8815_Config.SC8815_VBUS_IBUS_Step == 100)
-        {
-            // 步进乘10
-            SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
+            //key2检测到单击
+            SC8815_Config.SC8815_VBUS_Old = SC8815_Config.SC8815_VBUS;  // 保存VBUS值
+            APP_config.LCD_Clear = 1;
             key2PressStartTime = 0; // 重置计时器
             key2_press = 0;
             BUZZER_OPEN(100);
+            Menu_Select_Item(KEY2_SHORT);
+            return;
+        }
+        else if (HAL_GetTick() - key2PressStartTime >= KEY_LONG_PRESS_THRESHOLD)
+        {
+            //key2检测到长按
             APP_config.LCD_Clear = 1;
+            key2PressStartTime = 0; // 重置计时器
+            key2_press = 0;
+            BUZZER_OPEN(100);
+            Menu_Select_Item(KEY2_LONG);
+            return;
         }
     }
 }
@@ -212,4 +166,21 @@ void SET_LED1_Status(void)
     else {
         HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_SET);
     }
+}
+
+uint8_t rotary_knob_value = 0;
+void rotary_knob_process(void)
+{
+    if (rotary_knob_value == LEFT)
+    {
+        Menu_Select_Item(LEFT);
+        rotary_knob_value = 0;
+    }
+    else if (rotary_knob_value == RIGHT)
+    {
+        Menu_Select_Item(RIGHT);
+        rotary_knob_value = 0;
+    }
+    
+
 }

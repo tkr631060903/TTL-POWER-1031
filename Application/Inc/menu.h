@@ -14,7 +14,6 @@ typedef struct Menu_Key_Index
     menu_u8 wlan_on_off;
     menu_u8 lang_select;
     menu_u8 sensivity_select;
-
     menu_u8 Current_Page;
 } Key_Index;
 extern Key_Index sub_index;
@@ -22,13 +21,15 @@ extern Key_Index sub_index;
 typedef void (*menu_op_func)(menu_u8);
 typedef struct OP_STRUCT
 {
-    int op_menu;        // 操作菜单
-    menu_op_func opfun; // 操作方法
+    int op_menu;        // 鎿嶄綔鑿滃崟
+    menu_op_func opfun; // 鎿嶄綔鏂规硶
 } OP_MENU_PAGE;
 
 typedef enum
 {
     MAIN_PAGE = 0,
+    MAIN_MENU_PAGE,
+    VOUT_PAGE,
     DETECT_PAGE,
     LOG_PAGE,
     VOLUME_PAGE,
@@ -39,9 +40,13 @@ typedef enum
 } OP_PAGE;
 
 void Enter_Page(menu_i32 index, menu_u8 KeyValue);
-void Menu_Select_Item(menu_i32 current_index, menu_u8 KeyValue);
+// void Menu_Select_Item(menu_i32 current_menu_index, menu_u8 KeyValue);
+void Menu_Select_Item(menu_u8 KeyValue);
 
 void main_page_process(menu_u8 KeyValue);
+void main_menu_page_process(menu_u8 KeyValue);
+void vout_page_process(menu_u8 KeyValue);
+
 void detect_page_process(menu_u8 KeyValue);
 void log_page_process(menu_u8 KeyValue);
 void volume_page_process(menu_u8 KeyValue);

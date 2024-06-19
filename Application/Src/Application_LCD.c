@@ -1,5 +1,4 @@
 #include "Application_LCD.h"
-#include "pic.h"
 #include "Application_ADC.h"
 #include "Application_SC8815.h"
 
@@ -146,7 +145,7 @@ void APP_LCD_Show(void)
 {
     if (APP_config.LCD_Clear)
     {
-        LCD_Fill_DMA(0, 0, LCD_W, LCD_H, BLACK);
+        LCD_Clear();
         APP_config.LCD_Clear = 0;
         return;
     }

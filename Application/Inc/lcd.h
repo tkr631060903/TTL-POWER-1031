@@ -4,6 +4,7 @@
 #include "main.h"
 
 #define LCD_Fill_DMA_SIZE 128
+#define LCD_Clear() LCD_Fill_DMA(0, 0, LCD_W, LCD_H, BLACK)
 
 void LCD_Fill(uint16_t xsta, uint16_t ysta, uint16_t xend, uint16_t yend, uint16_t color);//指定区域填充颜色
 void LCD_DrawPoint(uint16_t x, uint16_t y, uint16_t color);//在指定位置画一个点

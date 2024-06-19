@@ -40,6 +40,7 @@ typedef struct Current_User_Data
 } Current_Select_Mode;
 extern Current_Select_Mode current_mode;
 
+void set_vout(menu_u8 KeyValue);
 // …Ë÷√“Ù¡ø
 void setting_volume(menu_u32 index);
 // …Ë÷√”Ô—‘

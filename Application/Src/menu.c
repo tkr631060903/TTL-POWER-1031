@@ -2,18 +2,21 @@
 #include "UART_Debug.h"
 
 Key_Index sub_index;
+menu_i32 current_menu_index;
 
 // 菜单操作表定义
 static OP_MENU_PAGE g_opStruct[] =
-    {
-        {MAIN_PAGE, main_page_process},
-        {DETECT_PAGE, detect_page_process},
-        {LOG_PAGE, log_page_process},
-        {VOLUME_PAGE, volume_page_process},
-        {BRIGNE_PAGE, backlight_page_process},
-        {WLAN_PAGE, wlan_page_process},
-        {LANGUAGE_PAGE, language_page_process},
-        {SENSIVITY_PAGE, sensivity_page_process},
+{
+    {MAIN_PAGE, main_page_process},
+    {MAIN_MENU_PAGE, main_menu_page_process},
+    {VOUT_PAGE, vout_page_process},
+    {DETECT_PAGE, detect_page_process},
+    {LOG_PAGE, log_page_process},
+    {VOLUME_PAGE, volume_page_process},
+    {BRIGNE_PAGE, backlight_page_process},
+    {WLAN_PAGE, wlan_page_process},
+    {LANGUAGE_PAGE, language_page_process},
+    {SENSIVITY_PAGE, sensivity_page_process},
 };
 
 // 跳转到表所对应的页面
@@ -29,14 +32,38 @@ static int JUMP_Table(menu_i32 op, menu_u8 KeyValue)
 }
 
 // 菜单选择项
-void Menu_Select_Item(menu_i32 current_index, menu_u8 KeyValue)
+// void Menu_Select_Item(menu_i32 current_menu_index, menu_u8 KeyValue)
+// {
+//     JUMP_Table(current_menu_index, KeyValue);
+// }
+void Menu_Select_Item(menu_u8 KeyValue)
 {
-    JUMP_Table(current_index, KeyValue);
+    JUMP_Table(current_menu_index, KeyValue);
 }
 
-// 主页面处理
 void main_page_process(menu_u8 KeyValue)
 {
+    switch (KeyValue)
+    {
+    case KEY2_LONG:
+        main_menu_Init();
+        break;
+    case KEY2_SHORT:
+        current_menu_index = VOUT_PAGE;
+        vout_page_ui_process(KeyValue);
+        break;
+    case KEY1_SHORT:
+        Enter_Page(sub_index.main_current_index, KeyValue);
+        break;
+    default:
+        break;
+    }
+}
+
+// 主菜单页面处理
+void main_menu_page_process(menu_u8 KeyValue)
+{
+    current_menu_index = MAIN_MENU_PAGE;
     switch (KeyValue)
     {
     case LEFT:
@@ -48,15 +75,45 @@ void main_page_process(menu_u8 KeyValue)
         main_page_ui_process(sub_index.main_current_index);
         break;
 
-    // 在主页面的时候，短按ENTER按键进入对应的子页面
+        // 在主页面的时候，短按ENTER按键进入对应的子页面
     case ENTER_SHORT:
         Enter_Page(sub_index.main_current_index, KeyValue);
         break;
 
-    // 在主页面的时候，只要触发了ENTER按键长按即回到开机对应的页面
-    case ENTER_LONG:
+        // 在主页面的时候，只要触发了ENTER按键长按即回到开机对应的页面
+    case KEY2_LONG:
         Enter_Page(MAIN_PAGE, KeyValue);
-        Menu_Main_Init();
+        break;
+    default:
+        break;
+    }
+}
+
+void vout_page_process(menu_u8 KeyValue)
+{
+    current_menu_index = VOUT_PAGE;
+    switch (KeyValue)
+    {
+    case LEFT:
+        set_vout(KeyValue);
+        vout_page_ui_process(KeyValue);
+        break;
+    case RIGHT:
+        set_vout(KeyValue);
+        vout_page_ui_process(KeyValue);
+        break;
+    // case KEY2_SHORT:
+    //     vout_page_ui_process(KeyValue);
+    //     break;
+    case KEY2_LONG:
+        Enter_Page(MAIN_PAGE, KeyValue);
+        break;
+    case KEY3_SHORT:
+        //返回上一级
+        break;
+    case KEY4_SHORT:
+        vout_page_ui_process(KeyValue);
+        set_vout(KeyValue);
         break;
     default:
         break;
@@ -104,8 +161,8 @@ void volume_page_process(menu_u8 KeyValue)
         break;
 
     case ENTER_LONG:
-        Enter_Page(MAIN_PAGE, KeyValue);
-        Menu_Main_Init();
+        Enter_Page(MAIN_MENU_PAGE, KeyValue);
+        main_menu_Init();
         break;
     default:
         break;
@@ -130,8 +187,8 @@ void backlight_page_process(menu_u8 KeyValue)
         break;
 
     case ENTER_LONG:
-        Enter_Page(MAIN_PAGE, KeyValue);
-        Menu_Main_Init();
+        Enter_Page(MAIN_MENU_PAGE, KeyValue);
+        main_menu_Init();
         break;
     default:
         break;
@@ -156,8 +213,8 @@ void wlan_page_process(menu_u8 KeyValue)
         break;
 
     case ENTER_LONG:
-        Enter_Page(MAIN_PAGE, KeyValue);
-        Menu_Main_Init();
+        Enter_Page(MAIN_MENU_PAGE, KeyValue);
+        main_menu_Init();
         break;
 
     default:
@@ -183,8 +240,8 @@ void language_page_process(menu_u8 KeyValue)
         break;
 
     case ENTER_LONG:
-        Enter_Page(MAIN_PAGE, KeyValue);
-        Menu_Main_Init();
+        Enter_Page(MAIN_MENU_PAGE, KeyValue);
+        main_menu_Init();
         break;
 
     default:
@@ -210,8 +267,8 @@ void sensivity_page_process(menu_u8 KeyValue)
         break;
 
     case ENTER_LONG:
-        Enter_Page(MAIN_PAGE, KeyValue);
-        Menu_Main_Init();
+        Enter_Page(MAIN_MENU_PAGE, KeyValue);
+        main_menu_Init();
         break;
     default:
         break;
