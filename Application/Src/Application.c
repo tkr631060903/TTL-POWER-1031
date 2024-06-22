@@ -9,13 +9,11 @@
  *
  */
 #include "Application.h"
-#include "Application_ADC.h"
 #include "Application_SC8815.h"
 #include "Application_BUZZER.h"
-#include "APPlication_LCD.h"
-#include "CH224K.h"
 #include "usbd_cdc_if.h"
 #include "menu.h"
+#include "Application_LCD.h"
 
 Application_Config APP_config;
 
@@ -32,44 +30,20 @@ void Application_main()
         starttick = HAL_GetTick();
         Application_SC8815_loadStart();
         key4_button_process();
+        key1_button_process();
         key2_button_process();
         rotary_knob_process();
+        key3_button_process();
         // SC8815_Soft_Protect();
         SET_LED1_Status();
         if (current_menu_index == MAIN_PAGE)
         {
-            main_page_init();
+            APP_LCD_main_show();
         }
         //CDC_Transmit_FS((uint8_t*)starttick, 4); //CDC_Receive_FS中断接收
         printf("tick: %d\n", HAL_GetTick() - starttick);
     }
 }
-
-/**
- *@brief 系统运行
- *
- */
- // void Application_main()
- // {
- //     uint32_t starttick = 0;
- //     uint8_t i = 0;
- //     while (1)
- //     {
- //         starttick = HAL_GetTick();
- //         APP_LCD_Show();
- //         // if (i)
- //         // {
- //         //     LCD_Clear();
- //         //     i = 0;
- //         // }
- //         // else
- //         // {
- //         //     LCD_Clear();
- //         //     i = 1;
- //         // }
- //         printf("tick: %d\n", HAL_GetTick() - starttick);
- //     }
- // }
 
  /**
   *@brief 错误处理
@@ -119,6 +93,21 @@ void key4_button_process(void)
     BUZZER_OPEN(100);
 }
 
+uint8_t key1_press = 0; //ket1是否按下标志位
+/**
+ *@brief 识别按键3单击并执行相应操作
+ *
+ */
+void key1_button_process(void)
+{
+    if (key1_press)
+    {
+        key1_press = 0;
+        BUZZER_OPEN(100);
+        Menu_Select_Item(KEY1_SHORT);
+    }
+}
+
 uint32_t key2PressStartTime = 0;    //key2按下时间
 uint8_t key2_press = 0; //ket2是否按下标志位
 /**
@@ -132,8 +121,6 @@ void key2_button_process(void)
         if (HAL_GPIO_ReadPin(KEY2_GPIO_Port, KEY2_Pin) == SET)
         {
             //key2检测到单击
-            SC8815_Config.SC8815_VBUS_Old = SC8815_Config.SC8815_VBUS;  // 保存VBUS值
-            APP_config.LCD_Clear = 1;
             key2PressStartTime = 0; // 重置计时器
             key2_press = 0;
             BUZZER_OPEN(100);
@@ -143,13 +130,27 @@ void key2_button_process(void)
         else if (HAL_GetTick() - key2PressStartTime >= KEY_LONG_PRESS_THRESHOLD)
         {
             //key2检测到长按
-            APP_config.LCD_Clear = 1;
             key2PressStartTime = 0; // 重置计时器
             key2_press = 0;
             BUZZER_OPEN(100);
             Menu_Select_Item(KEY2_LONG);
             return;
         }
+    }
+}
+
+uint8_t key3_press = 0; //ket3是否按下标志位
+/**
+ *@brief 识别按键3单击并执行相应操作
+ *
+ */
+void key3_button_process(void)
+{
+    if (key3_press)
+    {
+        key3_press = 0;
+        BUZZER_OPEN(100);
+        Menu_Select_Item(KEY3_SHORT);
     }
 }
 

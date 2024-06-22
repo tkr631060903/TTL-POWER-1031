@@ -10,13 +10,13 @@ typedef short menu_s16;
 typedef char menu_s8;
 
 // 菜单按键键值定义
-#define LEFT 1
-#define RIGHT 2
-#define KEY2_LONG 3
-#define KEY2_SHORT 4
-#define KEY4_SHORT 5
-#define KEY1_SHORT 6
-#define KEY3_SHORT 7
+#define LEFT 1       // 旋钮左转键
+#define RIGHT 2      // 旋钮右转键
+#define KEY2_LONG 3  // 长按KEY2
+#define KEY2_SHORT 4 // 短按KEY2
+#define KEY4_SHORT 5 // 短按KEY4
+#define KEY1_SHORT 6 // 短按KEY1
+#define KEY3_SHORT 7 // 短按KEY3
 
 #define ENTER_SHORT 6
 #define ENTER_LONG 7

@@ -176,3 +176,54 @@ void APP_LCD_Show(void)
         break;
     }
 }
+
+void APP_LCD_main_show(void)
+{
+    LCD_ShowString(0, 0, "VSET:", RED, BLACK, 32, 0);
+    float temp = SC8815_Config.SC8815_VBUS / 1000;
+    if (temp < 10)
+    {
+        LCD_ShowFloatNum(80, 0, temp, 3, RED, BLACK, 32);
+        LCD_ShowChar(150, 0, 'V', RED, BLACK, 32, 0);
+    }
+    else {
+        LCD_ShowFloatNum(80, 0, temp, 4, RED, BLACK, 32);
+        LCD_ShowChar(160, 0, 'V', RED, BLACK, 32, 0);
+    }
+
+    LCD_ShowString(0, 33, "ISET:", RED, BLACK, 32, 0);
+    temp = SC8815_Config.SC8815_IBUS_Limit / 1000;
+    if (temp < 10)
+    {
+        LCD_ShowFloatNum(80, 33, temp, 3, RED, BLACK, 32);
+        LCD_ShowChar(150, 33, 'A', RED, BLACK, 32, 0);
+    }
+    else {
+        LCD_ShowFloatNum(80, 33, temp, 4, RED, BLACK, 32);
+        LCD_ShowChar(160, 33, 'A', RED, BLACK, 32, 0);
+    }
+
+    LCD_ShowString(0, 66, "VOUT:", RED, BLACK, 32, 0);
+    temp = App_getVBUS_V();
+    if (temp < 10)
+    {
+        LCD_ShowFloatNum(80, 66, temp, 3, RED, BLACK, 32);
+        LCD_ShowChar(150, 66, 'V', RED, BLACK, 32, 0);
+    }
+    else {
+        LCD_ShowFloatNum(80, 66, temp, 4, RED, BLACK, 32);
+        LCD_ShowChar(160, 66, 'V', RED, BLACK, 32, 0);
+    }
+
+    LCD_ShowString(0, 99, "IOUT:", RED, BLACK, 32, 0);
+    temp = App_getIBUS_A();
+    if (temp < 10)
+    {
+        LCD_ShowFloatNum(80, 99, temp, 3, RED, BLACK, 32);
+        LCD_ShowChar(150, 99, 'A', RED, BLACK, 32, 0);
+    }
+    else {
+        LCD_ShowFloatNum(80, 99, temp, 4, RED, BLACK, 32);
+        LCD_ShowChar(160, 99, 'A', RED, BLACK, 32, 0);
+    }
+}

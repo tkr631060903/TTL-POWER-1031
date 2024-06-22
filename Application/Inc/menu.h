@@ -6,14 +6,9 @@
 
 typedef struct Menu_Key_Index
 {
-    menu_u8 main_current_index;
-    menu_u8 detect_current_index;
-    menu_u8 log_current_index;
-    menu_u8 volume_level;
-    menu_u8 backlight_level;
-    menu_u8 wlan_on_off;
-    menu_u8 lang_select;
-    menu_u8 sensivity_select;
+    menu_u8 main_menu_current_index;
+    menu_u8 presset_current_index;
+    menu_u8 fastch_current_index;
     menu_u8 Current_Page;
 } Key_Index;
 extern Key_Index sub_index;
@@ -27,32 +22,26 @@ typedef struct OP_STRUCT
 
 typedef enum
 {
-    MAIN_PAGE = 0,
-    MAIN_MENU_PAGE,
-    VOUT_PAGE,
-    DETECT_PAGE,
-    LOG_PAGE,
-    VOLUME_PAGE,
-    BRIGNE_PAGE,
-    WLAN_PAGE,
-    LANGUAGE_PAGE,
-    SENSIVITY_PAGE
+    MAIN_PAGE = 0,  // 开机页面
+    MAIN_MENU_PAGE, // 主菜单页面
+    VOUT_PAGE,      // 设置输出电压页面
+    IOUT_PAGE,      // 设置输出限流页面
+    PRESSET_PAGE,   // 设置预设页面
+    BUZZER_PAGE,    // 设置蜂鸣器页面
+    TEMP_PAGE,      // 设置温度预警页面
+    FASTCH_PAGE,    // 设置快充输入页面
 } OP_PAGE;
 
 void Enter_Page(menu_i32 index, menu_u8 KeyValue);
-// void Menu_Select_Item(menu_i32 current_menu_index, menu_u8 KeyValue);
 void Menu_Select_Item(menu_u8 KeyValue);
 
 void main_page_process(menu_u8 KeyValue);
 void main_menu_page_process(menu_u8 KeyValue);
 void vout_page_process(menu_u8 KeyValue);
-
-void detect_page_process(menu_u8 KeyValue);
-void log_page_process(menu_u8 KeyValue);
-void volume_page_process(menu_u8 KeyValue);
-void backlight_page_process(menu_u8 KeyValue);
-void wlan_page_process(menu_u8 KeyValue);
-void language_page_process(menu_u8 KeyValue);
-void sensivity_page_process(menu_u8 KeyValue);
+void iout_page_process(menu_u8 KeyValue);
+void presset_page_process(menu_u8 KeyValue);
+void buzzer_page_process(menu_u8 KeyValue);
+void temp_page_process(menu_u8 KeyValue);
+void fastch_page_process(menu_u8 KeyValue);
 
 #endif //__MENU_H

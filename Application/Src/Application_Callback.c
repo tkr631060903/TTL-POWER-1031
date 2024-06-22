@@ -78,7 +78,9 @@ int Encoder_B_Value = 0;                 //第二次B项的值
  */
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
+    extern uint8_t key1_press;
     extern uint8_t key2_press;
+    extern uint8_t key3_press;
     extern uint32_t key2PressStartTime;
     extern uint8_t fastCharge_list[];
     switch (GPIO_Pin)
@@ -87,7 +89,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
         SoftwareDelay(50);
         if (HAL_GPIO_ReadPin(KEY1_GPIO_Port, KEY1_Pin) == RESET)
             return;
-        BUZZER_OPEN(100);
+        key1_press = 1;
         break;
     case KEY2_Pin:
         if (key2_press)return;
@@ -101,7 +103,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
         SoftwareDelay(50);
         if (HAL_GPIO_ReadPin(KEY3_GPIO_Port, KEY3_Pin) == RESET)
             return;
-        BUZZER_OPEN(100);
+        key3_press = 1;
         break;
     case Rotar_L_Pin:
         // 解析旋转编码器
@@ -122,38 +124,6 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
                 // printf("Rotar_L\r\n");     //左
                 extern uint8_t rotary_knob_value;
                 rotary_knob_value = LEFT;
-                // if (APP_config.Sys_Mode == setIBUSMode)
-                // {
-                //     if (SC8815_Config.SC8815_IBUS_Limit - SC8815_Config.SC8815_VBUS_IBUS_Step <= 300)
-                //     {
-                //         SC8815_Config.SC8815_IBUS_Limit = 300;
-                //     }
-                //     else {
-                //         SC8815_Config.SC8815_IBUS_Limit = SC8815_Config.SC8815_IBUS_Limit - SC8815_Config.SC8815_VBUS_IBUS_Step;
-                //     }
-                // }
-                // else if (APP_config.Sys_Mode == setVBUSMode)
-                // {
-                //     if (SC8815_Config.SC8815_VBUS - SC8815_Config.SC8815_VBUS_IBUS_Step <= 0)
-                //     {
-                //         SC8815_Config.SC8815_IBUS_Limit = 0;
-                //     }
-                //     else {
-                //         SC8815_Config.SC8815_VBUS = SC8815_Config.SC8815_VBUS - SC8815_Config.SC8815_VBUS_IBUS_Step;
-                //     }
-                // }
-                // else if (APP_config.Sys_Mode == fastChargeMode)
-                // {
-                //     if (APP_config.fastCharge_InVoltage == 5)  return;
-                //     for (int i = 0; i < 5; i++)
-                //     {
-                //         if (APP_config.fastCharge_InVoltage == fastCharge_list[i])
-                //         {
-                //             APP_config.fastCharge_InVoltage = fastCharge_list[i - 1];
-                //             break;
-                //         }
-                //     }
-                // }
                 BUZZER_OPEN(100);
             }
             else if (((Encoder_A_Last_Value == 0 && Encoder_A_Value == 1) && (Encoder_B_Last_Value == 0 && Encoder_B_Value == 1)) || ((Encoder_A_Last_Value == 1 && Encoder_A_Value == 0) && (Encoder_B_Last_Value == 1 && Encoder_B_Value == 0)))  //顺时针旋转
@@ -161,34 +131,6 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
                 // printf("Rotar_R\r\n");      //右
                 extern uint8_t rotary_knob_value;
                 rotary_knob_value = RIGHT;
-                // if (APP_config.Sys_Mode == setIBUSMode)
-                // {
-                //     SC8815_Config.SC8815_IBUS_Limit = SC8815_Config.SC8815_IBUS_Limit + SC8815_Config.SC8815_VBUS_IBUS_Step;
-                //     if (SC8815_Config.SC8815_IBUS_Limit >= 6000)
-                //     {
-                //         SC8815_Config.SC8815_IBUS_Limit = 6000;
-                //     }
-                // }
-                // else if (APP_config.Sys_Mode == setVBUSMode)
-                // {
-                //     SC8815_Config.SC8815_VBUS = SC8815_Config.SC8815_VBUS + SC8815_Config.SC8815_VBUS_IBUS_Step;
-                //     if (SC8815_Config.SC8815_VBUS >= 36000)
-                //     {
-                //         SC8815_Config.SC8815_VBUS = 36000;
-                //     }
-                // }
-                // else if (APP_config.Sys_Mode == fastChargeMode)
-                // {
-                //     if (APP_config.fastCharge_InVoltage == 20) return;
-                //     for (int i = 0; i < 5; i++)
-                //     {
-                //         if (APP_config.fastCharge_InVoltage == fastCharge_list[i])
-                //         {
-                //             APP_config.fastCharge_InVoltage = fastCharge_list[i + 1];
-                //             break;
-                //         }
-                //     }
-                // }
                 BUZZER_OPEN(100);
             }
             Encoder_B_Last_Value = 2;       //清除状态值，不初始化0原因是在全局第一次初始化就是0，为了区别

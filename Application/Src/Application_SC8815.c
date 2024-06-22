@@ -266,7 +266,9 @@ void Application_SC8815_Init(void)
 	// SC8815_SetOutputVoltage(12000);
 	SC8815_Config.SC8815_IBAT_Limit = 12000;
 	SC8815_Config.SC8815_IBUS_Limit = 1000;
+	SC8815_Config.SC8815_IBUS_Limit_Old = 1000;
 	SC8815_Config.SC8815_VBUS = 5000;
+	SC8815_Config.SC8815_VBUS_Old = 5000;
 	SC8815_SetBatteryCurrLimit(SC8815_Config.SC8815_IBAT_Limit);
 	SC8815_SetBusCurrentLimit(SC8815_Config.SC8815_IBUS_Limit);
 	SC8815_SetOutputVoltage(SC8815_Config.SC8815_VBUS);

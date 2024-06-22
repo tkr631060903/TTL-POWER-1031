@@ -48,7 +48,9 @@ void Application_Error_Handler(void);
 void Application_Assert_Failed(void);
 void Application_SoftwareDelay(uint16_t time);
 void key4_button_process(void);
+void key1_button_process(void);
 void key2_button_process(void);
+void key3_button_process(void);
 void SET_LED1_Status(void);
 void rotary_knob_process(void);
 

@@ -9,5 +9,8 @@
 
 void LCD_show(void);
 void APP_LCD_Show(void);
+void APP_LCD_main_show(void);
+void APP_LCD_Show_SETVOUT(void);
+void APP_LCD_Show_SETIOUT(void);
 
 #endif

@@ -1,9 +1,7 @@
 #include "Hardware_setting.h"
 #include "Application_SC8815.h"
+#include "CH224K.h"
 
-Current_Select_Mode current_mode;
-
-// 设置音量
 void set_vout(menu_u8 KeyValue)
 {
     switch (KeyValue)
@@ -22,7 +20,25 @@ void set_vout(menu_u8 KeyValue)
             SC8815_Config.SC8815_VBUS = 36000;
         }
         break;
+    case KEY1_SHORT:
+        if (SC8815_Config.SC8815_VBUS_IBUS_Step == 1000)
+        {
+            SC8815_Config.SC8815_VBUS_IBUS_Step = 100;
+        }
+        break;
+    case KEY2_SHORT:
+        if (SC8815_Config.SC8815_VBUS_IBUS_Step == 100)
+        {
+            SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
+        }
+        break;
+    case KEY3_SHORT:
+        SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
+        SC8815_Config.SC8815_VBUS = SC8815_Config.SC8815_VBUS_Old;
+        break;
     case KEY4_SHORT:
+        SC8815_SetOutputVoltage(SC8815_Config.SC8815_VBUS);
+        SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
         SC8815_Config.SC8815_VBUS_Old = SC8815_Config.SC8815_VBUS;
         break;
     default:
@@ -30,109 +46,68 @@ void set_vout(menu_u8 KeyValue)
     }
 }
 
-// 设置音量
-void setting_volume(menu_u32 index)
+void set_iout(menu_u8 KeyValue)
 {
-    switch (index)
+    switch (KeyValue)
     {
-    case 0:
-        current_mode.Current_Volume_Level = VOLUME_LEVEL0;
+    case LEFT:
+        SC8815_Config.SC8815_IBUS_Limit = SC8815_Config.SC8815_IBUS_Limit - SC8815_Config.SC8815_VBUS_IBUS_Step;
+        if (SC8815_Config.SC8815_IBUS_Limit <= 300)
+        {
+            SC8815_Config.SC8815_IBUS_Limit = 300;
+        }
         break;
-
-    case 1:
-        current_mode.Current_Volume_Level = VOLUME_LEVEL1;
+    case RIGHT:
+        SC8815_Config.SC8815_IBUS_Limit = SC8815_Config.SC8815_IBUS_Limit + SC8815_Config.SC8815_VBUS_IBUS_Step;
+        if (SC8815_Config.SC8815_IBUS_Limit >= 6000)
+        {
+            SC8815_Config.SC8815_IBUS_Limit = 6000;
+        }
         break;
-
-    case 2:
-        current_mode.Current_Volume_Level = VOLUME_LEVEL2;
+    case KEY1_SHORT:
+        if (SC8815_Config.SC8815_VBUS_IBUS_Step == 1000)
+        {
+            SC8815_Config.SC8815_VBUS_IBUS_Step = 100;
+        }
         break;
-
-    case 3:
-        current_mode.Current_Volume_Level = VOLUME_LEVEL3;
+    case KEY2_SHORT:
+        if (SC8815_Config.SC8815_VBUS_IBUS_Step == 100)
+        {
+            SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
+        }
         break;
-
-    case 4:
-        current_mode.Current_Volume_Level = VOLUME_LEVEL4;
+    case KEY3_SHORT:
+        SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
+        SC8815_Config.SC8815_IBUS_Limit = SC8815_Config.SC8815_IBUS_Limit_Old;
+        break;
+    case KEY4_SHORT:
+        SC8815_SetBusCurrentLimit(SC8815_Config.SC8815_IBUS_Limit);
+        SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
+        SC8815_Config.SC8815_IBUS_Limit_Old = SC8815_Config.SC8815_IBUS_Limit;
         break;
     default:
         break;
     }
 }
 
-// 设置背光
-void setting_backlight(menu_u32 index)
+void set_fastcharge(menu_u32 index)
 {
     switch (index)
     {
-    case 0:
-        current_mode.Current_Backlight_Level = BACKLIGHT_LEVEL0;
+    case 5:
+        CH224K_5V();
         break;
-
-    case 1:
-        current_mode.Current_Backlight_Level = BACKLIGHT_LEVEL1;
+    case 9:
+        CH224K_9V();
         break;
-
-    case 2:
-        current_mode.Current_Backlight_Level = BACKLIGHT_LEVEL2;
+    case 12:
+        CH224K_12V();
         break;
-
-    case 3:
-        current_mode.Current_Backlight_Level = BACKLIGHT_LEVEL3;
+    case 15:
+        CH224K_15V();
         break;
-
-    case 4:
-        current_mode.Current_Backlight_Level = BACKLIGHT_LEVEL4;
-        break;
-    default:
-        break;
-    }
-}
-
-// 设置无线网络的状态
-void setting_wlan_status(menu_u32 index)
-{
-    switch (index)
-    {
-    case 0:
-        current_mode.Current_Select_Wlan = WLAN_OFF;
-        break;
-    case 1:
-        current_mode.Current_Select_Wlan = WLAN_OFF;
-        break;
-    default:
-        break;
-    }
-}
-
-// 设置语言
-void setting_language(menu_u32 index)
-{
-    switch (index)
-    {
-    case 0:
-        current_mode.Current_Select_Language = CHINESE;
-        break;
-    case 1:
-        current_mode.Current_Select_Language = ENGLISH;
-        break;
-    default:
-        break;
-    }
-}
-
-// 设置灵敏度
-void setting_sensivity(menu_u32 index)
-{
-    switch (index)
-    {
-    case 0:
-        current_mode.Current_Sensivity = SENSIVITY_HIGH;
-        break;
-    case 1:
-        current_mode.Current_Sensivity = SENSIVITY_MIDDLE;
-        break;
-    case 2:
-        current_mode.Current_Sensivity = SENSIVITY_LOW;
+    case 20:
+        CH224K_20V();
         break;
     default:
         break;
