@@ -41,7 +41,7 @@ void Application_main()
             APP_LCD_main_show();
         }
         //CDC_Transmit_FS((uint8_t*)starttick, 4); //CDC_Receive_FS中断接收
-        printf("tick: %d\n", HAL_GetTick() - starttick);
+        // printf("tick: %d\n", HAL_GetTick() - starttick);
     }
 }
 
@@ -175,13 +175,13 @@ void rotary_knob_process(void)
     if (rotary_knob_value == LEFT)
     {
         Menu_Select_Item(LEFT);
+        BUZZER_OPEN(100);
         rotary_knob_value = 0;
     }
     else if (rotary_knob_value == RIGHT)
     {
         Menu_Select_Item(RIGHT);
+        BUZZER_OPEN(100);
         rotary_knob_value = 0;
     }
-    
-
 }

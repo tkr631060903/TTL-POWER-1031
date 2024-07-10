@@ -71,7 +71,6 @@ void Error_Handler(void);
 #define Rotar_R_GPIO_Port GPIOA
 #define Rotar_L_Pin GPIO_PIN_3
 #define Rotar_L_GPIO_Port GPIOA
-#define Rotar_L_EXTI_IRQn EXTI3_IRQn
 #define EEPROM_I2C_SCL_Pin GPIO_PIN_4
 #define EEPROM_I2C_SCL_GPIO_Port GPIOA
 #define EEPROM_I2C_SDA_Pin GPIO_PIN_5
