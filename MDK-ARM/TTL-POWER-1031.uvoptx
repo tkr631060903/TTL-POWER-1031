@@ -157,25 +157,9 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>9</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134224148</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\Application\Src\menu_ui.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\TTL_POWER_1031\../Application/Src/menu_ui.c\9</Expression>
-        </Bp>
-        <Bp>
-          <Number>1</Number>
-          <Type>0</Type>
           <LineNumber>260</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134223832</Address>
+          <Address>134224432</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -187,11 +171,11 @@
           <Expression>\\TTL_POWER_1031\../USB_DEVICE/App/usbd_cdc_if.c\260</Expression>
         </Bp>
         <Bp>
-          <Number>2</Number>
+          <Number>1</Number>
           <Type>0</Type>
           <LineNumber>250</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134260114</Address>
+          <Address>134255332</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -203,11 +187,11 @@
           <Expression>\\TTL_POWER_1031\../Application/Src/UART_Debug.c\250</Expression>
         </Bp>
         <Bp>
-          <Number>3</Number>
+          <Number>2</Number>
           <Type>0</Type>
           <LineNumber>270</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134260162</Address>
+          <Address>134255376</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -219,11 +203,11 @@
           <Expression>\\TTL_POWER_1031\../Application/Src/UART_Debug.c\270</Expression>
         </Bp>
         <Bp>
-          <Number>4</Number>
+          <Number>3</Number>
           <Type>0</Type>
           <LineNumber>264</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134260138</Address>
+          <Address>134255388</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -235,11 +219,11 @@
           <Expression>\\TTL_POWER_1031\../Application/Src/UART_Debug.c\264</Expression>
         </Bp>
         <Bp>
-          <Number>5</Number>
+          <Number>4</Number>
           <Type>0</Type>
           <LineNumber>216</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134260496</Address>
+          <Address>134255684</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -251,9 +235,25 @@
           <Expression>\\TTL_POWER_1031\../Application/Src/UART_Debug.c\216</Expression>
         </Bp>
         <Bp>
+          <Number>5</Number>
+          <Type>0</Type>
+          <LineNumber>243</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>134222972</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>..\Application\Src\Application_LCD.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\TTL_POWER_1031\../Application/Src/Application_LCD.c\243</Expression>
+        </Bp>
+        <Bp>
           <Number>6</Number>
           <Type>0</Type>
-          <LineNumber>55</LineNumber>
+          <LineNumber>9</LineNumber>
           <EnabledFlag>1</EnabledFlag>
           <Address>0</Address>
           <ByteObject>0</ByteObject>
@@ -262,14 +262,14 @@
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
           <BreakIfRCount>0</BreakIfRCount>
-          <Filename>startup_stm32f103xb.s</Filename>
+          <Filename>..\Application\Src\menu_ui.c</Filename>
           <ExecCommand></ExecCommand>
           <Expression></Expression>
         </Bp>
         <Bp>
           <Number>7</Number>
           <Type>0</Type>
-          <LineNumber>159</LineNumber>
+          <LineNumber>9</LineNumber>
           <EnabledFlag>1</EnabledFlag>
           <Address>0</Address>
           <ByteObject>0</ByteObject>
@@ -285,7 +285,7 @@
         <Bp>
           <Number>8</Number>
           <Type>0</Type>
-          <LineNumber>165</LineNumber>
+          <LineNumber>55</LineNumber>
           <EnabledFlag>1</EnabledFlag>
           <Address>0</Address>
           <ByteObject>0</ByteObject>
@@ -301,7 +301,7 @@
         <Bp>
           <Number>9</Number>
           <Type>0</Type>
-          <LineNumber>210</LineNumber>
+          <LineNumber>159</LineNumber>
           <EnabledFlag>1</EnabledFlag>
           <Address>0</Address>
           <ByteObject>0</ByteObject>
@@ -317,7 +317,7 @@
         <Bp>
           <Number>10</Number>
           <Type>0</Type>
-          <LineNumber>223</LineNumber>
+          <LineNumber>165</LineNumber>
           <EnabledFlag>1</EnabledFlag>
           <Address>0</Address>
           <ByteObject>0</ByteObject>
@@ -333,7 +333,7 @@
         <Bp>
           <Number>11</Number>
           <Type>0</Type>
-          <LineNumber>245</LineNumber>
+          <LineNumber>210</LineNumber>
           <EnabledFlag>1</EnabledFlag>
           <Address>0</Address>
           <ByteObject>0</ByteObject>
@@ -349,7 +349,7 @@
         <Bp>
           <Number>12</Number>
           <Type>0</Type>
-          <LineNumber>246</LineNumber>
+          <LineNumber>223</LineNumber>
           <EnabledFlag>1</EnabledFlag>
           <Address>0</Address>
           <ByteObject>0</ByteObject>
@@ -365,7 +365,7 @@
         <Bp>
           <Number>13</Number>
           <Type>0</Type>
-          <LineNumber>259</LineNumber>
+          <LineNumber>245</LineNumber>
           <EnabledFlag>1</EnabledFlag>
           <Address>0</Address>
           <ByteObject>0</ByteObject>
@@ -380,6 +380,38 @@
         </Bp>
         <Bp>
           <Number>14</Number>
+          <Type>0</Type>
+          <LineNumber>246</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>0</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>0</BreakIfRCount>
+          <Filename>startup_stm32f103xb.s</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression></Expression>
+        </Bp>
+        <Bp>
+          <Number>15</Number>
+          <Type>0</Type>
+          <LineNumber>259</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>0</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>0</BreakIfRCount>
+          <Filename>startup_stm32f103xb.s</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression></Expression>
+        </Bp>
+        <Bp>
+          <Number>16</Number>
           <Type>0</Type>
           <LineNumber>271</LineNumber>
           <EnabledFlag>1</EnabledFlag>
@@ -404,7 +436,7 @@
         <Ww>
           <count>1</count>
           <WinNumber>1</WinNumber>
-          <ItemText>SC8815_TIM_Work</ItemText>
+          <ItemText>LCD_Buff</ItemText>
         </Ww>
       </WatchWindow1>
       <MemoryWindow1>
@@ -489,7 +521,7 @@
 
   <Group>
     <GroupName>Application/User/Core</GroupName>
-    <tvExp>1</tvExp>
+    <tvExp>0</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>

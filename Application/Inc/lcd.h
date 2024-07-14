@@ -50,6 +50,7 @@ void LCD_Fill_DMA(uint16_t xsta, uint16_t ysta, uint16_t xend, uint16_t yend, ui
 #define LGRAY 			     0XC618 //浅灰色(PANNEL),窗体背景色
 #define LGRAYBLUE        0XA651 //浅灰蓝色(中间层颜色)
 #define LBBLUE           0X2B12 //浅棕蓝色(选择条目的反色)
+#define ORANGE  0XFD20 //橙色
 
 #endif
 

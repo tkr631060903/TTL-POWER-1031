@@ -43,6 +43,7 @@ void Application_Init(void)
     // Application_SC8815_Run();
     extern menu_i32 current_menu_index;
     current_menu_index = MAIN_PAGE;
+    APP_LCD_main_init();
     BUZZER_OPEN(100);
     BUZZER_OPEN(300);
     printf("Init Success\r\n");

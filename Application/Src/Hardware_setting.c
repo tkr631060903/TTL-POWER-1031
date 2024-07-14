@@ -2,6 +2,11 @@
 #include "Application_SC8815.h"
 #include "CH224K.h"
 
+/**
+ * @brief 设置输出电压
+ * 
+ * @param KeyValue 触发键值
+ */
 void set_vout(menu_u8 KeyValue)
 {
     switch (KeyValue)
@@ -25,11 +30,19 @@ void set_vout(menu_u8 KeyValue)
         {
             SC8815_Config.SC8815_VBUS_IBUS_Step = 100;
         }
+        else if (SC8815_Config.SC8815_VBUS_IBUS_Step == 10000)
+        {
+            SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
+        }
         break;
     case KEY2_SHORT:
         if (SC8815_Config.SC8815_VBUS_IBUS_Step == 100)
         {
             SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
+        }
+        else if (SC8815_Config.SC8815_VBUS_IBUS_Step == 1000)
+        {
+            SC8815_Config.SC8815_VBUS_IBUS_Step = 10000;
         }
         break;
     case KEY3_SHORT:
@@ -46,6 +59,11 @@ void set_vout(menu_u8 KeyValue)
     }
 }
 
+/**
+ * @brief 设置输出电流
+ * 
+ * @param KeyValue 触发键值
+ */
 void set_iout(menu_u8 KeyValue)
 {
     switch (KeyValue)
@@ -69,11 +87,19 @@ void set_iout(menu_u8 KeyValue)
         {
             SC8815_Config.SC8815_VBUS_IBUS_Step = 100;
         }
+        else if (SC8815_Config.SC8815_VBUS_IBUS_Step == 10000)
+        {
+            SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
+        }
         break;
     case KEY2_SHORT:
         if (SC8815_Config.SC8815_VBUS_IBUS_Step == 100)
         {
             SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
+        }
+        else if (SC8815_Config.SC8815_VBUS_IBUS_Step == 1000)
+        {
+            SC8815_Config.SC8815_VBUS_IBUS_Step = 10000;
         }
         break;
     case KEY3_SHORT:
@@ -90,6 +116,11 @@ void set_iout(menu_u8 KeyValue)
     }
 }
 
+/**
+ * @brief 设置快充输入电压
+ * 
+ * @param index 快充电压
+ */
 void set_fastcharge(menu_u32 index)
 {
     switch (index)

@@ -296,8 +296,8 @@ void Application_SC8815_Init(void)
 	SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
 	SC8815_Config.SC8815_Status = SC8815_Standby;
 	Application_SC8815_Standby();
-	STMFLASH_Read(SC8815_PRESET_FLASH_SAVE_ADDR, (uint16_t*)&SC8815_Preset, sizeof(SC8815_PresetTypeDef) * 10);
-	STMFLASH_Read(SC8815_TIM_WORK_FLASH_SAVE_ADDR, (uint16_t*)&SC8815_TIM_Work, sizeof(SC8815_TIM_WorkTypeDef) * 5);	//会导致USB连接不上
+	// STMFLASH_Read(SC8815_PRESET_FLASH_SAVE_ADDR, (uint16_t*)&SC8815_Preset, sizeof(SC8815_PresetTypeDef) * 10);
+	// STMFLASH_Read(SC8815_TIM_WORK_FLASH_SAVE_ADDR, (uint16_t*)&SC8815_TIM_Work, sizeof(SC8815_TIM_WorkTypeDef) * 5);	//会导致USB连接不上
 	printf("SC8815 Init.\n");
 }
 
@@ -424,6 +424,6 @@ void SC8815_Preset_Save(void)
 	// SC8815_TIM_Work[1].SC8815_VBUS[1] = 6;
 	STMFLASH_Write(SC8815_PRESET_FLASH_SAVE_ADDR, (uint16_t*)SC8815_Preset, sizeof(SC8815_PresetTypeDef) * 10);
 	// STMFLASH_Read(SC8815_PRESET_FLASH_SAVE_ADDR, (uint16_t*)&SC8815_Preset1, sizeof(SC8815_PresetTypeDef) * 10);
-	// STMFLASH_Write(SC8815_TIM_WORK_FLASH_SAVE_ADDR, (uint16_t*)SC8815_TIM_Work, sizeof(SC8815_TIM_WorkTypeDef) * 6);
+	STMFLASH_Write(SC8815_TIM_WORK_FLASH_SAVE_ADDR, (uint16_t*)SC8815_TIM_Work, sizeof(SC8815_TIM_WorkTypeDef) * 6);
 	// STMFLASH_Read(SC8815_TIM_WORK_FLASH_SAVE_ADDR, (uint16_t*)&SC8815_TIM_Work1, sizeof(SC8815_TIM_WorkTypeDef) * 6);
 }

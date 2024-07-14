@@ -23,11 +23,11 @@ Application_Config APP_config;
  */
 void Application_main()
 {
-    uint32_t starttick = 0;
+    // uint32_t starttick = 0;
     extern menu_i32 current_menu_index;
     while (1)
     {
-        starttick = HAL_GetTick();
+        // starttick = HAL_GetTick();
         Application_SC8815_loadStart();
         key4_button_process();
         key1_button_process();
@@ -40,7 +40,7 @@ void Application_main()
         {
             APP_LCD_main_show();
         }
-        //CDC_Transmit_FS((uint8_t*)starttick, 4); //CDC_Receive_FS中断接收
+        // CDC_Transmit_FS((uint8_t*)starttick, 4); //CDC_Receive_FS中断接收
         // printf("tick: %d\n", HAL_GetTick() - starttick);
     }
 }
