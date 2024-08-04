@@ -33,6 +33,26 @@ float App_getVBUS_V(void)
 }
 
 /**
+ *@brief 使用ADC获取温度传感器电压
+ *
+ * @return VBUS单位mV
+ */
+float App_getTemp_mV(void)
+{
+    return ((float)ADC_Value[1] * SAMPLING_RATE) * 1000;
+}
+
+/**
+ *@brief 使用ADC获取温度传感器电压
+ *
+ * @return VBUS单位V
+ */
+float App_getTemp_V(void)
+{
+    return ((float)ADC_Value[1] * SAMPLING_RATE);
+}
+
+/**
  *@brief 使用ADC获取VBUS电流
  *
  * @return 单位mA

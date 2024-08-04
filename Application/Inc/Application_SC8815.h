@@ -13,7 +13,7 @@
 
 #include "SC8815.h"
 #include "tim.h"
- // #include "Application.h"
+#include "Application.h"
 
 #define SC8815_WRITE_ADDR 0xE8
 #define SC8815_READ_ADDR 0xE9
@@ -38,8 +38,7 @@
 
 #define i2c_delay(us) TIM2_Delay1us(us)
 
-#define SC8815_PRESET_ADDR 0x800F000   // 8815预设地址
-#define SC8815_TIM_WORK_ADDR 0x800F400   // 8815定时工作地址
+#define SC8815_TIM_WORK_TIME_FAST 0xFFFFFFFF //判断当前开启是否为首次
 
 typedef enum
 {
@@ -47,7 +46,15 @@ typedef enum
     SC8815_Shutdown = 0x01U,
     SC8815_Standby = 0x02U,
     SC8815_LoadStart = 0x03U,
+    SC8815_TIM_WORK,
 } SC8815_StatusTypeDef; // SC8815工作状态结构体
+
+typedef enum
+{
+    tim_work_lcd_main = 0x00U,
+    tim_work_lcd_running,
+    tim_work_lcd_none,
+} sc8815_tim_work_lcd_flush_TypeDef; // SC8815工作状态结构体
 
 typedef struct
 {
@@ -59,6 +66,9 @@ typedef struct
     float SC8815_VBUS_Old;              // 8815 VBUS输出电压mv旧值
     float SC8815_VBUS_IBUS_Step;        // 8815 VBUS输出电压/电流步进值
     uint32_t VOUT_Open_Time;            // 8815 输出开启时间
+    uint32_t sc8815_tim_work_time;      // 8815 定时工作时间
+    uint8_t sc8815_tim_work_step;       // 8815 定时工作当前循环第n个步骤
+    uint8_t sc8815_tim_work_lcd_flush;  // 8815 定时工作LCD刷新标志位
 } SC8815_ConfigTypeDef;                 // SC8815配置结构体
 
 typedef struct
@@ -72,13 +82,13 @@ typedef struct
 
 typedef struct
 {
-    uint8_t SC8815_TIM_Work_Num;     // 8815定时工作号
+    // uint8_t SC8815_TIM_Work_Num;     // 8815定时工作号
     // uint8_t SC8815_TIM_Work_Length;  // 8815定时工作长度,考虑使用保持时间来判断是否结束
     uint8_t circular;   // 循环次数
-    uint16_t SC8815_TIM_Work_second[30]; // 8815定时工作保持时间单位s
-    float SC8815_IBAT_Limit;      // 8815电池(输入)限流mA
-    float SC8815_IBUS_Limit[30];     // 8815 VBUS(输出)限流mA
-    float SC8815_VBUS[30];           // 8815 VBUS输出电压mv
+    uint32_t SC8815_TIM_Work_second[SC8815_TIM_WORK_STEP]; // 8815定时工作保持时间单位s
+    // float SC8815_IBAT_Limit;      // 8815电池(输入)限流mA
+    float SC8815_IBUS_Limit[SC8815_TIM_WORK_STEP];     // 8815 VBUS(输出)限流mA
+    float SC8815_VBUS[SC8815_TIM_WORK_STEP];           // 8815 VBUS输出电压mv
 } SC8815_TIM_WorkTypeDef;            // SC8815定时工作预设结构体
 
 extern SC8815_ConfigTypeDef SC8815_Config;

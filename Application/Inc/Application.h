@@ -15,6 +15,8 @@
 #include "UART_Debug.h"
 
 #define KEY_LONG_PRESS_THRESHOLD 1000 // 定义KEY4长按阈值，单位为毫秒
+#define SC8815_TIM_WORK_SIZE 10 //预设保存数量
+#define SC8815_TIM_WORK_STEP 30 //每个预设设定步骤
 
 typedef enum
 {
@@ -37,6 +39,8 @@ typedef enum
 typedef struct
 {
     uint8_t LCD_Clear;             // LCD是否清屏
+    uint16_t msg_get_time;   //信息上报时间间隔
+    uint32_t msg_get_timestamp;   //信息上报时间戳
     uint16_t fastCharge_InVoltage; // 快充输入电压v
     Sys_ModeTypeDef Sys_Mode;      // 设置当前为控制电压还是电流参数
 } Application_Config;

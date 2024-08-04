@@ -181,14 +181,24 @@ void APP_LCD_Show(void)
 void APP_LCD_main_init(void)
 {
     // LCD_DrawPoint(100, 100, LIGHTBLUE);
-    LCD_DrawLine(66, 0, 66, LCD_H, LIGHTBLUE);
-    LCD_DrawLine(0, 0, 0, LCD_H, LIGHTBLUE);
-    LCD_DrawLine(0, 0, LCD_W, 0, LIGHTBLUE);
-    LCD_DrawLine(0, 32, 66, 32, LIGHTBLUE);
-    LCD_DrawLine(0, 67, 66, 67, LIGHTBLUE);
-    LCD_DrawLine(0, 100, 66, 100, LIGHTBLUE);
-    LCD_DrawLine(0, LCD_H - 1, LCD_W, LCD_H - 1, LIGHTBLUE);
-    LCD_DrawLine(LCD_W - 1, 0, LCD_W - 1, LCD_H - 1, LIGHTBLUE);
+    // LCD_DrawLine(66, 0, 66, LCD_H, LIGHTBLUE);
+    // LCD_DrawLine(0, 0, 0, LCD_H, LIGHTBLUE);
+    // LCD_DrawLine(0, 0, LCD_W, 0, LIGHTBLUE);
+    // LCD_DrawLine(0, 32, 66, 32, LIGHTBLUE);
+    // LCD_DrawLine(0, 67, 66, 67, LIGHTBLUE);
+    // LCD_DrawLine(0, 100, 66, 100, LIGHTBLUE);
+    // LCD_DrawLine(0, LCD_H - 1, LCD_W, LCD_H - 1, LIGHTBLUE);
+    // LCD_DrawLine(LCD_W - 1, 0, LCD_W - 1, LCD_H - 1, LIGHTBLUE);
+
+    LCD_Fill_DMA(66, 0, 67, LCD_H, LIGHTBLUE);
+    LCD_Fill_DMA(0, 0, 1, LCD_H, LIGHTBLUE);
+    LCD_Fill_DMA(0, 0, LCD_W, 1, LIGHTBLUE);
+    LCD_Fill_DMA(0, 32, 66, 33, LIGHTBLUE);
+    LCD_Fill_DMA(0, 67, 66, 68, LIGHTBLUE);
+    LCD_Fill_DMA(0, 100, 66, 101, LIGHTBLUE);
+    LCD_Fill_DMA(0, LCD_H - 1, LCD_W, LCD_H, LIGHTBLUE);
+    LCD_Fill_DMA(LCD_W - 1, 0, LCD_W, LCD_H, LIGHTBLUE);
+
     LCD_ShowString(20, 1, "Vset", LIGHTBLUE, BLACK, 16, 0);
     // LCD_ShowString(15, 16, "5.00V", LIGHTBLUE, BLACK, 16, 0);
     LCD_ShowString(20, 34, "Iset", LIGHTBLUE, BLACK, 16, 0);
@@ -235,31 +245,16 @@ void APP_LCD_main_show(void)
 
     memset(str, 0, 10);
     temp = App_getVBAT_V();
-    printf("temp = %f\n", temp);
     if (temp < 10)
     {
         sprintf(str, "%.2fV", temp);
         LCD_ShowString(15, 84, (const uint8_t*)str, LIGHTBLUE, BLACK, 16, 0);
-        // sprintf(str, "%d.0V", APP_config.fastCharge_InVoltage);
-        // LCD_ShowString(15, 84, (const uint8_t*)str, LIGHTBLUE, BLACK, 16, 0);
     }
     else
     {
         sprintf(str, "%.1fV", temp);
         LCD_ShowString(15, 84, (const uint8_t*)str, LIGHTBLUE, BLACK, 16, 0);
-        // sprintf(str, "%d.00V", APP_config.fastCharge_InVoltage);
-        // LCD_ShowString(15, 84, (const uint8_t*)str, LIGHTBLUE, BLACK, 16, 0);
     }
-    // if (APP_config.fastCharge_InVoltage >= 10)
-    // {
-    //     sprintf(str, "%d.0V", APP_config.fastCharge_InVoltage);
-    //     LCD_ShowString(15, 84, (const uint8_t*)str, LIGHTBLUE, BLACK, 16, 0);
-    // }
-    // else
-    // {
-    //     sprintf(str, "%d.00V", APP_config.fastCharge_InVoltage);
-    //     LCD_ShowString(15, 84, (const uint8_t*)str, LIGHTBLUE, BLACK, 16, 0);
-    // }
 
     memset(str, 0, 10);
     float vbus = App_getVBUS_V();

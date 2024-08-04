@@ -1,6 +1,8 @@
 #include "Hardware_setting.h"
 #include "Application_SC8815.h"
 #include "CH224K.h"
+#include "menu.h"
+#include "string.h"
 
 /**
  * @brief 设置输出电压
@@ -139,6 +141,135 @@ void set_fastcharge(menu_u32 index)
         break;
     case 20:
         CH224K_20V();
+        break;
+    default:
+        break;
+    }
+}
+
+/**
+ * @brief 设置预设参数
+ * 
+ * @param KeyValue 触发键值
+ */
+void set_presset_config(menu_u8 KeyValue)
+{
+    extern presset_config_set_typeDef presset_config_set;
+    extern SC8815_TIM_WorkTypeDef SC8815_TIM_Work[SC8815_TIM_WORK_SIZE];
+    switch (KeyValue)
+    {
+    case LEFT:
+        switch (presset_config_set.set_flag)
+        {
+        case PRESSET_SET_VOUT:
+            presset_config_set.set_vbus[presset_config_set.current_index] -= presset_config_set.set_setp;
+            if (presset_config_set.set_vbus[presset_config_set.current_index] <= 0)
+            {
+                presset_config_set.set_vbus[presset_config_set.current_index] = 0;
+            }
+            break;
+        case PRESSET_SET_IOUT:
+            presset_config_set.set_ibus[presset_config_set.current_index] -= presset_config_set.set_setp;
+            if (presset_config_set.set_ibus[presset_config_set.current_index] <= 300)
+            {
+                presset_config_set.set_ibus[presset_config_set.current_index] = 300;
+            }
+            break;
+        case PRESSET_SET_TIME:
+            if (presset_config_set.set_time[presset_config_set.current_index] - presset_config_set.set_setp <= 0)
+                presset_config_set.set_time[presset_config_set.current_index] = 0;
+            else
+                presset_config_set.set_time[presset_config_set.current_index] -= presset_config_set.set_setp;
+            break;
+        case PRESSET_SET_CIRCULAR:
+            if (presset_config_set.set_circular - presset_config_set.set_setp <= 0)
+                presset_config_set.set_circular = 0;
+            else
+                presset_config_set.set_circular -= presset_config_set.set_setp;
+            break;
+        default:
+            break;
+        }
+        break;
+    case RIGHT:
+        switch (presset_config_set.set_flag)
+        {
+        case PRESSET_SET_VOUT:
+            presset_config_set.set_vbus[presset_config_set.current_index] += presset_config_set.set_setp;
+            if (presset_config_set.set_vbus[presset_config_set.current_index] >= 36000)
+            {
+                presset_config_set.set_vbus[presset_config_set.current_index] = 36000;
+            }
+            break;
+        case PRESSET_SET_IOUT:
+            presset_config_set.set_ibus[presset_config_set.current_index] += presset_config_set.set_setp;
+            if (presset_config_set.set_ibus[presset_config_set.current_index] >= 6000)
+            {
+                presset_config_set.set_ibus[presset_config_set.current_index] = 6000;
+            }
+            if (presset_config_set.set_ibus[presset_config_set.current_index] <= 300)
+            {
+                presset_config_set.set_ibus[presset_config_set.current_index] = 300;
+            }
+            break;
+        case PRESSET_SET_TIME:
+            presset_config_set.set_time[presset_config_set.current_index] += presset_config_set.set_setp;
+            if (presset_config_set.set_time[presset_config_set.current_index] >= 65535)
+            {
+                presset_config_set.set_time[presset_config_set.current_index] = 65535;
+            }
+            break;
+        case PRESSET_SET_CIRCULAR:
+            presset_config_set.set_circular += presset_config_set.set_setp;
+            if (presset_config_set.set_circular >= 254)
+            {
+                presset_config_set.set_circular = 254;
+            }
+            break;
+        default:
+            break;
+        }
+        break;
+    case KEY1_SHORT:
+        if (presset_config_set.set_flag == PRESSET_SET_VOUT || presset_config_set.set_flag == PRESSET_SET_IOUT)
+        {
+            if (presset_config_set.set_setp - presset_config_set.set_setp <= 0)
+                presset_config_set.set_setp = 0;
+            else
+                presset_config_set.set_setp = presset_config_set.set_setp / 100;
+            break;
+        }
+        else
+        {
+            if (presset_config_set.set_setp - presset_config_set.set_setp <= 0)
+                presset_config_set.set_setp = 0;
+            else
+                presset_config_set.set_setp = presset_config_set.set_setp / 10;
+            break;
+        }
+    case KEY2_SHORT:
+        if (presset_config_set.set_flag == PRESSET_SET_VOUT || presset_config_set.set_flag == PRESSET_SET_IOUT)
+        {
+            if (presset_config_set.set_setp + presset_config_set.set_setp >= 10000)
+                presset_config_set.set_setp = 10000;
+            else
+                presset_config_set.set_setp = presset_config_set.set_setp * 10;
+            break;
+        }
+        else
+        {
+            if (presset_config_set.set_setp + presset_config_set.set_setp >= 100)
+                presset_config_set.set_setp = 100;
+            else
+                presset_config_set.set_setp = presset_config_set.set_setp * 10;
+            break;
+        }
+    case KEY4_SHORT:
+        memcpy(&SC8815_TIM_Work[sub_index.presset_current_index].circular, &presset_config_set.set_circular, sizeof(uint8_t));
+        memcpy(&SC8815_TIM_Work[sub_index.presset_current_index].SC8815_TIM_Work_second, &presset_config_set.set_time, sizeof(uint16_t) * SC8815_TIM_WORK_STEP);
+        memcpy(&SC8815_TIM_Work[sub_index.presset_current_index].SC8815_IBUS_Limit, &presset_config_set.set_ibus, sizeof(float) * SC8815_TIM_WORK_STEP);
+        memcpy(&SC8815_TIM_Work[sub_index.presset_current_index].SC8815_VBUS, &presset_config_set.set_vbus, sizeof(float) * SC8815_TIM_WORK_STEP);
+        SC8815_Preset_Save();
         break;
     default:
         break;

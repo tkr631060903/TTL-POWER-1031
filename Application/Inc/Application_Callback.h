@@ -13,7 +13,7 @@
 
 #include "Application.h"
 
-#define UART_Cmd_Length 20
+#define Cmd_Length 20
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart);
 

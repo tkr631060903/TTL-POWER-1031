@@ -11,7 +11,6 @@
 #include "Application.h"
 #include "Application_SC8815.h"
 #include "Application_BUZZER.h"
-#include "usbd_cdc_if.h"
 #include "menu.h"
 #include "Application_LCD.h"
 
@@ -25,6 +24,8 @@ void Application_main()
 {
     // uint32_t starttick = 0;
     extern menu_i32 current_menu_index;
+    extern SC8815_ConfigTypeDef SC8815_Config;
+    SC8815_Config.sc8815_tim_work_lcd_flush = tim_work_lcd_none;
     while (1)
     {
         // starttick = HAL_GetTick();
@@ -40,15 +41,27 @@ void Application_main()
         {
             APP_LCD_main_show();
         }
-        // CDC_Transmit_FS((uint8_t*)starttick, 4); //CDC_Receive_FS中断接收
+        if (SC8815_Config.sc8815_tim_work_lcd_flush == tim_work_lcd_main)
+        {
+            LCD_Clear();
+            APP_LCD_main_init();
+            current_menu_index = MAIN_PAGE;
+            SC8815_Config.sc8815_tim_work_lcd_flush = tim_work_lcd_none;
+        }
+        else if (SC8815_Config.sc8815_tim_work_lcd_flush == tim_work_lcd_running)
+        {
+            presset_running_page_process(0);
+            SC8815_Config.sc8815_tim_work_lcd_flush = tim_work_lcd_none;
+        }
+        // CDC_Transmit_FS((uint8_t*)&starttick, sizeof(uint32_t)); //CDC_Receive_FS中断接收
         // printf("tick: %d\n", HAL_GetTick() - starttick);
     }
 }
 
- /**
-  *@brief 错误处理
-  *
-  */
+/**
+ *@brief 错误处理
+ *
+ */
 void Application_Error_Handler()
 {
     /* User can add his own implementation to report the HAL error return state */
@@ -174,13 +187,13 @@ void rotary_knob_process(void)
 {
     if (rotary_knob_value == LEFT)
     {
-        Menu_Select_Item(LEFT);
+        Menu_Select_Item(RIGHT);
         BUZZER_OPEN(100);
         rotary_knob_value = 0;
     }
     else if (rotary_knob_value == RIGHT)
     {
-        Menu_Select_Item(RIGHT);
+        Menu_Select_Item(LEFT);
         BUZZER_OPEN(100);
         rotary_knob_value = 0;
     }

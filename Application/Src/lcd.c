@@ -37,23 +37,9 @@ void LCD_Fill_DMA(uint16_t xsta, uint16_t ysta, uint16_t xend, uint16_t yend, ui
 		color1[i + 1] = color;
 		i += 2;
 	}
-
-	// uint16_t num = ((xend - xsta) * (yend - ysta));
 	isData = 0;
 	LCD_Address_Set(xsta, ysta, xend - 1, yend - 1);//ÉèÖÃÏÔÊ¾·¶Î§
 	isData = 1;
-	// hspi2.Init.DataSize = SPI_DATASIZE_16BIT;
-	// if (HAL_SPI_Init(&hspi2) != HAL_OK)
-	// {
-	// 	Error_Handler();
-	// }
-	// hdma_spi2_tx.Init.MemInc = DMA_MINC_DISABLE;
-	// hdma_spi2_tx.Init.PeriphDataAlignment = DMA_PDATAALIGN_HALFWORD;
-	// hdma_spi2_tx.Init.MemDataAlignment = DMA_PDATAALIGN_HALFWORD;
-	// if (HAL_DMA_Init(&hdma_spi2_tx) != HAL_OK)
-	// {
-	// 	Error_Handler();
-	// }
 	while (num > LCD_Fill_DMA_SIZE)
 	{
 		HAL_SPI_Transmit_DMA(&hspi2, color1, LCD_Fill_DMA_SIZE);
@@ -62,20 +48,6 @@ void LCD_Fill_DMA(uint16_t xsta, uint16_t ysta, uint16_t xend, uint16_t yend, ui
 	}
 	HAL_SPI_Transmit_DMA(&hspi2, color1, num);
 	while (HAL_DMA_GetState(&hdma_spi2_tx) != HAL_DMA_STATE_READY);
-	// HAL_SPI_Transmit_DMA(&hspi2, color1, LCD_Fill_DMA_SIZE);
-	// while (HAL_DMA_GetState(&hdma_spi2_tx) != HAL_DMA_STATE_READY);
-	// hspi2.Init.DataSize = SPI_DATASIZE_8BIT;
-	// if (HAL_SPI_Init(&hspi2) != HAL_OK)
-	// {
-	// 	Error_Handler();
-	// }
-	// hdma_spi2_tx.Init.MemInc = DMA_MINC_ENABLE;
-	// hdma_spi2_tx.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
-	// hdma_spi2_tx.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
-	// if (HAL_DMA_Init(&hdma_spi2_tx) != HAL_OK)
-	// {
-	// 	Error_Handler();
-	// }
 }
 
 /******************************************************************************

@@ -3,6 +3,11 @@
 FLASH_ProcessTypeDef p_Flash;
 u16 STMFLASH_BUF[STM_SECTOR_SIZE / 2];    //缓存数组
 
+uint8_t STMFLASH_ReadByte(uint32_t addr)
+{
+    return *((__IO uint8_t*)(addr));
+}
+
 /**********************************************************************************
  * 函数功能: 读取指定地址的半字(16位数据)
  * 输入参数: faddr：读地址
@@ -11,7 +16,8 @@ u16 STMFLASH_BUF[STM_SECTOR_SIZE / 2];    //缓存数组
  */
 u16 STMFLASH_ReadHalfWord(u32 faddr)
 {
-    return *(vu16*)faddr;
+    // return *(vu16*)faddr;
+    return *((__IO uint16_t*)(faddr));
 }
 
 #if STM32_FLASH_WREN	//如果使能了写   
@@ -104,6 +110,22 @@ void STMFLASH_Read(u32 ReadAddr, u16* pBuffer, u16 NumToRead)
     {
         pBuffer[i] = STMFLASH_ReadHalfWord(ReadAddr);//读取2个字节.
         ReadAddr += 2;//偏移2个字节.	
+    }
+}
+
+/**********************************************************************************
+ * 函数功能:从指定地址开始读出指定长度的数据
+ * 输入参数:ReadAddr:起始地址、pBuffer:数据指针、NumToWrite:半字(16位)数
+ * 返 回 值: 无
+ * 说    明：
+ */
+void STMFLASH_ReadBytes(u32 ReadAddr, u8* pBuffer, u16 NumToRead)
+{
+    u16 i;
+    for (i = 0;i < NumToRead;i++)
+    {
+        pBuffer[i] = STMFLASH_ReadByte(ReadAddr);
+        ReadAddr++;
     }
 }
 

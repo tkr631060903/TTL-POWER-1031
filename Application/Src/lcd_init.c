@@ -4,8 +4,8 @@
 #include <string.h>
 
 extern SPI_HandleTypeDef hspi2;
-// static uint8_t LCD_Buff[LCD_BUFF_SIZE];
-// static uint16_t LCD_Buff_Point = 0;
+static uint8_t LCD_Buff[LCD_BUFF_SIZE];
+static uint16_t LCD_Buff_Point = 0;
 uint8_t isData = 0;  // 0:命令  1:数据
 
 void delay(uint16_t time)
@@ -25,32 +25,32 @@ void delay(uint16_t time)
 void LCD_Writ_Bus(uint8_t dat)
 {
 	extern DMA_HandleTypeDef hdma_spi2_tx;
-	// if (isData)
-    // {
-    //     if(LCD_Buff_Point == LCD_BUFF_SIZE - 1)
-    //     {
-	// 		HAL_SPI_Transmit_DMA(&hspi2, LCD_Buff, LCD_BUFF_SIZE);
-    //         while (HAL_DMA_GetState(&hdma_spi2_tx) != HAL_DMA_STATE_READY);
-	// 		memset(LCD_Buff, 0, LCD_BUFF_SIZE);
-    //         LCD_Buff_Point = 0;
-    //     }else{
-    //         LCD_Buff[LCD_Buff_Point] = dat;
-    //         LCD_Buff_Point++;
-    //     }
-    // }else{
-    //     if (LCD_Buff_Point != 0)
-    //     {
-	// 		HAL_SPI_Transmit_DMA(&hspi2, LCD_Buff, LCD_Buff_Point);
-    //         while (HAL_DMA_GetState(&hdma_spi2_tx) != HAL_DMA_STATE_READY);
-	// 		memset(LCD_Buff, 0, LCD_Buff_Point);
-    //         LCD_Buff_Point = 0;
-    //     }
-	// 	HAL_SPI_Transmit(&hspi2, &dat, 1, 10);//发送
-	// 	while (HAL_SPI_GetState(&hspi2) != HAL_SPI_STATE_READY);//检查接收标志位
-	// }
+	if (isData)
+    {
+        if(LCD_Buff_Point == LCD_BUFF_SIZE - 1)
+        {
+			HAL_SPI_Transmit_DMA(&hspi2, LCD_Buff, LCD_BUFF_SIZE);
+            while (HAL_DMA_GetState(&hdma_spi2_tx) != HAL_DMA_STATE_READY);
+			memset(LCD_Buff, 0, LCD_BUFF_SIZE);
+            LCD_Buff_Point = 0;
+        }else{
+            LCD_Buff[LCD_Buff_Point] = dat;
+            LCD_Buff_Point++;
+        }
+    }else{
+        if (LCD_Buff_Point != 0)
+        {
+			HAL_SPI_Transmit_DMA(&hspi2, LCD_Buff, LCD_Buff_Point);
+            while (HAL_DMA_GetState(&hdma_spi2_tx) != HAL_DMA_STATE_READY);
+			memset(LCD_Buff, 0, LCD_Buff_Point);
+            LCD_Buff_Point = 0;
+        }
+		HAL_SPI_Transmit(&hspi2, &dat, 1, 10);//发送
+		while (HAL_SPI_GetState(&hspi2) != HAL_SPI_STATE_READY);//检查接收标志位
+	}
 
-	while (HAL_SPI_GetState(&hspi2) == HAL_SPI_STATE_RESET);
-	HAL_SPI_Transmit(&hspi2, &dat, 1, 10);
+	// while (HAL_SPI_GetState(&hspi2) == HAL_SPI_STATE_RESET);
+	// HAL_SPI_Transmit(&hspi2, &dat, 1, 10);
 	// HAL_SPI_Transmit_DMA(&hspi2, &dat, 1);
 }
 
