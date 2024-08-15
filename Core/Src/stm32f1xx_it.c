@@ -22,6 +22,8 @@
 #include "stm32f1xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "Application_Callback.h"
+#include <string.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -264,7 +266,35 @@ void TIM3_IRQHandler(void)
 void USART1_IRQHandler(void)
 {
   /* USER CODE BEGIN USART1_IRQn 0 */
+  if(__HAL_UART_GET_FLAG(&huart1, UART_FLAG_IDLE ) != RESET) //中断判断产生了空闲中断标志认为一轮结束
+	{				
+    extern uint32_t cmd_Index;  //串口1命令计数指针
+    extern char uart1_Cmd[Cmd_Length];    //命令缓冲区
+    cmd_Index += Cmd_Length - huart1.RxXferCount;    //累计达不到BUFFSIZE个数的部分
+    __HAL_UART_CLEAR_IDLEFLAG(&huart1);
+    HAL_UART_AbortReceive_IT(&huart1);
+    
+    if (strchr((char*)uart1_Cmd, ' ') != NULL || strstr((char*)uart1_Cmd, "MEAS") != NULL || strstr((char*)uart1_Cmd, "SYST") != NULL)
+    {
+      extern int ascii_process(char *cmd, uint8_t cmd_source);
+      ascii_process(uart1_Cmd, 0);
+      // if (ascii_process(uart1_Cmd))
+      // {
+      //   printf("%s ok\n", uart1_Cmd);
+      // }
+      // else 
+      // {
+      //   printf("%s error\n", uart1_Cmd);
+      // }
+    }
+    else
+    {
+      printf("cmd error\n");
+    }
 
+    HAL_UART_Receive_IT(&huart1, (uint8_t*)uart1_Cmd, Cmd_Length);
+    return;
+	}	
   /* USER CODE END USART1_IRQn 0 */
   HAL_UART_IRQHandler(&huart1);
   /* USER CODE BEGIN USART1_IRQn 1 */

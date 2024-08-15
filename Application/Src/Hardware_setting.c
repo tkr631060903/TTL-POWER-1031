@@ -55,6 +55,8 @@ void set_vout(menu_u8 KeyValue)
         SC8815_SetOutputVoltage(SC8815_Config.SC8815_VBUS);
         SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
         SC8815_Config.SC8815_VBUS_Old = SC8815_Config.SC8815_VBUS;
+        app_config_save_config.SC8815_VBUS = SC8815_Config.SC8815_VBUS;
+        app_config_save();
         break;
     default:
         break;
@@ -112,6 +114,8 @@ void set_iout(menu_u8 KeyValue)
         SC8815_SetBusCurrentLimit(SC8815_Config.SC8815_IBUS_Limit);
         SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
         SC8815_Config.SC8815_IBUS_Limit_Old = SC8815_Config.SC8815_IBUS_Limit;
+        app_config_save_config.SC8815_IBUS_Limit = SC8815_Config.SC8815_IBUS_Limit;
+        app_config_save();
         break;
     default:
         break;
@@ -155,7 +159,6 @@ void set_fastcharge(menu_u32 index)
 void set_presset_config(menu_u8 KeyValue)
 {
     extern presset_config_set_typeDef presset_config_set;
-    extern SC8815_TIM_WorkTypeDef SC8815_TIM_Work[SC8815_TIM_WORK_SIZE];
     switch (KeyValue)
     {
     case LEFT:

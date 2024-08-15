@@ -31,44 +31,10 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart)
 {
     if (huart == &huart1)
     {
-        extern char uart1_Cmd[Cmd_Length];
-        extern uint8_t cmd_Index;  //串口1命令计数指针
-        extern uint8_t uart1_Receive_Data;
-        HAL_UART_Receive_IT(&huart1, &uart1_Receive_Data, 1);
-        if ((char)uart1_Receive_Data == '\n')
-        {
-            return;
-        }
-        // HAL_UART_Transmit(&huart1, &uart1_Receive_Data, 1, 10);    //调式串口回显
-        if ((char)uart1_Receive_Data == '\r')
-        {
-            // if (strcmp("rst\r", uart1_Cmd) == 0)
-            // {
-            //     printf("SysRest\r\n");
-            //     __set_FAULTMASK(1); //关闭所有中断
-            //     NVIC_SystemReset(); //进行软件复位
-            // }
-            if (ascii_process(uart1_Cmd))
-            {
-                printf("%s ok\r\n", uart1_Cmd);
-            }
-            else {
-                printf("%s error\r\n", uart1_Cmd);
-            }
-            // 清除uart1_Cmd，uart1_Cmd全置为0
-            memset(uart1_Cmd, 0, Cmd_Length);
-            cmd_Index = 0;
-            return;
-        }
-        else if (cmd_Index >= Cmd_Length)
-        {
-            // 清除uart1_Cmd，uart1_Cmd全置为0
-            printf("Command too long\r\n");
-            memset(uart1_Cmd, 0, Cmd_Length);
-            cmd_Index = 0;
-            return;
-        }
-        uart1_Cmd[cmd_Index++] = (char)uart1_Receive_Data;   //保存串口命令到uart1_Cmd
+        extern char uart1_Cmd[Cmd_Length];   //串口1接收缓冲区
+        extern uint32_t cmd_Index;  //串口1命令计数指针
+        cmd_Index += huart1.RxXferSize;		
+		HAL_UART_Receive_IT(&huart1, (uint8_t*)uart1_Cmd, Cmd_Length);
     }
 }
 
@@ -83,7 +49,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
     extern uint8_t key2_press;
     extern uint8_t key3_press;
     extern uint32_t key2PressStartTime;
-    extern uint8_t fastCharge_list[];
+    extern uint32_t key3PressStartTime;
     switch (GPIO_Pin)
     {
     case KEY1_Pin:
@@ -101,10 +67,8 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
         }
         break;
     case KEY3_Pin:
-        SoftwareDelay(50);
-        if (HAL_GPIO_ReadPin(KEY3_GPIO_Port, KEY3_Pin) == RESET)
-            return;
         key3_press = 1;
+        key3PressStartTime = HAL_GetTick();
         break;
     default:
         break;
@@ -118,16 +82,27 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
 {
     if (htim->Instance == htim3.Instance)
     {
-        extern SC8815_ConfigTypeDef SC8815_Config;
-        SC8815_Config.sc8815_tim_work_time++;
         extern uint8_t rotary_knob_value;
-        extern Application_Config APP_config;
         if (APP_config.msg_get_time > 0)
         {
             APP_config.msg_get_timestamp++;
         }
         sc8815_tim_work();
         get_msg();
+
+        if (ADC_Value_timestamp > 10)
+        {
+            if (ADC_Value_count > 9)
+            {
+                ADC_Value_count = 0;
+            }
+            VBUS_Value_Buff[ADC_Value_count] = App_getVBUS_V();
+            IBUS_Value_Buff[ADC_Value_count] = App_getIBUS_A();
+            ADC_Value_count++;
+            ADC_Value_timestamp = 0;
+        }
+        ADC_Value_timestamp++;
+
         if (HAL_GPIO_ReadPin(Rotar_L_GPIO_Port, Rotar_L_Pin) != previous)
         {
             if (HAL_GPIO_ReadPin(Rotar_R_GPIO_Port, Rotar_R_Pin) != previous)
@@ -149,13 +124,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
     }
 }
 
-uint32_t htonl(uint32_t hostlong) {
-    return ((hostlong & 0xFF000000) >> 24) |
-           ((hostlong & 0x00FF0000) >> 8)  |
-           ((hostlong & 0x0000FF00) << 8)  |
-           ((hostlong & 0x000000FF) << 24);
-}
-
 static void get_msg(void)
 {
     extern Application_Config APP_config;
@@ -165,7 +133,7 @@ static void get_msg(void)
         temp[0] = App_getVBUS_mV();
         temp[1] = App_getIBUS_mA();
         temp[2] = (temp[0] / 1000) * (temp[1] / 1000);
-        if (HAL_GPIO_ReadPin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin) == SET)
+        if (HAL_GPIO_ReadPin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin) == GPIO_PIN_SET)
         {
             temp[3] = 0;
         }
@@ -202,7 +170,7 @@ static void sc8815_tim_work(void)
         }
         if (SC8815_Config.sc8815_tim_work_time >= SC8815_TIM_WORK_TIME_FAST) //判断当前开启是否为首次
         {
-            if (presset_config_set.set_vbus[SC8815_Config.sc8815_tim_work_step] >= 0 && presset_config_set.set_ibus[SC8815_Config.sc8815_tim_work_step] >= 300)
+            if (presset_config_set.set_vbus[SC8815_Config.sc8815_tim_work_step] > 0 && presset_config_set.set_ibus[SC8815_Config.sc8815_tim_work_step] >= 300)
             {
                 SC8815_SetOutputVoltage(presset_config_set.set_vbus[SC8815_Config.sc8815_tim_work_step]);
                 SC8815_SetBusCurrentLimit(presset_config_set.set_ibus[SC8815_Config.sc8815_tim_work_step]);
@@ -241,7 +209,7 @@ static void sc8815_tim_work(void)
                     {
                         SC8815_Config.sc8815_tim_work_lcd_flush = tim_work_lcd_running;
                     }
-                    if (presset_config_set.set_vbus[SC8815_Config.sc8815_tim_work_step] >= 0 && presset_config_set.set_ibus[SC8815_Config.sc8815_tim_work_step] >= 300)
+                    if (presset_config_set.set_vbus[SC8815_Config.sc8815_tim_work_step] > 0 && presset_config_set.set_ibus[SC8815_Config.sc8815_tim_work_step] >= 300)
                     {
                         SC8815_SetOutputVoltage(presset_config_set.set_vbus[SC8815_Config.sc8815_tim_work_step]);
                         SC8815_SetBusCurrentLimit(presset_config_set.set_ibus[SC8815_Config.sc8815_tim_work_step]);
@@ -264,5 +232,6 @@ static void sc8815_tim_work(void)
                 }
             }
         }
+        SC8815_Config.sc8815_tim_work_time++;
     }
 }

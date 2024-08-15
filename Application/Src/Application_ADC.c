@@ -11,6 +11,10 @@
 #include "Application_ADC.h"
 
 uint16_t ADC_Value[4];
+float VBUS_Value_Buff[10];
+float IBUS_Value_Buff[10];
+uint8_t ADC_Value_count = 0;
+uint8_t ADC_Value_timestamp = 0;
 
 /**
  *@brief 使用ADC获取VBUS电压
@@ -19,7 +23,8 @@ uint16_t ADC_Value[4];
  */
 float App_getVBUS_mV(void)
 {
-    return (12 * ((float)ADC_Value[0] * SAMPLING_RATE)) * 1000;
+    // return (12 * ((float)ADC_Value[0] * SAMPLING_RATE)) * 1000;
+    return ((12.023 * ((float)ADC_Value[0] * SAMPLING_RATE)) * 1000 - 22.312);
 }
 
 /**
@@ -29,7 +34,8 @@ float App_getVBUS_mV(void)
  */
 float App_getVBUS_V(void)
 {
-    return 12 * ((float)ADC_Value[0] * SAMPLING_RATE);
+    // return 12 * ((float)ADC_Value[0] * SAMPLING_RATE);
+    return 12.023 * ((float)ADC_Value[0] * SAMPLING_RATE) - 0.022312;
 }
 
 /**
@@ -49,7 +55,7 @@ float App_getTemp_mV(void)
  */
 float App_getTemp_V(void)
 {
-    return ((float)ADC_Value[1] * SAMPLING_RATE);
+    return ((float)ADC_Value[1] * SAMPLING_RATE);   //ADC=1.22V=3K=45℃ ADC=0.93V=2K=55℃  ADC=0.79V=1.6K=75℃
 }
 
 /**
@@ -59,7 +65,8 @@ float App_getTemp_V(void)
  */
 float App_getIBUS_mA(void)
 {
-    return (((float)ADC_Value[2] * SAMPLING_RATE) / 0.5 * 1000) * 0.932;
+    // return (((float)ADC_Value[2] * SAMPLING_RATE) / 0.5 * 1000) * 0.932;
+    return (((float)ADC_Value[2] * SAMPLING_RATE) / 0.5 * 1000);
 }
 
 /**
@@ -69,7 +76,8 @@ float App_getIBUS_mA(void)
  */
 float App_getIBUS_A(void)
 {
-    return (((float)ADC_Value[2] * SAMPLING_RATE) / 0.5) * 0.932;
+    // return (((float)ADC_Value[2] * SAMPLING_RATE) / 0.5) * 0.932;
+    return (((float)ADC_Value[2] * SAMPLING_RATE) / 0.5);
 }
 
 /**
@@ -143,17 +151,23 @@ float App_getVBUS_average_mV(void)
  */
 float App_getVBUS_average_V(void)
 {
-    float res_arr[10], res = 0;
+    // float res_arr[10], res = 0;
+    // for (int i = 0; i < 10; i++)
+    // {
+    //     res_arr[i] = App_getVBUS_V();
+    // }
+    // BubbleSort(res_arr, 10);
+    // for (int i = 1; i < 9; i++)
+    // {
+    //     res += res_arr[i];
+    // }
+    // return res / 8;
+    float res = 0;
     for (int i = 0; i < 10; i++)
     {
-        res_arr[i] = App_getVBUS_V();
+        res += VBUS_Value_Buff[i];
     }
-    BubbleSort(res_arr, 10);
-    for (int i = 1; i < 9; i++)
-    {
-        res += res_arr[i];
-    }
-    return res / 8;
+    return res / 10;
 }
 
 /**
@@ -183,17 +197,23 @@ float App_getIBUS_average_mA(void)
  */
 float App_getIBUS_average_A(void)
 {
-    float res_arr[10], res = 0;
+    // float res_arr[10], res = 0;
+    // for (int i = 0; i < 10; i++)
+    // {
+    //     res_arr[i] = App_getIBUS_A();
+    // }
+    // BubbleSort(res_arr, 10);
+    // for (int i = 1; i < 9; i++)
+    // {
+    //     res += res_arr[i];
+    // }
+    // return res / 8;
+    float res = 0;
     for (int i = 0; i < 10; i++)
     {
-        res_arr[i] = App_getIBUS_A();
+        res += IBUS_Value_Buff[i];
     }
-    BubbleSort(res_arr, 10);
-    for (int i = 1; i < 9; i++)
-    {
-        res += res_arr[i];
-    }
-    return res / 8;
+    return res / 10;
 }
 
 /**

@@ -4,8 +4,6 @@
 #include "Application_SC8815.h"
 #include <math.h>
 
-uint8_t fastCharge_list[] = {5, 9, 12, 15, 20};
-
 /**
  *@brief 申请快充输入5V电压
  *

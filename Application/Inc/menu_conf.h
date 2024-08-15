@@ -17,6 +17,7 @@ typedef char menu_s8;
 #define KEY4_SHORT 5 // 短按KEY4
 #define KEY1_SHORT 6 // 短按KEY1
 #define KEY3_SHORT 7 // 短按KEY3
+#define KEY3_LONG 8 // 长按KEY3
 
 #define ENTER_SHORT 6
 #define ENTER_LONG 7

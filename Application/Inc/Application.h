@@ -18,6 +18,10 @@
 #define SC8815_TIM_WORK_SIZE 10 //预设保存数量
 #define SC8815_TIM_WORK_STEP 30 //每个预设设定步骤
 
+#define TEMPERATURE_45 (float)1.51
+#define TEMPERATURE_55 (float)1.22
+#define TEMPERATURE_65 (float)0.93
+
 typedef enum
 {
     APP_OK = 0x00U,
@@ -26,26 +30,27 @@ typedef enum
     APP_TIMEOUT = 0x03U
 } APP_StatusTypeDef;
 
-typedef enum
-{
-    normalMode = 0x00U,      // 正常模式
-    setVBUSMode = 0x01U,     // 设置VBUS
-    setIBUSMode = 0x02U,     // 设置IBUS
-    VINProtectMode = 0x03U,  // 输入保护
-    VOUTProtectMode = 0x04U, // 输出保护
-    fastChargeMode = 0x05U,  // 设置快充
-} Sys_ModeTypeDef;           // 系统当前模式
-
 typedef struct
 {
-    uint8_t LCD_Clear;             // LCD是否清屏
+    uint8_t lock_key;   //锁定按键 1锁 0不锁
+    uint8_t lock_buzzer;     //蜂鸣器锁定 1锁 0不锁
+    float temperature;     //温度监控值
     uint16_t msg_get_time;   //信息上报时间间隔
     uint32_t msg_get_timestamp;   //信息上报时间戳
     uint16_t fastCharge_InVoltage; // 快充输入电压v
-    Sys_ModeTypeDef Sys_Mode;      // 设置当前为控制电压还是电流参数
 } Application_Config;
 
+typedef struct
+{
+    uint8_t lock_buzzer;     //蜂鸣器锁定 1锁 0不锁
+    uint8_t SW_FREQ;
+    float temperature;     //温度监控值
+    float SC8815_IBUS_Limit;
+    float SC8815_VBUS;
+} Application_SaveConfig;
+
 extern Application_Config APP_config;
+extern Application_SaveConfig app_config_save_config;
 
 void Application_main(void);
 void Application_Error_Handler(void);
@@ -57,5 +62,8 @@ void key2_button_process(void);
 void key3_button_process(void);
 void SET_LED1_Status(void);
 void rotary_knob_process(void);
+uint32_t htonl(uint32_t hostlong);
+void app_config_load(void);
+void app_config_save(void);
 
 #endif

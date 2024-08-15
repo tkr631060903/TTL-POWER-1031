@@ -4,20 +4,27 @@
 #include "Application_SC8815.h"
 #include <stdio.h>
 #include "Application_Callback.h"
+#include "usart.h"
+#include "usbd_cdc_if.h"
+#include "Application_ADC.h"
+#include "menu.h"
 
-#define CMD_STR_CNT 5 // ÃüÁî²ÎÊýÊýÁ¿
+#define CMD_STR_CNT 6 // å‘½ä»¤å‚æ•°æ•°é‡
 
-char uart1_Cmd[Cmd_Length];    //ÃüÁî»º³åÇø
-char USB_COM_Cmd[Cmd_Length];    //ÃüÁî»º³åÇø
-uint8_t cmd_Index = 0;  //´®¿Ú1ÃüÁî¼ÆÊýÖ¸Õë
-uint8_t uart1_Receive_Data = 0;  //´®¿Ú1ÖÐ¶Ï½ÓÊÕÊý¾Ý»º´æ
+char uart1_Cmd[Cmd_Length];    //å‘½ä»¤ç¼“å†²åŒº
+uint32_t cmd_Index = 0;  //ä¸²å£1å‘½ä»¤è®¡æ•°æŒ‡é’ˆ
+// uint8_t uart1_Receive_Data = 0;  //ä¸²å£1ä¸­æ–­æŽ¥æ”¶æ•°æ®ç¼“å­˜
 
 typedef char *CmdStr[CMD_STR_CNT];
-typedef int ascii_handler_fn(CmdStr param, short param_cnt);
+typedef int ascii_handler_fn(CmdStr param, short param_cnt, uint8_t cmd_source);
 static ascii_handler_fn
     setVBUS_handler, setIBUS_handler, setIBAT_handler, setIRCOMP_handler, setVBAT_SEL_handler, setCSEL_handler,
-    setVCELL_handler, setSW_FREQ_handler, setDeadTime_handler,
-    setFB_Mode_handler, setDITHER_handler, setSLEW_SET_handler, setILIM_BW_handler, get_msg_handler;
+    setVCELL_handler, setSW_FREQ_handler, setDeadTime_handler, setFB_Mode_handler, setDITHER_handler,
+    setSLEW_SET_handler, setILIM_BW_handler, get_msg_handler, lock_key_handler, start_preset_handler,
+    set_switch_handler, set_current_handler, set_current_port_handler, set_current_step_handler,
+    set_voltage_handler, set_voltage_step_handler, set_voltage_prot_handler, set_voltage_limit_handler,
+    get_fetch_current_handler, get_fetch_voltage_handler, get_fetch_power_handler, get_versions_handler,
+    set_preset_handler, save_config_handler;
 typedef struct lookup_table
 {
     const char *desc;
@@ -26,26 +33,36 @@ typedef struct lookup_table
 static const lookup_table_t handler_map_static[] = {
     {"setvbus", setVBUS_handler}, {"setibus", setIBUS_handler}, {"setibat", setIBAT_handler}, {"setircomp", setIRCOMP_handler},
     {"setvbatsel", setVBAT_SEL_handler}, {"setcsel", setCSEL_handler}, {"setvcell", setVCELL_handler}, {"setswfreq", setSW_FREQ_handler}, 
-    {"setdeadtime", setDeadTime_handler}, {"setfbmode", setFB_Mode_handler},
-    {"setdither", setDITHER_handler}, {"setslewset", setSLEW_SET_handler}, {"setilimbw", setILIM_BW_handler}, {"getmsg", get_msg_handler}};
-const lookup_table_t *handler_map = handler_map_static;
+    {"setdeadtime", setDeadTime_handler}, {"setfbmode", setFB_Mode_handler}, {"setdither", setDITHER_handler},
+    {"setslewset", setSLEW_SET_handler}, {"setilimbw", setILIM_BW_handler}, {"getmsg", get_msg_handler}, {"lockkey", lock_key_handler}, {"startPreset", start_preset_handler},
+    {"OUTP", set_switch_handler}, {"CURR", set_current_handler}, {"CURR:PROT", set_current_port_handler}, {"CURR:STEP", set_current_step_handler},
+    {"VOLT", set_voltage_handler}, {"VOLT:STEP", set_voltage_step_handler}, {"VOLT:PROT", set_voltage_prot_handler},
+    {"VOLT:LIMIT", set_voltage_limit_handler}, {"MEAS:CURR?", get_fetch_current_handler}, {"MEAS:VOLT?", get_fetch_voltage_handler},
+    {"MEAS:POW?", get_fetch_power_handler}, {"SYST:VERS?", get_versions_handler}, {"preset", set_preset_handler}, {"save", save_config_handler}
+};
+const lookup_table_t* handler_map = handler_map_static;
 
 
 /**
- * @brief ÉèÖÃ SC8815 ÔÚ OTG ·´ÏòÊä³öÊ±µÄÊä³öµçÑ¹
+ * @brief è®¾ç½® SC8815 åœ¨ OTG åå‘è¾“å‡ºæ—¶çš„è¾“å‡ºç”µåŽ‹
  * 
- * @param param ÃüÁî²ÎÊý
- * @param param_cnt ÃüÁî²ÎÊý¸öÊý
- * @return 1-ÃüÁîÖ´ÐÐ³É¹¦£¬0-ÃüÁîÖ´ÐÐÊ§°Ü 
+ * @param param å‘½ä»¤å‚æ•°
+ * @param param_cnt å‘½ä»¤å‚æ•°ä¸ªæ•°
+ * @return 1-å‘½ä»¤æ‰§è¡ŒæˆåŠŸï¼Œ0-å‘½ä»¤æ‰§è¡Œå¤±è´¥ 
  */
-int setVBUS_handler(CmdStr param, short param_cnt)
+int setVBUS_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
 {
     if (param_cnt == 1)
     {
         return 0;
     }
-    int value;
-    sscanf(param[1], "%d", &value);
+    float value;
+    sscanf(param[1], "%f", &value);
+    if (value > 36)
+    {
+        return 0;
+    }
+    value = value * 1000;
     SC8815_Config.SC8815_VBUS = value;
     SC8815_Config.SC8815_VBUS_Old = value;
     SC8815_SetOutputVoltage(value);
@@ -53,20 +70,25 @@ int setVBUS_handler(CmdStr param, short param_cnt)
 }
 
 /**
- * @brief ÉèÖÃ SC8815 VBUS Â·¾¶ÉÏµÄÏÞÁ÷Öµ,Ë«ÏòÍ¨ÓÃ
+ * @brief è®¾ç½® SC8815 VBUS è·¯å¾„ä¸Šçš„é™æµå€¼,åŒå‘é€šç”¨
  * 
- * @param param ÃüÁî²ÎÊý
- * @param param_cnt ÃüÁî²ÎÊý¸öÊý
- * @return 1-ÃüÁîÖ´ÐÐ³É¹¦£¬0-ÃüÁîÖ´ÐÐÊ§°Ü 
+ * @param param å‘½ä»¤å‚æ•°
+ * @param param_cnt å‘½ä»¤å‚æ•°ä¸ªæ•°
+ * @return 1-å‘½ä»¤æ‰§è¡ŒæˆåŠŸï¼Œ0-å‘½ä»¤æ‰§è¡Œå¤±è´¥ 
  */
-int setIBUS_handler(CmdStr param, short param_cnt)
+int setIBUS_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
 {
     if (param_cnt == 1)
     {
         return 0;
     }
-    int value;
-    sscanf(param[1], "%d", &value);
+    float value;
+    sscanf(param[1], "%f", &value);
+    if (value > 6)
+    {
+        return 0;
+    }
+    value = value * 1000;
     SC8815_Config.SC8815_IBUS_Limit = value;
     SC8815_Config.SC8815_IBUS_Limit_Old = value;
     SC8815_SetBusCurrentLimit(value);
@@ -74,13 +96,13 @@ int setIBUS_handler(CmdStr param, short param_cnt)
 }
 
 /**
- * @brief ÉèÖÃ SC8815 µç³ØÂ·¾¶ÉÏµÄÏÞÁ÷Öµ,Ë«ÏòÍ¨ÓÃ
+ * @brief è®¾ç½® SC8815 ç”µæ± è·¯å¾„ä¸Šçš„é™æµå€¼,åŒå‘é€šç”¨
  * 
- * @param param ÃüÁî²ÎÊý
- * @param param_cnt ÃüÁî²ÎÊý¸öÊý
- * @return 1-ÃüÁîÖ´ÐÐ³É¹¦£¬0-ÃüÁîÖ´ÐÐÊ§°Ü 
+ * @param param å‘½ä»¤å‚æ•°
+ * @param param_cnt å‘½ä»¤å‚æ•°ä¸ªæ•°
+ * @return 1-å‘½ä»¤æ‰§è¡ŒæˆåŠŸï¼Œ0-å‘½ä»¤æ‰§è¡Œå¤±è´¥ 
  */
-int setIBAT_handler(CmdStr param, short param_cnt)
+int setIBAT_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
 {
     if (param_cnt == 1)
     {
@@ -88,21 +110,22 @@ int setIBAT_handler(CmdStr param, short param_cnt)
     }
     SC8815_Config.SC8815_Status = SC8815_Standby;
     Application_SC8815_Standby();
-    int value;
-    sscanf(param[1], "%d", &value);
+    float value;
+    sscanf(param[1], "%f", &value);
+    value = value * 1000; 
     SC8815_Config.SC8815_IBAT_Limit = value;
     SC8815_SetBatteryCurrLimit(value);
     return 1;
 }
 
 /**
- * @brief ÅäÖÃ SC8815 µç³ØÄÚ×è²ÎÊý
+ * @brief é…ç½® SC8815 ç”µæ± å†…é˜»å‚æ•°
  * 
- * @param param ÃüÁî²ÎÊý
- * @param param_cnt ÃüÁî²ÎÊý¸öÊý
- * @return 1-ÃüÁîÖ´ÐÐ³É¹¦£¬0-ÃüÁîÖ´ÐÐÊ§°Ü 
+ * @param param å‘½ä»¤å‚æ•°
+ * @param param_cnt å‘½ä»¤å‚æ•°ä¸ªæ•°
+ * @return 1-å‘½ä»¤æ‰§è¡ŒæˆåŠŸï¼Œ0-å‘½ä»¤æ‰§è¡Œå¤±è´¥ 
  */
-int setIRCOMP_handler(CmdStr param, short param_cnt)
+int setIRCOMP_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
 {
     if (param_cnt == 1)
     {
@@ -119,13 +142,13 @@ int setIRCOMP_handler(CmdStr param, short param_cnt)
 }
 
 /**
- * @brief ÅäÖÃ SC8815 µç³Ø·´À¡Ä£Ê½
+ * @brief é…ç½® SC8815 ç”µæ± åé¦ˆæ¨¡å¼
  * 
- * @param param ÃüÁî²ÎÊý
- * @param param_cnt ÃüÁî²ÎÊý¸öÊý
- * @return 1-ÃüÁîÖ´ÐÐ³É¹¦£¬0-ÃüÁîÖ´ÐÐÊ§°Ü 
+ * @param param å‘½ä»¤å‚æ•°
+ * @param param_cnt å‘½ä»¤å‚æ•°ä¸ªæ•°
+ * @return 1-å‘½ä»¤æ‰§è¡ŒæˆåŠŸï¼Œ0-å‘½ä»¤æ‰§è¡Œå¤±è´¥ 
  */
-int setVBAT_SEL_handler(CmdStr param, short param_cnt)
+int setVBAT_SEL_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
 {
     if (param_cnt == 1)
     {
@@ -142,13 +165,13 @@ int setVBAT_SEL_handler(CmdStr param, short param_cnt)
 }
 
 /**
- * @brief ÅäÖÃ SC8815 µç³Ø¸öÊý²ÎÊý
+ * @brief é…ç½® SC8815 ç”µæ± ä¸ªæ•°å‚æ•°
  * 
- * @param param ÃüÁî²ÎÊý
- * @param param_cnt ÃüÁî²ÎÊý¸öÊý
- * @return 1-ÃüÁîÖ´ÐÐ³É¹¦£¬0-ÃüÁîÖ´ÐÐÊ§°Ü 
+ * @param param å‘½ä»¤å‚æ•°
+ * @param param_cnt å‘½ä»¤å‚æ•°ä¸ªæ•°
+ * @return 1-å‘½ä»¤æ‰§è¡ŒæˆåŠŸï¼Œ0-å‘½ä»¤æ‰§è¡Œå¤±è´¥ 
  */
-int setCSEL_handler(CmdStr param, short param_cnt)
+int setCSEL_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
 {
     if (param_cnt == 1)
     {
@@ -163,13 +186,13 @@ int setCSEL_handler(CmdStr param, short param_cnt)
 }
 
 /**
- * @brief ÅäÖÃ SC8815 µç³ØµçÑ¹²ÎÊý
+ * @brief é…ç½® SC8815 ç”µæ± ç”µåŽ‹å‚æ•°
  * 
- * @param param ÃüÁî²ÎÊý
- * @param param_cnt ÃüÁî²ÎÊý¸öÊý
- * @return 1-ÃüÁîÖ´ÐÐ³É¹¦£¬0-ÃüÁîÖ´ÐÐÊ§°Ü 
+ * @param param å‘½ä»¤å‚æ•°
+ * @param param_cnt å‘½ä»¤å‚æ•°ä¸ªæ•°
+ * @return 1-å‘½ä»¤æ‰§è¡ŒæˆåŠŸï¼Œ0-å‘½ä»¤æ‰§è¡Œå¤±è´¥ 
  */
-int setVCELL_handler(CmdStr param, short param_cnt)
+int setVCELL_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
 {
     if (param_cnt == 1)
     {
@@ -186,13 +209,13 @@ int setVCELL_handler(CmdStr param, short param_cnt)
 }
 
 /**
- * @brief ÉèÖÃ SC8815 ¿ª¹ØÇÐ»»ÆµÂÊ
+ * @brief è®¾ç½® SC8815 å¼€å…³åˆ‡æ¢é¢‘çŽ‡
  * 
- * @param param ÃüÁî²ÎÊý
- * @param param_cnt ÃüÁî²ÎÊý¸öÊý
- * @return 1-ÃüÁîÖ´ÐÐ³É¹¦£¬0-ÃüÁîÖ´ÐÐÊ§°Ü 
+ * @param param å‘½ä»¤å‚æ•°
+ * @param param_cnt å‘½ä»¤å‚æ•°ä¸ªæ•°
+ * @return 1-å‘½ä»¤æ‰§è¡ŒæˆåŠŸï¼Œ0-å‘½ä»¤æ‰§è¡Œå¤±è´¥ 
  */
-int setSW_FREQ_handler(CmdStr param, short param_cnt)
+int setSW_FREQ_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
 {
     if (param_cnt == 1)
     {
@@ -204,19 +227,19 @@ int setSW_FREQ_handler(CmdStr param, short param_cnt)
     sscanf(param[1], "%x", &value);
     extern SC8815_HardwareInitTypeDef SC8815_HardwareInitStruct;
     SC8815_HardwareInitStruct.SW_FREQ = value;
-    SC8815_HardwareInit(&SC8815_HardwareInitStruct);
-    // SC8815_SetSWFreq(value);
+    // SC8815_HardwareInit(&SC8815_HardwareInitStruct);
+    SC8815_SetSWFreq(value);
     return 1;
 }
 
 /**
- * @brief ÉèÖÃ SC8815 ËÀÇøÊ±¼ä
+ * @brief è®¾ç½® SC8815 æ­»åŒºæ—¶é—´
  * 
- * @param param ÃüÁî²ÎÊý
- * @param param_cnt ÃüÁî²ÎÊý¸öÊý
- * @return 1-ÃüÁîÖ´ÐÐ³É¹¦£¬0-ÃüÁîÖ´ÐÐÊ§°Ü 
+ * @param param å‘½ä»¤å‚æ•°
+ * @param param_cnt å‘½ä»¤å‚æ•°ä¸ªæ•°
+ * @return 1-å‘½ä»¤æ‰§è¡ŒæˆåŠŸï¼Œ0-å‘½ä»¤æ‰§è¡Œå¤±è´¥ 
  */
-int setDeadTime_handler(CmdStr param, short param_cnt)
+int setDeadTime_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
 {
     if (param_cnt == 1)
     {
@@ -231,13 +254,13 @@ int setDeadTime_handler(CmdStr param, short param_cnt)
 }
 
 /**
- * @brief ÉèÖÃ SC8815 VBUSµçÑ¹·´À¡Ä£Ê½
+ * @brief è®¾ç½® SC8815 VBUSç”µåŽ‹åé¦ˆæ¨¡å¼
  * 
- * @param param ÃüÁî²ÎÊý
- * @param param_cnt ÃüÁî²ÎÊý¸öÊý
- * @return 1-ÃüÁîÖ´ÐÐ³É¹¦£¬0-ÃüÁîÖ´ÐÐÊ§°Ü 
+ * @param param å‘½ä»¤å‚æ•°
+ * @param param_cnt å‘½ä»¤å‚æ•°ä¸ªæ•°
+ * @return 1-å‘½ä»¤æ‰§è¡ŒæˆåŠŸï¼Œ0-å‘½ä»¤æ‰§è¡Œå¤±è´¥ 
  */
-int setFB_Mode_handler(CmdStr param, short param_cnt)
+int setFB_Mode_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
 {
     if (param_cnt == 1)
     {
@@ -252,13 +275,13 @@ int setFB_Mode_handler(CmdStr param, short param_cnt)
 }
 
 /**
- * @brief ´ò¿ª»ò¹Ø±Õ SC8815 ÆµÂÊ¶¶¶¯¹¦ÄÜ
+ * @brief æ‰“å¼€æˆ–å…³é—­ SC8815 é¢‘çŽ‡æŠ–åŠ¨åŠŸèƒ½
  * 
- * @param param ÃüÁî²ÎÊý
- * @param param_cnt ÃüÁî²ÎÊý¸öÊý
- * @return 1-ÃüÁîÖ´ÐÐ³É¹¦£¬0-ÃüÁîÖ´ÐÐÊ§°Ü 
+ * @param param å‘½ä»¤å‚æ•°
+ * @param param_cnt å‘½ä»¤å‚æ•°ä¸ªæ•°
+ * @return 1-å‘½ä»¤æ‰§è¡ŒæˆåŠŸï¼Œ0-å‘½ä»¤æ‰§è¡Œå¤±è´¥ 
  */
-int setDITHER_handler(CmdStr param, short param_cnt)
+int setDITHER_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
 {
     if (param_cnt == 1)
     {
@@ -275,13 +298,13 @@ int setDITHER_handler(CmdStr param, short param_cnt)
 }
 
 /**
- * @brief ÉèÖÃ SC8815 ·´Ïò·ÅµçÄ£Ê½ÏÂVBUS¶¯Ì¬±ä»¯µÄËÙÂÊ
+ * @brief è®¾ç½® SC8815 åå‘æ”¾ç”µæ¨¡å¼ä¸‹VBUSåŠ¨æ€å˜åŒ–çš„é€ŸçŽ‡
  * 
- * @param param ÃüÁî²ÎÊý
- * @param param_cnt ÃüÁî²ÎÊý¸öÊý
- * @return 1-ÃüÁîÖ´ÐÐ³É¹¦£¬0-ÃüÁîÖ´ÐÐÊ§°Ü 
+ * @param param å‘½ä»¤å‚æ•°
+ * @param param_cnt å‘½ä»¤å‚æ•°ä¸ªæ•°
+ * @return 1-å‘½ä»¤æ‰§è¡ŒæˆåŠŸï¼Œ0-å‘½ä»¤æ‰§è¡Œå¤±è´¥ 
  */
-int setSLEW_SET_handler(CmdStr param, short param_cnt)
+int setSLEW_SET_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
 {
     if (param_cnt == 1)
     {
@@ -298,13 +321,13 @@ int setSLEW_SET_handler(CmdStr param, short param_cnt)
 }
 
 /**
- * @brief ÉèÖÃ SC8815 µçÁ÷»·Â·ÏìÓ¦´ø¿í
+ * @brief è®¾ç½® SC8815 ç”µæµçŽ¯è·¯å“åº”å¸¦å®½
  * 
- * @param param ÃüÁî²ÎÊý
- * @param param_cnt ÃüÁî²ÎÊý¸öÊý
- * @return 1-ÃüÁîÖ´ÐÐ³É¹¦£¬0-ÃüÁîÖ´ÐÐÊ§°Ü 
+ * @param param å‘½ä»¤å‚æ•°
+ * @param param_cnt å‘½ä»¤å‚æ•°ä¸ªæ•°
+ * @return 1-å‘½ä»¤æ‰§è¡ŒæˆåŠŸï¼Œ0-å‘½ä»¤æ‰§è¡Œå¤±è´¥ 
  */
-int setILIM_BW_handler(CmdStr param, short param_cnt)
+int setILIM_BW_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
 {
     if (param_cnt == 1)
     {
@@ -319,13 +342,13 @@ int setILIM_BW_handler(CmdStr param, short param_cnt)
 }
 
 /**
- * @brief ¶©ÔÄÉÏ±¨Êý¾Ý
+ * @brief è®¢é˜…ä¸ŠæŠ¥æ•°æ®
  * 
- * @param param ÃüÁî²ÎÊý
- * @param param_cnt ÃüÁî²ÎÊý¸öÊý
- * @return 1-ÃüÁîÖ´ÐÐ³É¹¦£¬0-ÃüÁîÖ´ÐÐÊ§°Ü 
+ * @param param å‘½ä»¤å‚æ•°
+ * @param param_cnt å‘½ä»¤å‚æ•°ä¸ªæ•°
+ * @return 1-å‘½ä»¤æ‰§è¡ŒæˆåŠŸï¼Œ0-å‘½ä»¤æ‰§è¡Œå¤±è´¥ 
  */
-int get_msg_handler(CmdStr param, short param_cnt)
+int get_msg_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
 {
     if (param_cnt == 1)
     {
@@ -338,15 +361,326 @@ int get_msg_handler(CmdStr param, short param_cnt)
     return 1;
 }
 
+int lock_key_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
+{
+    if (param_cnt == 1)
+    {
+        return 0;
+    }
+    int value;
+    sscanf(param[1], "%d", &value);
+    APP_config.lock_key = value;
+    return 1;
+}
+
+int set_switch_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
+{
+    if (param_cnt == 1)
+    {
+        return 0;
+    }
+    extern uint8_t key3_press;
+    if (strstr(param[1], "ON") != NULL && HAL_GPIO_ReadPin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin) == SET)
+    {
+        // SC8815_Config.SC8815_Status = SC8815_LoadStart;
+        Application_SC8815_Run();
+		SC8815_SFB_Disable();
+		// HAL_Delay(50);
+		Application_SoftwareDelay(50);
+		SC8815_SFB_Enable();
+		SC8815_Config.VOUT_Open_Time = HAL_GetTick();
+    }
+    else if (strstr(param[1], "OFF") != NULL && HAL_GPIO_ReadPin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin) == RESET)
+    {
+        SC8815_Config.SC8815_Status = SC8815_Standby;
+        Application_SC8815_Standby();
+    }
+    return 1;
+}
+
+int set_current_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
+{
+    if (param_cnt == 1)
+    {
+        return 0;
+    }
+    if (strstr(param[1], "UP") != NULL)
+    {
+        if ((SC8815_Config.SC8815_IBUS_Limit + SC8815_Config.SC8815_IBUS_CMD_Step) > 6000)
+        {
+            return 0;
+        }
+        SC8815_Config.SC8815_IBUS_Limit += SC8815_Config.SC8815_IBUS_CMD_Step;
+        SC8815_Config.SC8815_IBUS_Limit_Old = SC8815_Config.SC8815_IBUS_Limit;
+        SC8815_SetBusCurrentLimit(SC8815_Config.SC8815_IBUS_Limit);
+    }
+    else
+    {
+        SC8815_Config.SC8815_Status = SC8815_Standby;
+        Application_SC8815_Standby();
+        float value;
+        sscanf(param[1], "%f", &value);
+        if (value > 6)
+        {
+            return 0;
+        }
+        value = value * 1000;
+        SC8815_Config.SC8815_IBUS_Limit = value;
+        SC8815_Config.SC8815_IBUS_Limit_Old = value;
+        SC8815_SetBusCurrentLimit(value);
+    }
+    return 1;
+}
+
+int set_current_port_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
+{
+    if (param_cnt == 1)
+    {
+        return 0;
+    }
+    // float value;
+    // sscanf(param[1], "%f", &value);
+    // value = value * 1000; 
+    // SC8815_Config.SC8815_IBUS_Limit = value;
+    // SC8815_Config.SC8815_IBUS_Limit_Old = value;
+    // SC8815_SetBusCurrentLimit(value);
+    return 1;
+}
+
+int set_current_step_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
+{
+    if (param_cnt == 1)
+    {
+        return 0;
+    }
+    float value;
+    sscanf(param[1], "%f", &value);
+    value = value * 1000; 
+    SC8815_Config.SC8815_IBUS_CMD_Step = value;
+    return 1;
+}
+
+int set_voltage_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
+{
+    if (param_cnt == 1)
+    {
+        return 0;
+    }
+    if (strstr(param[1], "UP") != NULL)
+    {
+        if ((SC8815_Config.SC8815_VBUS + SC8815_Config.SC8815_VBUS_CMD_Step) > 36000)
+        {
+            return 0;
+        }
+        SC8815_Config.SC8815_VBUS += SC8815_Config.SC8815_VBUS_CMD_Step;
+        SC8815_Config.SC8815_VBUS_Old = SC8815_Config.SC8815_VBUS;
+        SC8815_SetOutputVoltage(SC8815_Config.SC8815_VBUS);
+    }
+    else
+    {
+        float value;
+        sscanf(param[1], "%f", &value);
+        if (value > 36)
+        {
+            return 0;
+        }
+        value = value * 1000;
+        SC8815_Config.SC8815_VBUS = value;
+        SC8815_Config.SC8815_VBUS_Old = value;
+        SC8815_SetOutputVoltage(value);
+    }
+    return 1;
+}
+
+int set_voltage_step_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
+{
+    if (param_cnt == 1)
+    {
+        return 0;
+    }
+    float value;
+    sscanf(param[1], "%f", &value);
+    value = value * 1000; 
+    SC8815_Config.SC8815_VBUS_CMD_Step = value;
+    return 1;
+}
+
+int set_voltage_prot_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
+{
+    if (param_cnt == 1)
+    {
+        return 0;
+    }
+    return 1;
+}
+
+int set_voltage_limit_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
+{
+    if (param_cnt == 1)
+    {
+        return 0;
+    }
+    return 1;
+}
+
+int get_fetch_current_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
+{
+    // uint32_t value[1];
+    // // sscanf(param[1], "%d", &value);
+    // value[0] = htonl(App_getIBUS_mA());
+    // if (cmd_source)
+    // {
+    //     CDC_Transmit_FS((uint8_t*)&value, sizeof(uint32_t));
+    // }
+    // else
+    // {
+    //     HAL_UART_Transmit(&huart1, (uint8_t*)&value, sizeof(uint32_t), 1000);
+    // }
+    if (cmd_source)
+    {
+        usb_printf("%f", App_getIBUS_A());
+    }
+    else
+    {
+        printf("%f", App_getIBUS_A());
+    }
+    return 1;
+}
+
+int get_fetch_voltage_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
+{
+    // uint32_t value[1];
+    // // sscanf(param[1], "%d", &value);
+    // value[0] = htonl(App_getVBUS_mV());
+    // if (cmd_source)
+    // {
+    //     CDC_Transmit_FS((uint8_t*)&value, sizeof(uint32_t));
+    // }
+    // else
+    // {
+    //     HAL_UART_Transmit(&huart1, (uint8_t*)&value, sizeof(uint32_t), 1000);
+    // }
+    if (cmd_source)
+    {
+        usb_printf("%f", App_getVBUS_V());
+    }
+    else
+    {
+        printf("%f", App_getVBUS_V());
+    }
+    return 1;
+}
+
+int get_fetch_power_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
+{
+    // uint32_t value[1];
+    // // sscanf(param[1], "%d", &value);
+    // value[0] = htonl((App_getVBUS_mV() / 1000) * (App_getIBUS_mA() / 1000));
+    // if (cmd_source)
+    // {
+    //     CDC_Transmit_FS((uint8_t*)&value, sizeof(uint32_t));
+    // }
+    // else
+    // {
+    //     HAL_UART_Transmit(&huart1, (uint8_t*)&value, sizeof(uint32_t), 1000);
+    // }
+    if (cmd_source)
+    {
+        usb_printf("%f", App_getVBUS_V() * App_getIBUS_A());
+    }
+    else
+    {
+        printf("%f", App_getVBUS_V() * App_getIBUS_A());
+    }
+    return 1;
+}
+
+int get_versions_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
+{
+    if (cmd_source)
+    {
+        CDC_Transmit_FS("1.1.1", strlen("1.1.1"));
+    }
+    else
+    {
+        printf("1.1.1");
+    }
+    return 1;
+}
+
+int set_preset_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
+{
+    if (param_cnt < 4)
+    {
+        return 0;
+    }
+    int value, value1;
+    sscanf(param[1], "%d", &value);
+    sscanf(param[2], "%d", &value1);
+    if (strstr(param[2], "30") != NULL && param_cnt == 4)
+    {
+        int value2;
+        sscanf(param[3], "%d", &value2);
+        SC8815_TIM_Work[value].circular = value1;
+    }
+    else if(param_cnt == 6){
+        float value2, value3, value4;
+        sscanf(param[3], "%f", &value2);
+        value2 *= 1000;
+        sscanf(param[4], "%f", &value3);
+        value3 *= 1000;
+        sscanf(param[5], "%f", &value4);
+        SC8815_TIM_Work[value].SC8815_VBUS[value1] = value2;
+        SC8815_TIM_Work[value].SC8815_IBUS_Limit[value1] = value3;
+        SC8815_TIM_Work[value].SC8815_TIM_Work_second[value1] = value4;
+    }
+    return 1;
+}
+
+int save_config_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
+{
+    if (param_cnt == 1)
+    {
+        return 0;
+    }
+    if (strstr(param[1], "preset") != NULL)
+    {
+        SC8815_Preset_Save();
+        return 1;
+    }
+    return 0;
+}
+
+int start_preset_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
+{
+    if (param_cnt == 1)
+    {
+        return 0;
+    }
+    int value;
+    sscanf(param[1], "%d", &value);
+    extern presset_config_set_typeDef presset_config_set;
+    extern SC8815_TIM_WorkTypeDef SC8815_TIM_Work[SC8815_TIM_WORK_SIZE];
+    SC8815_Config.sc8815_tim_work_time = SC8815_TIM_WORK_TIME_FAST;
+    SC8815_Config.sc8815_tim_work_step = 0;
+    memcpy(&presset_config_set.set_circular, &SC8815_TIM_Work[value].circular, sizeof(uint8_t));
+    memcpy(&presset_config_set.set_time, &SC8815_TIM_Work[value].SC8815_TIM_Work_second, sizeof(uint16_t) * SC8815_TIM_WORK_STEP);
+    memcpy(&presset_config_set.set_ibus, &SC8815_TIM_Work[value].SC8815_IBUS_Limit, sizeof(float) * SC8815_TIM_WORK_STEP);
+    memcpy(&presset_config_set.set_vbus, &SC8815_TIM_Work[value].SC8815_VBUS, sizeof(float) * SC8815_TIM_WORK_STEP);
+    APP_config.lock_key = 1;
+    SC8815_Config.sc8815_tim_work_lcd_flush = tim_work_lcd_cmd;
+    return 1;
+}
+
 /**
- * @brief ½âÎöÃüÁî×Ö·û´®
+ * @brief è§£æžå‘½ä»¤å­—ç¬¦ä¸²
  * 
- * @param input ÃüÁî×Ö·û´®
- * @param delimiter ·Ö¸ô·û
- * @param tokens ½âÎöºóµÄ²ÎÊýÊý×é
- * @param max_tokens ×î´ó²ÎÊý¸öÊý
- * @param param ½âÎöºóµÄ²ÎÊýÊý×é
- * @return ½âÎö²ÎÊýµÄ¸öÊý 
+ * @param input å‘½ä»¤å­—ç¬¦ä¸²
+ * @param delimiter åˆ†éš”ç¬¦
+ * @param tokens è§£æžåŽçš„å‚æ•°æ•°ç»„
+ * @param max_tokens æœ€å¤§å‚æ•°ä¸ªæ•°
+ * @param param è§£æžåŽçš„å‚æ•°æ•°ç»„
+ * @return è§£æžå‚æ•°çš„ä¸ªæ•° 
  */
 int splitString(char* input, char delimiter, char** tokens, int max_tokens, CmdStr param) {
     int token_count = 0;
@@ -356,18 +690,21 @@ int splitString(char* input, char delimiter, char** tokens, int max_tokens, CmdS
         tokens[token_count++] = token;
         token = strtok(NULL, &delimiter);
     }
-    param[0] = tokens[0];
-    param[1] = tokens[1];
+    for (size_t i = 0; i < CMD_STR_CNT; i++)
+    {
+        param[i] = tokens[i];
+    }
     return token_count;
 }
 
 /**
- * @brief ASCIIÃüÁî´¦Àíº¯Êý
+ * @brief ASCIIå‘½ä»¤å¤„ç†å‡½æ•°
  * 
- * @param cmd ÃüÁî×Ö·û´®
- * @return 1-³É¹¦ 0-Ê§°Ü
+ * @param cmd å‘½ä»¤å­—ç¬¦ä¸²
+ * @param cmd_source å‘½ä»¤æºå¤´ï¼Œ0-UARTï¼Œ1-USB
+ * @return 1-æˆåŠŸ 0-å¤±è´¥
  */
-int ascii_process(char *cmd)
+int ascii_process(char *cmd, uint8_t cmd_source)
 {
     CmdStr param;
     short param_cnt;
@@ -375,7 +712,8 @@ int ascii_process(char *cmd)
     int i;
     int map_cnt = sizeof(handler_map_static) / sizeof(lookup_table_t);
     char* tokens[10];
-    param_cnt = splitString(cmd, ':', tokens, 10, param);
+    // param_cnt = splitString(cmd, ':', tokens, 10, param);
+    param_cnt = splitString(cmd, ' ', tokens, 10, param);
     for (i = 0; i < map_cnt; i++)
     {
         if (!strcasecmp(param[0], handler_map[i].desc))
@@ -384,7 +722,7 @@ int ascii_process(char *cmd)
             handler = handler_map[i].handler;
             if (handler)
             {
-                ret = (*handler)(param, param_cnt);
+                ret = (*handler)(param, param_cnt, cmd_source);
                 break;
             }
         }

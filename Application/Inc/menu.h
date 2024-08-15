@@ -5,13 +5,18 @@
 #include "Hardware_setting.h"
 #include "Application.h"
 
+#define MENU_PAGE_NUM 6
+
 typedef struct Menu_Key_Index
 {
     menu_u8 main_menu_current_index;
     menu_u8 presset_current_index;
     menu_u8 presset_config_current_index;
     menu_u8 presset_config_set_current_index;
+    menu_u8 buzzer_current_index;
+    float temperature_current_index;
     menu_u8 fastch_current_index;
+    menu_u8 FSW_current_index;
     menu_u8 Current_Page;
 } Key_Index;
 extern Key_Index sub_index;
@@ -35,8 +40,10 @@ typedef enum
     PRESSET_START_PAGE,   // 开启预设页面
     PRESSET_RUNNING_PAGE,   // 预设运行页面
     BUZZER_PAGE,    // 设置蜂鸣器页面
-    TEMP_PAGE,      // 设置温度预警页面
+    TEMPERATURE_PAGE,      // 设置温度预警页面
     FASTCH_PAGE,    // 设置快充输入页面
+    FSW_PAGE,    // 设置开关频率页面
+    PROTECT_PAGE,   //保护状态页面
 } OP_PAGE;
 
 typedef enum
@@ -71,7 +78,9 @@ void presset_config_set_page_process(menu_u8 KeyValue);
 void presset_start_page_process(menu_u8 KeyValue);
 void presset_running_page_process(menu_u8 KeyValue);
 void buzzer_page_process(menu_u8 KeyValue);
-void temp_page_process(menu_u8 KeyValue);
+void temperature_page_process(menu_u8 KeyValue);
 void fastch_page_process(menu_u8 KeyValue);
+void FSW_page_process(menu_u8 KeyValue);
+void protect_page_process(menu_u8 KeyValue);
 
 #endif //__MENU_H

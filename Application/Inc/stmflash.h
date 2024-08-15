@@ -16,8 +16,6 @@ typedef __IO uint16_t vu16;
 #define STM_SECTOR_SIZE	    2048    //2K字节
 #endif	
 #define STM32_FLASH_BASE    0x08000000 		//STM32 FLASH的起始地址
-#define SC8815_PRESET_FLASH_SAVE_ADDR     STM32_FLASH_BASE+STM_SECTOR_SIZE*62	//写Flash的地址，这里从倒数第二页开始
-#define SC8815_TIM_WORK_FLASH_SAVE_ADDR     STM32_FLASH_BASE+STM_SECTOR_SIZE*120	//写Flash的地址，这里从倒数第二页开始
 #define STM32_FLASH_WREN 	1              	//使能FLASH写入(0，不使能;1，使能)
 #define FLASH_WAITETIME  	50000          	//FLASH等待超时时间
 

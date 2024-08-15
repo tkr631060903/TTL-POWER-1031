@@ -8,6 +8,9 @@
         "uart_debug.h": "c",
         "menu.h": "c",
         "menu_conf.h": "c",
-        "lcd_init.h": "c"
+        "lcd_init.h": "c",
+        "application_callback.h": "c",
+        "application_sc8815.h": "c",
+        "application_lcd.h": "c"
     }
 }

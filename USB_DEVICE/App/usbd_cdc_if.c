@@ -23,6 +23,9 @@
 
 /* USER CODE BEGIN INCLUDE */
 #include "Application_Callback.h"
+#include <string.h>
+#include <stdio.h>
+#include <stdarg.h>
 /* USER CODE END INCLUDE */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -260,7 +263,28 @@ static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
 {
   /* USER CODE BEGIN 6 */
   USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);
-  extern char USB_COM_Cmd[Cmd_Length];
+
+  if (strchr((char *)Buf, ' ') != NULL || strstr((char *)Buf, "MEAS") != NULL || strstr((char *)Buf, "SYST") != NULL)
+  {
+    extern int ascii_process(char *cmd, uint8_t cmd_source);
+    ascii_process((char*)Buf, 1);
+    // char str[20];
+    // if (ascii_process((char*)Buf))
+    // {
+    //   sprintf(str, "%s%s", Buf, " ok\n");
+    //   CDC_Transmit_FS((uint8_t *)str, strlen(str));
+    // }
+    // else 
+    // {
+    //   sprintf(str, "%s%s", Buf, " error\n");
+    //   CDC_Transmit_FS((uint8_t *)str, strlen(str));
+    // }
+  }
+  else
+  {
+    CDC_Transmit_FS("cmd error\n", strlen("cmd error"));
+  }
+  memset(Buf, 0, Cmd_Length);
 
   USBD_CDC_ReceivePacket(&hUsbDeviceFS);
   return (USBD_OK);
@@ -294,6 +318,15 @@ uint8_t CDC_Transmit_FS(uint8_t* Buf, uint16_t Len)
 
 /* USER CODE BEGIN PRIVATE_FUNCTIONS_IMPLEMENTATION */
 
+void usb_printf(const char* format, ...)
+{
+  va_list args;
+  uint32_t length;
+  va_start(args, format);
+  length = vsnprintf((char*)UserTxBufferFS, APP_TX_DATA_SIZE, (char*)format, args);
+  va_end(args);
+  CDC_Transmit_FS(UserTxBufferFS, length);
+}
 /* USER CODE END PRIVATE_FUNCTIONS_IMPLEMENTATION */
 
 /**
