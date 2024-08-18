@@ -47,6 +47,7 @@ typedef enum
     SC8815_Standby = 0x02U,
     SC8815_LoadStart = 0x03U,
     SC8815_TIM_WORK,
+    SC8815_PORT,
 } SC8815_StatusTypeDef;
 
 typedef enum

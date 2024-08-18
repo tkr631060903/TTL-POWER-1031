@@ -23,8 +23,8 @@ uint8_t ADC_Value_timestamp = 0;
  */
 float App_getVBUS_mV(void)
 {
-    // return (12 * ((float)ADC_Value[0] * SAMPLING_RATE)) * 1000;
-    return ((12.023 * ((float)ADC_Value[0] * SAMPLING_RATE)) * 1000 - 22.312);
+    return (12 * ((float)ADC_Value[0] * SAMPLING_RATE)) * 1000;
+    // return ((12.023 * ((float)ADC_Value[0] * SAMPLING_RATE)) * 1000 - 22.312);
 }
 
 /**
@@ -34,8 +34,8 @@ float App_getVBUS_mV(void)
  */
 float App_getVBUS_V(void)
 {
-    // return 12 * ((float)ADC_Value[0] * SAMPLING_RATE);
-    return 12.023 * ((float)ADC_Value[0] * SAMPLING_RATE) - 0.022312;
+    return 12 * ((float)ADC_Value[0] * SAMPLING_RATE);
+    // return 12.023 * ((float)ADC_Value[0] * SAMPLING_RATE) - 0.022312;
 }
 
 /**

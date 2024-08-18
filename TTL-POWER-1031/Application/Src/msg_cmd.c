@@ -24,7 +24,7 @@ static ascii_handler_fn
     set_switch_handler, set_current_handler, set_current_port_handler, set_current_step_handler,
     set_voltage_handler, set_voltage_step_handler, set_voltage_prot_handler, set_voltage_limit_handler,
     get_fetch_current_handler, get_fetch_voltage_handler, get_fetch_power_handler, get_versions_handler,
-    set_preset_handler, save_config_handler;
+    set_preset_handler, save_config_handler, upgrade_app_handler;
 typedef struct lookup_table
 {
     const char *desc;
@@ -38,7 +38,7 @@ static const lookup_table_t handler_map_static[] = {
     {"OUTP", set_switch_handler}, {"CURR", set_current_handler}, {"CURR:PROT", set_current_port_handler}, {"CURR:STEP", set_current_step_handler},
     {"VOLT", set_voltage_handler}, {"VOLT:STEP", set_voltage_step_handler}, {"VOLT:PROT", set_voltage_prot_handler},
     {"VOLT:LIMIT", set_voltage_limit_handler}, {"MEAS:CURR?", get_fetch_current_handler}, {"MEAS:VOLT?", get_fetch_voltage_handler},
-    {"MEAS:POW?", get_fetch_power_handler}, {"SYST:VERS?", get_versions_handler}, {"preset", set_preset_handler}, {"save", save_config_handler}
+    {"MEAS:POW?", get_fetch_power_handler}, {"SYST:VERS?", get_versions_handler}, {"preset", set_preset_handler}, {"save", save_config_handler}, {"upgrade", upgrade_app_handler}
 };
 const lookup_table_t* handler_map = handler_map_static;
 
@@ -646,6 +646,24 @@ int save_config_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
     if (strstr(param[1], "preset") != NULL)
     {
         SC8815_Preset_Save();
+        return 1;
+    }
+    return 0;
+}
+
+int upgrade_app_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
+{
+    if (param_cnt == 1)
+    {
+        return 0;
+    }
+    if (strstr(param[1], "app") != NULL)
+    {
+//        app_config_save_config.upgrade_flag = 1;
+//        app_config_save();
+//        usb_printf("To start the upgrade, reinsert the USB\n");
+        __set_FAULTMASK(1); //关闭所有中断
+        NVIC_SystemReset(); //进行软件复位
         return 1;
     }
     return 0;

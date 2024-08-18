@@ -339,44 +339,44 @@ void SC8815_Soft_Protect(void)
 		//     APP_config.Sys_Mode = VINProtectMode;
 		//     BUZZER_OPEN(200);
 		// }
-		SC8815_Config.SC8815_Status = SC8815_Standby;
+		SC8815_Config.SC8815_Status = SC8815_PORT;
 		Application_SC8815_Standby();
-        protect_page_ui_process(2);
-		BUZZER_OPEN(500);
+        // protect_page_ui_process(2);
+		// BUZZER_OPEN(500);
 	}
-	if (HAL_GetTick() - SC8815_Config.VOUT_Open_Time >= 100)
-	{
-		if (App_getIBUS_mA() >= SC8815_Config.SC8815_IBUS_Limit || App_getVBUS_mV() <= SC8815_Config.SC8815_VBUS - (SC8815_Config.SC8815_VBUS * 0.1)) // 输出保护
-		{
-			// uint16_t VBUS = 0, IBUS = 0;
-			// for (uint8_t i = 0; i < 5; i++)
-			// {
-			//     if (VBUS == 0)
-			//     {
-			//         VBUS = App_getVBUS_mV();
-			//         IBUS = SC8815_Read_VBUS_Current();
-			//     }
-			//     else {
-			//         VBUS = (VBUS + App_getVBUS_mV()) / 2;
-			//         IBUS = (IBUS + SC8815_Read_VBUS_Current()) / 2;
-			//     }
-			//     printf("VBUS:%dmV, IBUS:%dmA\r\n", VBUS, IBUS);
-			//     HAL_Delay(10);
-			// }
-			// if (IBUS >= SC8815_Config.SC8815_IBUS_Limit || VBUS <= SC8815_Config.SC8815_VBUS - (SC8815_Config.SC8815_VBUS * 0.1))
-			// {
-			//     printf("VBUS/5:%dmV, IBUS/5:%dmA\r\n", VBUS, IBUS);
-			//     // printf("触发限流保护\r\n");
-			//     Application_SC8815_Standby();
-			//     APP_config.Sys_Mode = VOUTProtectMode;
-			//     BUZZER_OPEN(200);
-			// }
-			SC8815_Config.SC8815_Status = SC8815_Standby;
-			Application_SC8815_Standby();
-            protect_page_ui_process(0);
-			BUZZER_OPEN(500);
-		}
-	}
+	// if (HAL_GetTick() - SC8815_Config.VOUT_Open_Time >= 100)
+	// {
+	// 	if (App_getIBUS_mA() >= SC8815_Config.SC8815_IBUS_Limit || App_getVBUS_mV() <= SC8815_Config.SC8815_VBUS - (SC8815_Config.SC8815_VBUS * 0.1)) // 输出保护
+	// 	{
+	// 		// uint16_t VBUS = 0, IBUS = 0;
+	// 		// for (uint8_t i = 0; i < 5; i++)
+	// 		// {
+	// 		//     if (VBUS == 0)
+	// 		//     {
+	// 		//         VBUS = App_getVBUS_mV();
+	// 		//         IBUS = SC8815_Read_VBUS_Current();
+	// 		//     }
+	// 		//     else {
+	// 		//         VBUS = (VBUS + App_getVBUS_mV()) / 2;
+	// 		//         IBUS = (IBUS + SC8815_Read_VBUS_Current()) / 2;
+	// 		//     }
+	// 		//     printf("VBUS:%dmV, IBUS:%dmA\r\n", VBUS, IBUS);
+	// 		//     HAL_Delay(10);
+	// 		// }
+	// 		// if (IBUS >= SC8815_Config.SC8815_IBUS_Limit || VBUS <= SC8815_Config.SC8815_VBUS - (SC8815_Config.SC8815_VBUS * 0.1))
+	// 		// {
+	// 		//     printf("VBUS/5:%dmV, IBUS/5:%dmA\r\n", VBUS, IBUS);
+	// 		//     // printf("触发限流保护\r\n");
+	// 		//     Application_SC8815_Standby();
+	// 		//     APP_config.Sys_Mode = VOUTProtectMode;
+	// 		//     BUZZER_OPEN(200);
+	// 		// }
+	// 		SC8815_Config.SC8815_Status = SC8815_PORT;
+	// 		Application_SC8815_Standby();
+    //         // protect_page_ui_process(0);
+	// 		// BUZZER_OPEN(500);
+	// 	}
+	// }
 }
 
 /**

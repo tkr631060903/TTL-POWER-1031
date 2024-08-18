@@ -89,6 +89,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
         }
         sc8815_tim_work();
         get_msg();
+        SC8815_Soft_Protect();
 
         if (ADC_Value_timestamp > 10)
         {

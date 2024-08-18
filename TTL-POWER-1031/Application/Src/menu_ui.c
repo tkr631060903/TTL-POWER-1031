@@ -457,7 +457,7 @@ void FSW_page_ui_process(menu_u8 index)
 void protect_page_ui_process(menu_u8 index)
 {
     current_menu_index = PROTECT_PAGE;
-    // LCD_Clear();
+    LCD_Clear();
     switch (index)
     {
     case 0:

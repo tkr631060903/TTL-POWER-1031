@@ -74,16 +74,15 @@ void APP_LCD_main_show(void)
     memset(str, 0, 10);
     // float vbus = App_getVBUS_V();
     float vbus = App_getVBUS_average_V();
+    // vbus = 10;
     if (vbus >= 0 && vbus < 10)
     {
         sprintf(str, "0%.2f", vbus);
-        printf("vbus:%s\n", str);
         LCD_ShowString(80, 1, (const uint8_t*)str, MAGENTA, BLACK, 48, 0);
     }
     else if (vbus >= 10 && vbus < 40)
     {
         sprintf(str, "%.2f", vbus);
-        printf("vbus:%s\n", str);
         LCD_ShowString(80, 1, (const uint8_t*)str, MAGENTA, BLACK, 48, 0);
     }
 
