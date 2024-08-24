@@ -47,6 +47,7 @@ void Widget::on_pushButtonUART_clicked()
             ui->comboBoxUART->setEnabled(false);
             ui->enterUpgrade->setEnabled(true);
             ui->refreshCOM->setEnabled(false);
+            ui->quitUpgrade->setEnabled(true);
             ui->pushButtonUART->setText("关闭串口");
         }else{
             qDebug() << "serial error";
@@ -61,6 +62,7 @@ void Widget::on_pushButtonUART_clicked()
         ui->enterUpgrade->setEnabled(false);
         ui->startUpgrade->setEnabled(false);
         ui->refreshCOM->setEnabled(true);
+        ui->quitUpgrade->setEnabled(false);
         serialStatus = false;
         ui->pushButtonUART->setText("打开串口");
     }
@@ -190,5 +192,24 @@ void Widget::on_refreshCOM_clicked()
         qDebug() << serialInfo.portName();
         ui->comboBoxUART->addItem(serialInfo.portName());
     }
+}
+
+
+void Widget::on_quitUpgrade_clicked()
+{
+    ui->enterUpgrade->setEnabled(true);
+    setialPort->close();
+    setialPort->setPortName(ui->comboBoxUART->currentText());
+    setialPort->setBaudRate(QSerialPort::Baud115200);
+    setialPort->setDataBits(QSerialPort::DataBits(QSerialPort::Data8));
+    setialPort->setStopBits(QSerialPort::StopBits(QSerialPort::OneStop));
+    setialPort->setFlowControl(QSerialPort::NoFlowControl);
+    setialPort->setParity(QSerialPort::NoParity);
+    if(setialPort->open(QIODevice::ReadWrite)){
+        setialPort->write("upgrade quit");
+    }else{
+        setialPort->write("upgrade quit");
+    }
+    ui->textEditRev->append("已发送退出升级模式指令.");
 }
 

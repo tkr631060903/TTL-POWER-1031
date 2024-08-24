@@ -31,7 +31,7 @@
       <x>12</x>
       <y>20</y>
       <width>103</width>
-      <height>170</height>
+      <height>199</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayoutMenu">
@@ -70,6 +70,23 @@ border-color: rgb(0, 85, 255);</string>
        </property>
        <property name="text">
         <string>进入升级模式</string>
+       </property>
+       <property name="autoDefault">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="quitUpgrade">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">color: rgb(0, 85, 255);
+border-color: rgb(0, 85, 255);</string>
+       </property>
+       <property name="text">
+        <string>退出升级模式</string>
        </property>
        <property name="autoDefault">
         <bool>false</bool>
@@ -127,9 +144,9 @@ border-color: rgb(0, 85, 255);</string>
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>200</y>
+      <y>220</y>
       <width>101</width>
-      <height>71</height>
+      <height>51</height>
      </rect>
     </property>
     <property name="text">

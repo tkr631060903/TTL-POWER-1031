@@ -31,11 +31,9 @@ private slots:
 
     void on_loadFile_clicked();
 
-    void on_loadFile_2_clicked();
-
-    void on_refreshUART_clicked();
-
     void on_refreshCOM_clicked();
+
+    void on_quitUpgrade_clicked();
 
 private:
     Ui::WidgetUpgrade *ui;

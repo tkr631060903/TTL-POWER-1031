@@ -40,7 +40,7 @@ void STMFLASH_Write_NoCheck(u32 WriteAddr, u16* pBuffer, u16 NumToWrite)
  * 函数功能:从指定地址开始写入指定长度的数据
  * 输入参数:WriteAddr:起始地址(此地址必须为2的倍数!!)、pBuffer:数据指针、NumToWrite：半字(16位)数(就是要写入的16位数据的个数.)
  * 返 回 值: 无
- * 说    明：
+ * 说    明：实测会多擦写数据，长度以为的数据写成0
  */
 void STMFLASH_Write(u32 WriteAddr, u16* pBuffer, u16 NumToWrite)
 {

@@ -16,7 +16,7 @@
 #include <string.h>
 #include "menu_ui.h"
 
-#define SC8815_TIM_WORK_FLASH_SAVE_ADDR     STM32_FLASH_BASE+STM_SECTOR_SIZE*120
+#define SC8815_TIM_WORK_FLASH_SAVE_ADDR     STM32_FLASH_BASE+STM_SECTOR_SIZE*124
 
 SC8815_ConfigTypeDef SC8815_Config;
 SC8815_TIM_WorkTypeDef SC8815_TIM_Work[SC8815_TIM_WORK_SIZE] = { 0 };
@@ -414,5 +414,5 @@ void Application_SC8815_Run(void)
 
 void SC8815_Preset_Save(void)
 {
-	STMFLASH_Write(SC8815_TIM_WORK_FLASH_SAVE_ADDR, (uint16_t*)SC8815_TIM_Work, sizeof(SC8815_TIM_WorkTypeDef) * SC8815_TIM_WORK_SIZE);
+	STMFLASH_Write(SC8815_TIM_WORK_FLASH_SAVE_ADDR, (uint16_t*)SC8815_TIM_Work, (sizeof(SC8815_TIM_WorkTypeDef) * SC8815_TIM_WORK_SIZE) >> 1);
 }

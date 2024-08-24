@@ -48,16 +48,16 @@ void app_config_save(void)
     for (i = 0; i < STM_SECTOR_SIZE;)
     {
         STMFLASH_ReadBytes(APP_CONFIG_FLASH_ADDR + i, (uint8_t*)&app_config_save_config_temp, sizeof(Application_SaveConfig));
-        if (app_config_save_config_temp.lock_buzzer != 0 || app_config_save_config_temp.lock_buzzer != 1)
+        if (app_config_save_config_temp.lock_buzzer != 0 && app_config_save_config_temp.lock_buzzer != 1)
         {
-            STMFLASH_Write(APP_CONFIG_FLASH_ADDR + i, (uint16_t*)&g_app_config_save_config, sizeof(Application_SaveConfig));
+            STMFLASH_Write(APP_CONFIG_FLASH_ADDR + i, (uint16_t*)&g_app_config_save_config, sizeof(Application_SaveConfig) >> 1);
             break;
         }
         i += sizeof(Application_SaveConfig);
     }
     if (i > STM_SECTOR_SIZE)
     {
-        STMFLASH_Write(APP_CONFIG_FLASH_ADDR, (uint16_t*)&g_app_config_save_config, sizeof(Application_SaveConfig));
+        STMFLASH_Write(APP_CONFIG_FLASH_ADDR, (uint16_t*)&g_app_config_save_config, sizeof(Application_SaveConfig) >> 1);
     }
 }
 
@@ -71,10 +71,10 @@ void upgrade_process(uint8_t* Buf, uint32_t *Len)
     }
     if (size < 0x40)
     {
-        STMFLASH_Write(app_addr, (uint16_t*)app_data_buff, app_data_count);
+        STMFLASH_Write(app_addr, (uint16_t*)app_data_buff, app_data_count >> 1);
 		for(int i;i<1000000;i++);
         CDC_Transmit_FS("done", strlen("done"));
-        g_app_config_save_config.upgrade_flag = 0;
+        g_app_config_save_config.upgrade_flag = 2;
         app_config_save();
         __set_FAULTMASK(1); //关闭所有中断
         NVIC_SystemReset(); //进行软件复位
@@ -83,13 +83,21 @@ void upgrade_process(uint8_t* Buf, uint32_t *Len)
 	if (app_data_count >= APP_DATA_BUFF_SIZE)
     {
         //CDC_Transmit_FS("write", strlen("write"));
-        STMFLASH_Write(app_addr, (uint16_t*)app_data_buff, app_data_count);
+        STMFLASH_Write(app_addr, (uint16_t*)app_data_buff, app_data_count >> 1);
         memset(app_data_buff, 0, APP_DATA_BUFF_SIZE);
         app_addr += app_data_count;
         app_data_count = 0;
         CDC_Transmit_FS("read", strlen("read"));
     }
     //CDC_Transmit_FS(Buf, size);
+}
+
+void upgrade_quit(void)
+{
+    g_app_config_save_config.upgrade_flag = 0;
+    app_config_save();
+    __set_FAULTMASK(1); //关闭所有中断
+    NVIC_SystemReset(); //进行软件复位
 }
 
 void upgrade(void)

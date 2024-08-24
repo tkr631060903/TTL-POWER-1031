@@ -261,7 +261,11 @@ static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
   /* USER CODE BEGIN 6 */
   USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);
 
-  if (g_app_config_save_config.upgrade_flag == 1) {
+  if (strstr((const char*)Buf, "upgrade quit"))
+  {
+    upgrade_quit();
+  }
+  else if (g_app_config_save_config.upgrade_flag == 1) {
     upgrade_process(Buf, Len);
   }
 

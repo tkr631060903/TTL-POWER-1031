@@ -16,6 +16,7 @@ typedef struct
 extern Application_SaveConfig g_app_config_save_config;
 
 void upgrade(void);
-void upgrade_process(uint8_t* Buf, uint32_t *Len);
+void upgrade_process(uint8_t* Buf, uint32_t* Len);
+void upgrade_quit(void);
 
 #endif  //!__UPGRADE__H__
