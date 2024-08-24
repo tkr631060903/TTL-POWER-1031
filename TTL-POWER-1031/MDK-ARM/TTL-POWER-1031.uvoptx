@@ -152,25 +152,9 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>655</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134295548</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\Application\Src\msg_cmd.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\TTL_POWER_1031\../Application/Src/msg_cmd.c\655</Expression>
-        </Bp>
-        <Bp>
-          <Number>1</Number>
-          <Type>0</Type>
           <LineNumber>213</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134289612</Address>
+          <Address>134289520</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -180,6 +164,38 @@
           <Filename>..\Application\Src\menu.c</Filename>
           <ExecCommand></ExecCommand>
           <Expression>\\TTL_POWER_1031\../Application/Src/menu.c\213</Expression>
+        </Bp>
+        <Bp>
+          <Number>1</Number>
+          <Type>0</Type>
+          <LineNumber>80</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>134287136</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>../Core/Src/main.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\TTL_POWER_1031\../Core/Src/main.c\80</Expression>
+        </Bp>
+        <Bp>
+          <Number>2</Number>
+          <Type>0</Type>
+          <LineNumber>74</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>134264480</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>../Core/Src/gpio.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\TTL_POWER_1031\../Core/Src/gpio.c\74</Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>

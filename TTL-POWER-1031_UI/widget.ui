@@ -1,30 +1,164 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Widget</class>
- <widget class="QWidget" name="Widget">
+ <class>WidgetUpgrade</class>
+ <widget class="QWidget" name="WidgetUpgrade">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>600</height>
+    <width>442</width>
+    <height>303</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Widget</string>
+   <string>TTL-POWER升级工具</string>
   </property>
-  <widget class="QPushButton" name="pushButton">
+  <widget class="QGroupBox" name="groupBoxMenu">
    <property name="geometry">
     <rect>
-     <x>160</x>
-     <y>160</y>
-     <width>75</width>
-     <height>23</height>
+     <x>10</x>
+     <y>10</y>
+     <width>121</width>
+     <height>281</height>
     </rect>
    </property>
-   <property name="text">
-    <string>PushButton</string>
+   <property name="title">
+    <string>功能</string>
    </property>
+   <widget class="QWidget" name="layoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>12</x>
+      <y>20</y>
+      <width>103</width>
+      <height>170</height>
+     </rect>
+    </property>
+    <layout class="QVBoxLayout" name="verticalLayoutMenu">
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayoutUART">
+       <item>
+        <widget class="QLabel" name="labelUART">
+         <property name="text">
+          <string>串口</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QComboBox" name="comboBoxUART"/>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <widget class="QPushButton" name="refreshCOM">
+       <property name="styleSheet">
+        <string notr="true">color: rgb(0, 85, 255);</string>
+       </property>
+       <property name="text">
+        <string>刷新串口</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="enterUpgrade">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">color: rgb(0, 85, 255);
+border-color: rgb(0, 85, 255);</string>
+       </property>
+       <property name="text">
+        <string>进入升级模式</string>
+       </property>
+       <property name="autoDefault">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="loadFile">
+       <property name="styleSheet">
+        <string notr="true">color: rgb(0, 85, 255);</string>
+       </property>
+       <property name="text">
+        <string>加载文件</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="startUpgrade">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>101</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">color: rgb(0, 85, 255);</string>
+       </property>
+       <property name="text">
+        <string>开始升级</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="clearMessage">
+       <property name="minimumSize">
+        <size>
+         <width>101</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">color: rgb(0, 85, 255);</string>
+       </property>
+       <property name="text">
+        <string>清除消息</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QPushButton" name="pushButtonUART">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>200</y>
+      <width>101</width>
+      <height>71</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>打开串口</string>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QGroupBox" name="groupBoxRev">
+   <property name="geometry">
+    <rect>
+     <x>140</x>
+     <y>10</y>
+     <width>291</width>
+     <height>281</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>消息</string>
+   </property>
+   <widget class="QTextEdit" name="textEditRev">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>20</y>
+      <width>271</width>
+      <height>251</height>
+     </rect>
+    </property>
+   </widget>
   </widget>
  </widget>
  <resources/>

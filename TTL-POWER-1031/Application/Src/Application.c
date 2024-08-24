@@ -312,7 +312,7 @@ void app_config_save(void)
     for (i = 0; i < STM_SECTOR_SIZE;)
     {
         STMFLASH_ReadBytes(APP_CONFIG_FLASH_ADDR + i, (uint8_t*)&app_config_save_config_temp, sizeof(Application_SaveConfig));
-        if (app_config_save_config.lock_buzzer != 0 || app_config_save_config.lock_buzzer != 1)
+        if (app_config_save_config_temp.lock_buzzer != 0 || app_config_save_config_temp.lock_buzzer != 1)
         {
             STMFLASH_Write(APP_CONFIG_FLASH_ADDR + i, (uint16_t*)&app_config_save_config, sizeof(Application_SaveConfig));
             break;

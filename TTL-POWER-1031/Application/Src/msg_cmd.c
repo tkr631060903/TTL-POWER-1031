@@ -659,9 +659,17 @@ int upgrade_app_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
     }
     if (strstr(param[1], "app") != NULL)
     {
-//        app_config_save_config.upgrade_flag = 1;
-//        app_config_save();
-//        usb_printf("To start the upgrade, reinsert the USB\n");
+        app_config_save_config.upgrade_flag = 1;
+        app_config_save();
+        if (cmd_source)
+        {
+            usb_printf("ok");
+        }
+        else
+        {
+            printf("ok");
+        }
+        Application_SoftwareDelay(10);
         __set_FAULTMASK(1); //关闭所有中断
         NVIC_SystemReset(); //进行软件复位
         return 1;

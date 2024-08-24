@@ -1,11 +1,12 @@
 #ifndef WIDGET_H
 #define WIDGET_H
 
+#include <QSerialPort>
 #include <QWidget>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
-class Widget;
+class WidgetUpgrade;
 }
 QT_END_NAMESPACE
 
@@ -17,7 +18,29 @@ public:
     Widget(QWidget *parent = nullptr);
     ~Widget();
 
+private slots:
+    void on_pushButtonUART_clicked();
+
+    void on_enterUpgrade_clicked();
+
+    void on_serialData_readyToRead();
+
+    void on_clearMessage_clicked();
+
+    void on_startUpgrade_clicked();
+
+    void on_loadFile_clicked();
+
+    void on_loadFile_2_clicked();
+
+    void on_refreshUART_clicked();
+
+    void on_refreshCOM_clicked();
+
 private:
-    Ui::Widget *ui;
+    Ui::WidgetUpgrade *ui;
+    QSerialPort *setialPort;
+    bool serialStatus;
+    QByteArray flieData;
 };
 #endif // WIDGET_H

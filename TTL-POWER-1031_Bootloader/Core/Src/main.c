@@ -89,8 +89,6 @@ int main(void)
   MX_GPIO_Init();
   MX_USB_DEVICE_Init();
   /* USER CODE BEGIN 2 */
-	// HAL_Delay(2000);
-//   iap_load_app();	//跳转到APP的首地址
   upgrade();
   /* USER CODE END 2 */
 
