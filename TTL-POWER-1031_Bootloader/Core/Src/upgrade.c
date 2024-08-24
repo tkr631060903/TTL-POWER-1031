@@ -3,14 +3,17 @@
 #include "stmflash.h"
 #include "usbd_cdc_if.h"
 #include "Bootloader.h"
+#include "aes.h"
 
-#define APP_CONFIG_FLASH_ADDR     STM32_FLASH_BASE+STM_SECTOR_SIZE*119
+#define APP_CONFIG_FLASH_ADDR     STM32_FLASH_BASE+STM_SECTOR_SIZE*123
 #define APP_DATA_BUFF_SIZE  9 * 1024
 
 Application_SaveConfig g_app_config_save_config;
 static uint32_t app_addr = APP_ADDR;
 static uint8_t app_data_buff[APP_DATA_BUFF_SIZE];   //数据缓存区
 static uint32_t app_data_count = 0; //当前数据包的大小
+static unsigned char AES128key[16] = "0CoJUm6Qyw8W8jud";
+static unsigned char AES_IV[16] = "0102030405060708";
 
 void app_config_load(void)
 {
@@ -64,9 +67,14 @@ void app_config_save(void)
 void upgrade_process(uint8_t* Buf, uint32_t *Len)
 {
     uint16_t size = *Len;
-	if (app_data_count < APP_DATA_BUFF_SIZE)
+    if (app_data_count < APP_DATA_BUFF_SIZE)
     {
+        if (size >= 0x40) {
+            aes_decrypt(Buf, Buf, size, AES_IV);
+        }
         memcpy(&app_data_buff[app_data_count], Buf, size);
+
+        // memcpy(&app_data_buff[app_data_count], Buf, size);
         app_data_count += size;
     }
     if (size < 0x40)
@@ -102,7 +110,8 @@ void upgrade_quit(void)
 
 void upgrade(void)
 {
-	g_app_config_save_config.upgrade_flag = 1;
+	aes_init(AES128key);
+    g_app_config_save_config.upgrade_flag = 1;
     app_config_load();    //读取APP参数
     if (g_app_config_save_config.upgrade_flag == 0) {
         iap_load_app();	//跳转到APP的首地址

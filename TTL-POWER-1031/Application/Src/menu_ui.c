@@ -31,6 +31,8 @@ static Menu_NameTypeDef menu_name[] = {
 void Enter_Page(menu_i32 index, menu_u8 KeyValue)
 {
     sub_index.Current_Page = index;
+    int i;
+    uint8_t FSW_temp[] = {SCHWI_FREQ_150KHz, SCHWI_FREQ_300KHz_1, SCHWI_FREQ_300KHz_2, SCHWI_FREQ_450KHz};
     switch (sub_index.Current_Page)
     {
     case 0:
@@ -66,7 +68,14 @@ void Enter_Page(menu_i32 index, menu_u8 KeyValue)
         break;
     case 5:
         sub_index.FSW_current_index = SCHWI_FREQ_150KHz;
-        FSW_page_ui_process(SC8815_HardwareInitStruct.SW_FREQ);
+        for(i = 0; i < 4; i++)
+        {
+            if (FSW_temp[i] == app_config_save_config.SW_FREQ)
+            {
+                break;
+            }
+        }
+        FSW_page_ui_process(FSW_temp[i]);
         break;
     default:
         break;
@@ -95,6 +104,7 @@ void main_menu_Init(void)
     sub_index.Current_Page = MAIN_MENU_PAGE;
     current_menu_index = MAIN_MENU_PAGE;
     cursor_main_menu = 0;
+    main_menu_indxe = 0;
     //.....刷新回主页面的UI和状态
     LCD_Clear();
     LCD_ShowChinese(40, 0, "预设配置", BLACK, LIGHTBLUE, 32, 0);

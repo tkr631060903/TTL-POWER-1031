@@ -16,10 +16,12 @@
 #include "Application_ADC.h"
 #include "stmflash.h"
 
-#define APP_CONFIG_FLASH_ADDR     STM32_FLASH_BASE+STM_SECTOR_SIZE*119
+#define APP_CONFIG_FLASH_ADDR     STM32_FLASH_BASE+STM_SECTOR_SIZE*123
 
 Application_Config APP_config;
 Application_SaveConfig app_config_save_config;
+
+uint32_t APP_LCD_main_show_time = 0;
 
 /**
  *@brief 系统运行
@@ -41,9 +43,10 @@ void Application_main()
         key3_button_process();
         SET_LED1_Status();
 
-        if (current_menu_index == MAIN_PAGE)
+        if (current_menu_index == MAIN_PAGE && HAL_GetTick() - APP_LCD_main_show_time >= 200)
         {
             APP_LCD_main_show();
+            APP_LCD_main_show_time = HAL_GetTick();
         }
 
         if (SC8815_Config.sc8815_tim_work_lcd_flush == tim_work_lcd_main)

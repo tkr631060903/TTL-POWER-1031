@@ -229,6 +229,7 @@ int setSW_FREQ_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
     SC8815_HardwareInitStruct.SW_FREQ = value;
     // SC8815_HardwareInit(&SC8815_HardwareInitStruct);
     SC8815_SetSWFreq(value);
+    SC8815_OTG_Enable();
     return 1;
 }
 

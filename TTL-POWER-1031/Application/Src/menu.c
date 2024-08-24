@@ -607,9 +607,16 @@ void FSW_page_process(menu_u8 KeyValue)
         SC8815_Config.SC8815_Status = SC8815_Standby;
         Application_SC8815_Standby();
         extern SC8815_HardwareInitTypeDef SC8815_HardwareInitStruct;
-        SC8815_HardwareInitStruct.SW_FREQ = FSW_temp[sub_index.FSW_current_index];
-        SC8815_SetSWFreq(FSW_temp[sub_index.FSW_current_index]);
-        // SC8815_HardwareInit(&SC8815_HardwareInitStruct);
+        for(i = 0; i < 4; i++)
+        {
+            if (FSW_temp[i] == sub_index.FSW_current_index)
+            {
+                break;
+            }
+        }
+        SC8815_HardwareInitStruct.SW_FREQ = FSW_temp[i];
+        SC8815_SetSWFreq(FSW_temp[i]);
+        SC8815_OTG_Enable();
         app_config_save_config.SW_FREQ = SC8815_HardwareInitStruct.SW_FREQ;
         app_config_save();
         main_page_init();

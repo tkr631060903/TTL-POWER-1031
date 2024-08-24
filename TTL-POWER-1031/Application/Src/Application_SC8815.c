@@ -216,7 +216,7 @@ void Application_SC8815_Init(void)
 	SC8815_HardwareInitStruct.VBAT_RATIO = SCHWI_VBAT_RATIO_12_5x;
 	SC8815_HardwareInitStruct.VBUS_RATIO = SCHWI_VBUS_RATIO_12_5x;
 	SC8815_HardwareInitStruct.VINREG_Ratio = SCHWI_VINREG_RATIO_100x;
-	// SC8815_HardwareInitStruct.SW_FREQ = SCHWI_FREQ_150KHz;
+	SC8815_HardwareInitStruct.SW_FREQ = app_config_save_config.SW_FREQ;
 	SC8815_HardwareInitStruct.DeadTime = SCHWI_DT_60ns;
 	SC8815_HardwareInitStruct.ICHAR = SCHWI_ICHAR_IBAT;
 	SC8815_HardwareInitStruct.TRICKLE = SCHWI_TRICKLE_Disable;
