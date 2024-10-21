@@ -22,6 +22,8 @@
 #define TEMPERATURE_55 (float)1.22
 #define TEMPERATURE_65 (float)0.93
 
+#define APP_CONFIG_SAVE_TIME  30000
+
 typedef enum
 {
     APP_OK = 0x00U,
@@ -34,10 +36,12 @@ typedef struct
 {
     uint8_t lock_key;   //锁定按键 1锁 0不锁
     uint8_t lock_buzzer;     //蜂鸣器锁定 1锁 0不锁
+    uint8_t app_config_save_flag;   //应用参数保存标志位 1保存 0不保存
     float temperature;     //温度监控值
     uint16_t msg_get_time;   //信息上报时间间隔
     uint32_t msg_get_timestamp;   //信息上报时间戳
     uint16_t fastCharge_InVoltage; // 快充输入电压v
+    uint32_t app_config_save_time;   //应用参数保存时间
 } Application_Config;
 
 typedef struct

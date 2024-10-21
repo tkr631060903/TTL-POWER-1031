@@ -59,7 +59,7 @@ typedef struct
     uint8_t set_flag;   //预设参数设置标志0设置电压 1设置电流 2设置保持时间 3设置循环次数
     uint8_t current_index; //当前预设参数索引
     uint16_t set_setp;   //参数设置步进
-    uint8_t set_circular;
+    uint16_t set_circular;
     uint32_t set_time[SC8815_TIM_WORK_STEP];
     float set_vbus[SC8815_TIM_WORK_STEP];
     float set_ibus[SC8815_TIM_WORK_STEP];

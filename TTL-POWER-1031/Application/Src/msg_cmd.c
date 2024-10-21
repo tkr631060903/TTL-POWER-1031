@@ -227,7 +227,6 @@ int setSW_FREQ_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
     sscanf(param[1], "%x", &value);
     extern SC8815_HardwareInitTypeDef SC8815_HardwareInitStruct;
     SC8815_HardwareInitStruct.SW_FREQ = value;
-    // SC8815_HardwareInit(&SC8815_HardwareInitStruct);
     SC8815_SetSWFreq(value);
     SC8815_OTG_Enable();
     return 1;
@@ -690,7 +689,7 @@ int start_preset_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
     extern SC8815_TIM_WorkTypeDef SC8815_TIM_Work[SC8815_TIM_WORK_SIZE];
     SC8815_Config.sc8815_tim_work_time = SC8815_TIM_WORK_TIME_FAST;
     SC8815_Config.sc8815_tim_work_step = 0;
-    memcpy(&presset_config_set.set_circular, &SC8815_TIM_Work[value].circular, sizeof(uint8_t));
+    memcpy(&presset_config_set.set_circular, &SC8815_TIM_Work[value].circular, sizeof(uint16_t));
     memcpy(&presset_config_set.set_time, &SC8815_TIM_Work[value].SC8815_TIM_Work_second, sizeof(uint16_t) * SC8815_TIM_WORK_STEP);
     memcpy(&presset_config_set.set_ibus, &SC8815_TIM_Work[value].SC8815_IBUS_Limit, sizeof(float) * SC8815_TIM_WORK_STEP);
     memcpy(&presset_config_set.set_vbus, &SC8815_TIM_Work[value].SC8815_VBUS, sizeof(float) * SC8815_TIM_WORK_STEP);

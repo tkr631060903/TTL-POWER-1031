@@ -19,6 +19,11 @@ void set_vout(menu_u8 KeyValue)
         {
             SC8815_Config.SC8815_VBUS = 0;
         }
+        SC8815_SetOutputVoltage(SC8815_Config.SC8815_VBUS);
+        SC8815_Config.SC8815_VBUS_Old = SC8815_Config.SC8815_VBUS;
+        app_config_save_config.SC8815_VBUS = SC8815_Config.SC8815_VBUS;
+        APP_config.app_config_save_flag = 1;
+        APP_config.app_config_save_time = HAL_GetTick();
         break;
     case RIGHT:
         SC8815_Config.SC8815_VBUS = SC8815_Config.SC8815_VBUS + SC8815_Config.SC8815_VBUS_IBUS_Step;
@@ -26,6 +31,12 @@ void set_vout(menu_u8 KeyValue)
         {
             SC8815_Config.SC8815_VBUS = 36000;
         }
+        HAL_Delay(100);
+        SC8815_SetOutputVoltage(SC8815_Config.SC8815_VBUS);
+        SC8815_Config.SC8815_VBUS_Old = SC8815_Config.SC8815_VBUS;
+        app_config_save_config.SC8815_VBUS = SC8815_Config.SC8815_VBUS;
+        APP_config.app_config_save_flag = 1;
+        APP_config.app_config_save_time = HAL_GetTick();
         break;
     case KEY1_SHORT:
         if (SC8815_Config.SC8815_VBUS_IBUS_Step == 1000)
@@ -51,13 +62,13 @@ void set_vout(menu_u8 KeyValue)
         SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
         SC8815_Config.SC8815_VBUS = SC8815_Config.SC8815_VBUS_Old;
         break;
-    case KEY4_SHORT:
-        SC8815_SetOutputVoltage(SC8815_Config.SC8815_VBUS);
-        SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
-        SC8815_Config.SC8815_VBUS_Old = SC8815_Config.SC8815_VBUS;
-        app_config_save_config.SC8815_VBUS = SC8815_Config.SC8815_VBUS;
-        app_config_save();
-        break;
+    // case KEY4_SHORT:
+    //     SC8815_SetOutputVoltage(SC8815_Config.SC8815_VBUS);
+    //     SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
+    //     SC8815_Config.SC8815_VBUS_Old = SC8815_Config.SC8815_VBUS;
+    //     app_config_save_config.SC8815_VBUS = SC8815_Config.SC8815_VBUS;
+    //     app_config_save();
+    //     break;
     default:
         break;
     }
@@ -78,6 +89,11 @@ void set_iout(menu_u8 KeyValue)
         {
             SC8815_Config.SC8815_IBUS_Limit = 300;
         }
+        SC8815_SetBusCurrentLimit(SC8815_Config.SC8815_IBUS_Limit);
+        SC8815_Config.SC8815_IBUS_Limit_Old = SC8815_Config.SC8815_IBUS_Limit;
+        app_config_save_config.SC8815_IBUS_Limit = SC8815_Config.SC8815_IBUS_Limit;
+        APP_config.app_config_save_flag = 1;
+        APP_config.app_config_save_time = HAL_GetTick();
         break;
     case RIGHT:
         SC8815_Config.SC8815_IBUS_Limit = SC8815_Config.SC8815_IBUS_Limit + SC8815_Config.SC8815_VBUS_IBUS_Step;
@@ -85,6 +101,11 @@ void set_iout(menu_u8 KeyValue)
         {
             SC8815_Config.SC8815_IBUS_Limit = 6000;
         }
+        SC8815_SetBusCurrentLimit(SC8815_Config.SC8815_IBUS_Limit);
+        SC8815_Config.SC8815_IBUS_Limit_Old = SC8815_Config.SC8815_IBUS_Limit;
+        app_config_save_config.SC8815_IBUS_Limit = SC8815_Config.SC8815_IBUS_Limit;
+        APP_config.app_config_save_flag = 1;
+        APP_config.app_config_save_time = HAL_GetTick();
         break;
     case KEY1_SHORT:
         if (SC8815_Config.SC8815_VBUS_IBUS_Step == 1000)
@@ -101,22 +122,18 @@ void set_iout(menu_u8 KeyValue)
         {
             SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
         }
-        else if (SC8815_Config.SC8815_VBUS_IBUS_Step == 1000)
-        {
-            SC8815_Config.SC8815_VBUS_IBUS_Step = 10000;
-        }
         break;
     case KEY3_SHORT:
         SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
         SC8815_Config.SC8815_IBUS_Limit = SC8815_Config.SC8815_IBUS_Limit_Old;
         break;
-    case KEY4_SHORT:
-        SC8815_SetBusCurrentLimit(SC8815_Config.SC8815_IBUS_Limit);
-        SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
-        SC8815_Config.SC8815_IBUS_Limit_Old = SC8815_Config.SC8815_IBUS_Limit;
-        app_config_save_config.SC8815_IBUS_Limit = SC8815_Config.SC8815_IBUS_Limit;
-        app_config_save();
-        break;
+    // case KEY4_SHORT:
+    //     SC8815_SetBusCurrentLimit(SC8815_Config.SC8815_IBUS_Limit);
+    //     SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
+    //     SC8815_Config.SC8815_IBUS_Limit_Old = SC8815_Config.SC8815_IBUS_Limit;
+    //     app_config_save_config.SC8815_IBUS_Limit = SC8815_Config.SC8815_IBUS_Limit;
+    //     app_config_save();
+    //     break;
     default:
         break;
     }
@@ -179,7 +196,7 @@ void set_presset_config(menu_u8 KeyValue)
             }
             break;
         case PRESSET_SET_TIME:
-            if (presset_config_set.set_time[presset_config_set.current_index] - presset_config_set.set_setp <= 0)
+            if (presset_config_set.set_time[presset_config_set.current_index] <= presset_config_set.set_setp)
                 presset_config_set.set_time[presset_config_set.current_index] = 0;
             else
                 presset_config_set.set_time[presset_config_set.current_index] -= presset_config_set.set_setp;
@@ -224,9 +241,9 @@ void set_presset_config(menu_u8 KeyValue)
             break;
         case PRESSET_SET_CIRCULAR:
             presset_config_set.set_circular += presset_config_set.set_setp;
-            if (presset_config_set.set_circular >= 254)
+            if (presset_config_set.set_circular >= 65535)
             {
-                presset_config_set.set_circular = 254;
+                presset_config_set.set_circular = 65535;
             }
             break;
         default:
@@ -236,39 +253,43 @@ void set_presset_config(menu_u8 KeyValue)
     case KEY1_SHORT:
         if (presset_config_set.set_flag == PRESSET_SET_VOUT || presset_config_set.set_flag == PRESSET_SET_IOUT)
         {
-            if (presset_config_set.set_setp - presset_config_set.set_setp <= 0)
-                presset_config_set.set_setp = 0;
-            else
-                presset_config_set.set_setp = presset_config_set.set_setp / 100;
+            if (presset_config_set.set_setp == 1000)
+                presset_config_set.set_setp = 100;
+            else if (presset_config_set.set_setp == 10000)
+                presset_config_set.set_setp = 1000;
             break;
         }
         else
         {
-            if (presset_config_set.set_setp - presset_config_set.set_setp <= 0)
-                presset_config_set.set_setp = 0;
-            else
-                presset_config_set.set_setp = presset_config_set.set_setp / 10;
+            if (presset_config_set.set_setp == 10)
+                presset_config_set.set_setp = 1;
+            else if (presset_config_set.set_setp == 100)
+                presset_config_set.set_setp = 10;
+            else if (presset_config_set.set_setp == 1000)
+                presset_config_set.set_setp = 100;
             break;
         }
     case KEY2_SHORT:
         if (presset_config_set.set_flag == PRESSET_SET_VOUT || presset_config_set.set_flag == PRESSET_SET_IOUT)
         {
-            if (presset_config_set.set_setp + presset_config_set.set_setp >= 10000)
+            if (presset_config_set.set_setp == 100)
+                presset_config_set.set_setp = 1000;
+            else if (presset_config_set.set_setp == 1000)
                 presset_config_set.set_setp = 10000;
-            else
-                presset_config_set.set_setp = presset_config_set.set_setp * 10;
             break;
         }
         else
         {
-            if (presset_config_set.set_setp + presset_config_set.set_setp >= 100)
+            if (presset_config_set.set_setp == 1)
+                presset_config_set.set_setp = 10;
+            else if (presset_config_set.set_setp == 10)
                 presset_config_set.set_setp = 100;
-            else
-                presset_config_set.set_setp = presset_config_set.set_setp * 10;
+            else if (presset_config_set.set_setp == 100)
+                presset_config_set.set_setp = 1000;
             break;
         }
     case KEY4_SHORT:
-        memcpy(&SC8815_TIM_Work[sub_index.presset_current_index].circular, &presset_config_set.set_circular, sizeof(uint8_t));
+        memcpy(&SC8815_TIM_Work[sub_index.presset_current_index].circular, &presset_config_set.set_circular, sizeof(uint16_t));
         memcpy(&SC8815_TIM_Work[sub_index.presset_current_index].SC8815_TIM_Work_second, &presset_config_set.set_time, sizeof(uint16_t) * SC8815_TIM_WORK_STEP);
         memcpy(&SC8815_TIM_Work[sub_index.presset_current_index].SC8815_IBUS_Limit, &presset_config_set.set_ibus, sizeof(float) * SC8815_TIM_WORK_STEP);
         memcpy(&SC8815_TIM_Work[sub_index.presset_current_index].SC8815_VBUS, &presset_config_set.set_vbus, sizeof(float) * SC8815_TIM_WORK_STEP);

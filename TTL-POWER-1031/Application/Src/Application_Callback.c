@@ -53,7 +53,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
     switch (GPIO_Pin)
     {
     case KEY1_Pin:
-        SoftwareDelay(50);
+        SoftwareDelay(100);
         if (HAL_GPIO_ReadPin(KEY1_GPIO_Port, KEY1_Pin) == RESET)
             return;
         key1_press = 1;

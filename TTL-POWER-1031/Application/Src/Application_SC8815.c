@@ -217,7 +217,7 @@ void Application_SC8815_Init(void)
 	SC8815_HardwareInitStruct.VBUS_RATIO = SCHWI_VBUS_RATIO_12_5x;
 	SC8815_HardwareInitStruct.VINREG_Ratio = SCHWI_VINREG_RATIO_100x;
 	SC8815_HardwareInitStruct.SW_FREQ = app_config_save_config.SW_FREQ;
-	SC8815_HardwareInitStruct.DeadTime = SCHWI_DT_60ns;
+	SC8815_HardwareInitStruct.DeadTime = SCHWI_DT_40ns;
 	SC8815_HardwareInitStruct.ICHAR = SCHWI_ICHAR_IBAT;
 	SC8815_HardwareInitStruct.TRICKLE = SCHWI_TRICKLE_Disable;
 	SC8815_HardwareInitStruct.TERM = SCHWI_TERM_Enable;
@@ -300,7 +300,7 @@ void Application_SC8815_Init(void)
 	SC8815_Config.SC8815_Status = SC8815_Standby;
 	Application_SC8815_Standby();
 	STMFLASH_ReadBytes(SC8815_TIM_WORK_FLASH_SAVE_ADDR, (uint8_t*)&SC8815_TIM_Work, sizeof(SC8815_TIM_WorkTypeDef) * SC8815_TIM_WORK_SIZE);
-	if (SC8815_TIM_Work[0].circular == 0xff)
+	if (SC8815_TIM_Work[0].circular == 0xffff)
 	{
 		memset(SC8815_TIM_Work, 0, sizeof(SC8815_TIM_WorkTypeDef) * SC8815_TIM_WORK_SIZE);
 		SC8815_Preset_Save();

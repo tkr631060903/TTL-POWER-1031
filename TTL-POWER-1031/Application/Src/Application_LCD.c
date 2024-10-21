@@ -6,6 +6,15 @@
 
 extern Application_Config APP_config;
 
+/**
+ * @brief Initializes the main LCD display.
+ * 
+ * This function is responsible for initializing the LCD display by drawing the necessary lines and shapes
+ * to form a grid-like structure, and displays specific text on the LCD. It uses different colors to draw
+ * various elements and displays the current settings of the SC8815_Config structure such as voltage and current.
+ * 
+ * Note: Some lines are uncommented to explain their purpose, but are not executed.
+ */
 void APP_LCD_main_init(void)
 {
     // LCD_DrawPoint(100, 100, LIGHTBLUE);
@@ -49,22 +58,32 @@ void APP_LCD_main_init(void)
     // else {
     //     LCD_ShowString(1, 102, " ON ", BLACK, GREEN, 32, 0);
     // }
-}
-
-void APP_LCD_main_show(void)
-{
     char str[10];
     float temp = SC8815_Config.SC8815_VBUS / 1000;
     sprintf(str, "%.2fV", temp);
-    LCD_ShowString(15, 16, (const uint8_t*)str, LIGHTBLUE, BLACK, 16, 0);
+    if (temp < 10) {
+        LCD_ShowString(15, 16, (const uint8_t*)str, LIGHTBLUE, BLACK, 16, 0);
+    } else {
+        LCD_ShowString(7, 16, (const uint8_t*)str, LIGHTBLUE, BLACK, 16, 0);
+    }
 
     memset(str, 0, 10);
     temp = SC8815_Config.SC8815_IBUS_Limit / 1000;
-    sprintf(str, "%.2fA", temp);    
+    sprintf(str, "%.2fA", temp);
     LCD_ShowString(15, 51, (const uint8_t*)str, LIGHTBLUE, BLACK, 16, 0);
+}
 
-    memset(str, 0, 10);
-    temp = App_getVBAT_V();
+/**
+ * @brief  Show the main menu interface on the LCD.
+ *         This function shows the main menu interface on the LCD, including the
+ *         voltage setting, current setting, input voltage, and the status of the
+ *         power switch.
+ *         This function is called in the main loop.
+ */
+void APP_LCD_main_show(void)
+{
+    char str[10];
+    float temp = App_getVBAT_V();
     if (temp >= 0 && temp <= 25)
     {
         sprintf(str, "%.2fV", temp);
@@ -91,7 +110,7 @@ void APP_LCD_main_show(void)
     float ibus = App_getIBUS_average_A();
     if (ibus >= 0 && ibus < 10)
     {
-        sprintf(str, "0%.2f", ibus);
+        sprintf(str, "%.3f", ibus);
         LCD_ShowString(80, 44, (const uint8_t*)str, GREEN, BLACK, 48, 0);
     }
 

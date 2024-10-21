@@ -4,6 +4,7 @@
 #include "pic.h"
 #include "string.h"
 #include "Application_SC8815.h"
+#include <math.h>
 
 typedef struct
 {
@@ -155,23 +156,42 @@ void main_menu_page_ui_process(menu_u8 index, menu_u8 KeyValue)
 void vout_page_ui_process(menu_u8 KeyValue)
 {
     current_menu_index = VOUT_PAGE;
-    LCD_Clear();
-    float temp;
+    float temp = 0;
+    int number = 0, length = 0, digits[5] = {0};
+    char str[10] = {0};
     switch (KeyValue)
     {
     case LEFT:
     case RIGHT:
+    case KEY1_SHORT:
     case KEY2_SHORT:
-        LCD_ShowString(0, 0, "SETVOUT:", LIGHTBLUE, BLACK, 32, 0);
         temp = SC8815_Config.SC8815_VBUS / 1000;
-        if (temp < 10)
-        {
-            LCD_ShowFloatNum(128, 0, temp, 3, LIGHTBLUE, BLACK, 32);
-            LCD_ShowChar(192, 0, 'V', LIGHTBLUE, BLACK, 32, 0);
+        LCD_Fill_DMA(7, 16, 66, 32, BLACK);
+        sprintf(str, "%.2fV", temp);
+        if (temp < 10) {
+            LCD_ShowString(15, 16, (const uint8_t*)str, LIGHTBLUE, BLACK, 16, 0);
+        } else {
+            LCD_ShowString(7, 16, (const uint8_t*)str, LIGHTBLUE, BLACK, 16, 0);
         }
-        else {
-            LCD_ShowFloatNum(128, 0, temp, 4, LIGHTBLUE, BLACK, 32);
-            LCD_ShowChar(208, 0, 'V', LIGHTBLUE, BLACK, 32, 0);
+        if (SC8815_Config.SC8815_VBUS >= SC8815_Config.SC8815_VBUS_IBUS_Step) {
+            // Take the tens, thousands, and hundreds values and store them in variate digits
+            number = SC8815_Config.SC8815_VBUS;
+            while (number > 0) {
+                number /= 10;
+                length++;
+            }
+            number = SC8815_Config.SC8815_VBUS;
+            for (int i = length - 1; i >= 0; i--) {
+                digits[i] = number / (int)pow(10, i);
+                number %= (int)pow(10, i);
+            }
+        }
+        if (SC8815_Config.SC8815_VBUS_IBUS_Step == 100) {
+            LCD_ShowIntNum(15 * 2, 16, digits[2], 1, BLACK, LIGHTBLUE, 16);
+        } else if (SC8815_Config.SC8815_VBUS_IBUS_Step == 1000) {
+            LCD_ShowIntNum(15, 16, digits[3], 1, BLACK, LIGHTBLUE, 16);
+        } else if (SC8815_Config.SC8815_VBUS_IBUS_Step == 10000) {
+            LCD_ShowIntNum(7, 16, digits[4], 1, BLACK, LIGHTBLUE, 16);
         }
         break;
     default:
@@ -182,23 +202,42 @@ void vout_page_ui_process(menu_u8 KeyValue)
 void iout_page_ui_process(menu_u8 KeyValue)
 {
     current_menu_index = IOUT_PAGE;
-    LCD_Clear();
     float temp;
+    int number = 0, length = 0, digits[5] = {0};
+    char str[10] = {0};
     switch (KeyValue)
     {
     case LEFT:
     case RIGHT:
     case KEY1_SHORT:
-        LCD_ShowString(0, 0, "SETIOUT:", LIGHTBLUE, BLACK, 32, 0);
+    case KEY2_SHORT:
         temp = SC8815_Config.SC8815_IBUS_Limit / 1000;
-        if (temp < 10)
-        {
-            LCD_ShowFloatNum(128, 0, temp, 3, LIGHTBLUE, BLACK, 32);
-            LCD_ShowChar(192, 0, 'A', LIGHTBLUE, BLACK, 32, 0);
+        LCD_Fill_DMA(15, 51, 66, 67, BLACK);
+        sprintf(str, "%.2fA", temp);
+        if (temp < 10) {
+            LCD_ShowString(15, 51, (const uint8_t*)str, LIGHTBLUE, BLACK, 16, 0);
+        } else {
+            LCD_ShowString(7, 51, (const uint8_t*)str, LIGHTBLUE, BLACK, 16, 0);
         }
-        else {
-            LCD_ShowFloatNum(128, 0, temp, 4, LIGHTBLUE, BLACK, 32);
-            LCD_ShowChar(208, 0, 'A', LIGHTBLUE, BLACK, 32, 0);
+        if (SC8815_Config.SC8815_IBUS_Limit >= SC8815_Config.SC8815_VBUS_IBUS_Step) {
+            // Take the tens, thousands, and hundreds values and store them in variate digits
+            number = SC8815_Config.SC8815_IBUS_Limit;
+            while (number > 0) {
+                number /= 10;
+                length++;
+            }
+            number = SC8815_Config.SC8815_IBUS_Limit;
+            for (int i = length - 1; i >= 0; i--) {
+                digits[i] = number / (int)pow(10, i);
+                number %= (int)pow(10, i);
+            }
+        }
+        if (SC8815_Config.SC8815_VBUS_IBUS_Step == 100) {
+            LCD_ShowIntNum(15 * 2, 51, digits[2], 1, BLACK, LIGHTBLUE, 16);
+        } else if (SC8815_Config.SC8815_VBUS_IBUS_Step == 1000) {
+            LCD_ShowIntNum(15, 51, digits[3], 1, BLACK, LIGHTBLUE, 16);
+        } else if (SC8815_Config.SC8815_VBUS_IBUS_Step == 10000) {
+            LCD_ShowIntNum(7, 51, digits[4], 1, BLACK, LIGHTBLUE, 16);
         }
         break;
     default:

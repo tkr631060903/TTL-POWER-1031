@@ -43,7 +43,7 @@ void Application_main()
         key3_button_process();
         SET_LED1_Status();
 
-        if (current_menu_index == MAIN_PAGE && HAL_GetTick() - APP_LCD_main_show_time >= 200)
+        if ((current_menu_index == MAIN_PAGE || current_menu_index == VOUT_PAGE || current_menu_index == IOUT_PAGE) && HAL_GetTick() - APP_LCD_main_show_time >= 250)
         {
             APP_LCD_main_show();
             APP_LCD_main_show_time = HAL_GetTick();
@@ -84,6 +84,10 @@ void Application_main()
         {
             SC8815_Config.SC8815_Status = SC8815_Standby;
             protect_page_ui_process(2);
+        }
+
+        if (APP_config.app_config_save_flag && (HAL_GetTick() - APP_config.app_config_save_time) > APP_CONFIG_SAVE_TIME) {
+            app_config_save();
         }
 
         // printf("temperature:%f\n", App_getTemp_V());

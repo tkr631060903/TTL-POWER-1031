@@ -147,19 +147,21 @@ void vout_page_process(menu_u8 KeyValue)
         break;
     case KEY1_SHORT:
         set_vout(KeyValue);
+        vout_page_ui_process(KeyValue);
         break;
     case KEY2_SHORT:
         set_vout(KeyValue);
+        vout_page_ui_process(KeyValue);
         break;
     case KEY3_SHORT:
         //返回上一级
         set_vout(KeyValue);
         main_page_init();
         break;
-    case KEY4_SHORT:
-        set_vout(KeyValue);
-        main_page_init();
-        break;
+    // case KEY4_SHORT:
+    //     set_vout(KeyValue);
+    //     main_page_init();
+    //     break;
     default:
         break;
     }
@@ -188,16 +190,17 @@ void iout_page_process(menu_u8 KeyValue)
         break;
     case KEY2_SHORT:
         set_iout(KeyValue);
+        iout_page_ui_process(KeyValue);
         break;
     case KEY3_SHORT:
         //返回上一级
         set_iout(KeyValue);
         main_page_init();
         break;
-    case KEY4_SHORT:
-        set_iout(KeyValue);
-        main_page_init();
-        break;
+    // case KEY4_SHORT:
+    //     set_iout(KeyValue);
+    //     main_page_init();
+    //     break;
     default:
         break;
     }
@@ -380,7 +383,7 @@ void presset_start_page_process(menu_u8 KeyValue)
     case KEY4_SHORT:
         SC8815_Config.sc8815_tim_work_time = SC8815_TIM_WORK_TIME_FAST;
         SC8815_Config.sc8815_tim_work_step = 0;
-        memcpy(&presset_config_set.set_circular, &SC8815_TIM_Work[sub_index.presset_current_index].circular, sizeof(uint8_t));
+        memcpy(&presset_config_set.set_circular, &SC8815_TIM_Work[sub_index.presset_current_index].circular, sizeof(uint16_t));
         memcpy(&presset_config_set.set_time, &SC8815_TIM_Work[sub_index.presset_current_index].SC8815_TIM_Work_second, sizeof(uint16_t) * SC8815_TIM_WORK_STEP);
         memcpy(&presset_config_set.set_ibus, &SC8815_TIM_Work[sub_index.presset_current_index].SC8815_IBUS_Limit, sizeof(float) * SC8815_TIM_WORK_STEP);
         memcpy(&presset_config_set.set_vbus, &SC8815_TIM_Work[sub_index.presset_current_index].SC8815_VBUS, sizeof(float) * SC8815_TIM_WORK_STEP);

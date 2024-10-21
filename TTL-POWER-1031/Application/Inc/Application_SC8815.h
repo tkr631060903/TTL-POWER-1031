@@ -86,7 +86,7 @@ typedef struct
 
 typedef struct
 {
-    uint8_t circular;   // 循环次数
+    uint16_t circular;   // 循环次数
     uint32_t SC8815_TIM_Work_second[SC8815_TIM_WORK_STEP]; // 8815定时工作保持时间单位s
     // float SC8815_IBAT_Limit;      // 8815电池(输入)限流mA
     float SC8815_IBUS_Limit[SC8815_TIM_WORK_STEP];     // 8815 VBUS(输出)限流mA
