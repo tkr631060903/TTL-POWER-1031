@@ -88,6 +88,21 @@ void i2c_NAck(void)
 	IIC_delay();
 }
 
+/**
+ *@brief SC8815软件I2C应答信号
+ *
+ */
+void i2c_Ack(void)
+{
+    SC8815_I2C_SDA_0(); /* CPU驱动SDA = 0 */
+    IIC_delay();
+    SC8815_I2C_SCL_1(); /* CPU产生1个时钟 */
+    IIC_delay();
+    SC8815_I2C_SCL_0();
+    IIC_delay();
+    SC8815_I2C_SDA_1(); /* CPU释放SDA总线 */
+}
+
 //写入一个字节
 void i2c_SendByte(uint8_t dat)
 {
@@ -138,12 +153,12 @@ uint8_t i2c_ReadByte(void)
 uint8_t I2C_ReadRegByte(uint8_t SlaveAddress, uint8_t RegAddress)
 {
 	i2c_Start();
-	i2c_SendByte(SC8815_WRITE_ADDR);
+	i2c_SendByte(SlaveAddress & 0xfe);	//write
 	i2c_WaitAck();
 	i2c_SendByte(RegAddress);
 	i2c_WaitAck();
 	i2c_Start();
-	i2c_SendByte(SC8815_READ_ADDR);
+	i2c_SendByte(SlaveAddress | 1);	//read
 	i2c_WaitAck();
 	uint8_t data = i2c_ReadByte();
 	i2c_NAck();
@@ -157,14 +172,14 @@ void I2C_WriteRegByte(uint8_t SlaveAddress, uint8_t RegAddress, uint8_t ByteData
 	do
 	{
 		i2c_Start();
-		i2c_SendByte(SC8815_WRITE_ADDR);
+		i2c_SendByte(SlaveAddress & 0xfe);	//write
 		i2c_WaitAck();
 		i2c_SendByte(RegAddress);
 		i2c_WaitAck();
 		i2c_SendByte(ByteData);
 		i2c_WaitAck();
 		i2c_Stop();
-	} while (I2C_ReadRegByte(SlaveAddress, RegAddress) != ByteData && check_timeout++ < 1000);
+	} while (I2C_ReadRegByte(SlaveAddress, RegAddress) != ByteData && check_timeout++ < 1000 && SlaveAddress == SC8815_WRITE_ADDR);
 	if (check_timeout >= 1000)
 	{
 		printf("SysRest-->SC8815 Write Reg Error!\r\n");

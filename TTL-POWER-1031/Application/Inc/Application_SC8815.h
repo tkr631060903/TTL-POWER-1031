@@ -103,5 +103,15 @@ void Application_SC8815_Run(void);
 void Application_SC8815_loadStart(void);
 void SC8815_Soft_Protect(void);
 void SC8815_Preset_Save(void);
+void i2c_Start(void);
+void i2c_WaitAck(void);
+void i2c_SendByte(uint8_t dat);
+uint8_t i2c_ReadByte(void);
+void i2c_Stop(void);
+void IIC_delay(void);
+void i2c_NAck(void);
+void i2c_Ack(void);
+uint8_t I2C_ReadRegByte(uint8_t SlaveAddress, uint8_t RegAddress);
+void I2C_WriteRegByte(uint8_t SlaveAddress, uint8_t RegAddress, uint8_t ByteData);
 
 #endif

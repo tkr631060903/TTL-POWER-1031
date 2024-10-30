@@ -1153,6 +1153,16 @@
               <FileType>1</FileType>
               <FilePath>..\Application\Src\msg_cmd.c</FilePath>
             </File>
+            <File>
+              <FileName>husb238.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Application\Src\husb238.c</FilePath>
+            </File>
+            <File>
+              <FileName>ina226.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Application\Src\ina226.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

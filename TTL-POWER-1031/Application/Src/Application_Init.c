@@ -18,6 +18,8 @@
 #include "Application_BUZZER.h"
 #include "menu.h"
 #include "Application_Callback.h"
+#include "husb238.h"
+#include "ina226.h"
 
 /**
  * @brief 应用初始化
@@ -28,6 +30,9 @@ void Application_Init(void)
     extern ADC_HandleTypeDef hadc1;
     extern char uart1_Cmd[Cmd_Length];   //串口1接收缓冲区
     extern menu_i32 current_menu_index;
+    LCD_Init();
+    LCD_Clear();
+    husb238_init();
     // 初始化串口中断输入
     HAL_UART_Receive_IT(&huart1, (uint8_t*)uart1_Cmd, Cmd_Length);
     HAL_TIM_Base_Start_IT(&htim3);
@@ -40,9 +45,9 @@ void Application_Init(void)
     HAL_Delay(500);
     Application_CH224K_init();
     HAL_Delay(500);
-    LCD_Init();
-    LCD_Clear();
     // Application_SC8815_Run();
+    INA226_Init();
+    LCD_Clear();
     APP_LCD_main_init();
     BUZZER_OPEN(100);
     BUZZER_OPEN(300);

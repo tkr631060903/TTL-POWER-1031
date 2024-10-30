@@ -91,8 +91,7 @@ void APP_LCD_main_show(void)
     }
 
     memset(str, 0, 10);
-    // float vbus = App_getVBUS_V();
-    float vbus = App_getVBUS_average_V();
+    float vbus = App_getVBUS_V();
     // vbus = 10;
     if (vbus >= 0 && vbus < 10)
     {
@@ -106,8 +105,7 @@ void APP_LCD_main_show(void)
     }
 
     memset(str, 0, 10);
-    // float ibus = App_getIBUS_A();
-    float ibus = App_getIBUS_average_A();
+    float ibus = App_getIBUS_A();
     if (ibus >= 0 && ibus < 10)
     {
         sprintf(str, "%.3f", ibus);
@@ -184,7 +182,7 @@ void APP_LCD_presset_running_show(void)
     LCD_ShowString(25, 51, (const uint8_t*)str, LIGHTBLUE, BLACK, 16, 0);
 
     memset(str, 0, 10);
-    float vbus = App_getVBUS_average_V();
+    float vbus = App_getVBUS_V();
     if (vbus < 10)
     {
         sprintf(str, "0%.2f", vbus);
