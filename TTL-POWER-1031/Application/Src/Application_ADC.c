@@ -9,33 +9,30 @@
  *
  */
 #include "Application_ADC.h"
+#include "ina226.h"
 
 uint16_t ADC_Value[4];
-float VBUS_Value_Buff[10];
-float IBUS_Value_Buff[10];
-uint8_t ADC_Value_count = 0;
-uint8_t ADC_Value_timestamp = 0;
 
 /**
- *@brief 使用ADC获取VBUS电压
+ *@brief 获取VBUS电压
  *
  * @return VBUS单位mV
  */
 float App_getVBUS_mV(void)
 {
-    return (12 * ((float)ADC_Value[0] * SAMPLING_RATE)) * 1000;
-    // return ((12.023 * ((float)ADC_Value[0] * SAMPLING_RATE)) * 1000 - 22.312);
+    // return (12 * ((float)ADC_Value[0] * SAMPLING_RATE)) * 1000;
+    return INA226_ReadVoltage();
 }
 
 /**
- *@brief 使用ADC获取VBUS电压
+ *@brief 获取VBUS电压
  *
  * @return VBUS单位V
  */
 float App_getVBUS_V(void)
 {
-    return 12 * ((float)ADC_Value[0] * SAMPLING_RATE);
-    // return 12.023 * ((float)ADC_Value[0] * SAMPLING_RATE) - 0.022312;
+    // return 12 * ((float)ADC_Value[0] * SAMPLING_RATE);
+    return INA226_ReadVoltage() / 1000;
 }
 
 /**
@@ -59,25 +56,25 @@ float App_getTemp_V(void)
 }
 
 /**
- *@brief 使用ADC获取VBUS电流
+ *@brief 获取VBUS电流
  *
  * @return 单位mA
  */
 float App_getIBUS_mA(void)
 {
-    // return (((float)ADC_Value[2] * SAMPLING_RATE) / 0.5 * 1000) * 0.932;
-    return (((float)ADC_Value[2] * SAMPLING_RATE) / 0.5 * 1000);
+    // return (((float)ADC_Value[2] * SAMPLING_RATE) / 0.5 * 1000);
+    return INA226_ReadCurrent();
 }
 
 /**
- *@brief 使用ADC获取VBUS电流
+ *@brief 获取VBUS电流
  *
  * @return 单位A
  */
 float App_getIBUS_A(void)
 {
-    // return (((float)ADC_Value[2] * SAMPLING_RATE) / 0.5) * 0.932;
-    return (((float)ADC_Value[2] * SAMPLING_RATE) / 0.5);
+    // return (((float)ADC_Value[2] * SAMPLING_RATE) / 0.5);
+    return INA226_ReadCurrent() / 1000;
 }
 
 /**
@@ -87,7 +84,7 @@ float App_getIBUS_A(void)
  */
 float App_getVBAT_mV(void)
 {
-    return (12 * ((float)ADC_Value[3] * SAMPLING_RATE)) * 1000;
+    return (11.59 * ((float)ADC_Value[3] * SAMPLING_RATE)) * 1000;
 }
 
 /**
@@ -97,7 +94,7 @@ float App_getVBAT_mV(void)
  */
 float App_getVBAT_V(void)
 {
-    return 12 * ((float)ADC_Value[3] * SAMPLING_RATE);
+    return 11.59 * ((float)ADC_Value[3] * SAMPLING_RATE);
 }
 
 /**
@@ -165,7 +162,7 @@ float App_getVBUS_average_V(void)
     float res = 0;
     for (int i = 0; i < 10; i++)
     {
-        res += VBUS_Value_Buff[i];
+        // res += VBUS_Value_Buff[i];
     }
     return res / 10;
 }
@@ -211,7 +208,7 @@ float App_getIBUS_average_A(void)
     float res = 0;
     for (int i = 0; i < 10; i++)
     {
-        res += IBUS_Value_Buff[i];
+        // res += IBUS_Value_Buff[i];
     }
     return res / 10;
 }

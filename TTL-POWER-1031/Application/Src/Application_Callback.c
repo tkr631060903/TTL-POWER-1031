@@ -91,19 +91,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
         get_msg();
         //SC8815_Soft_Protect();
 
-        if (ADC_Value_timestamp > 10)
-        {
-            if (ADC_Value_count > 9)
-            {
-                ADC_Value_count = 0;
-            }
-            VBUS_Value_Buff[ADC_Value_count] = App_getVBUS_V();
-            IBUS_Value_Buff[ADC_Value_count] = App_getIBUS_A();
-            ADC_Value_count++;
-            ADC_Value_timestamp = 0;
-        }
-        ADC_Value_timestamp++;
-
         if (HAL_GPIO_ReadPin(Rotar_L_GPIO_Port, Rotar_L_Pin) != previous)
         {
             if (HAL_GPIO_ReadPin(Rotar_R_GPIO_Port, Rotar_R_Pin) != previous)

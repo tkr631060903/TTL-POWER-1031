@@ -16,10 +16,6 @@
 #define SAMPLING_RATE 0.0008056640625  // 3.3/4096
 
 extern uint16_t ADC_Value[4];
-extern float VBUS_Value_Buff[10];
-extern float IBUS_Value_Buff[10];
-extern uint8_t ADC_Value_count;
-extern uint8_t ADC_Value_timestamp;
 
 float App_getVBUS_mV(void);
 float App_getVBUS_V(void);

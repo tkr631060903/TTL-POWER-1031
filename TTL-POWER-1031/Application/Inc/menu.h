@@ -5,7 +5,7 @@
 #include "Hardware_setting.h"
 #include "Application.h"
 
-#define MENU_PAGE_NUM 6
+#define MENU_PAGE_NUM 7
 
 typedef struct Menu_Key_Index
 {
@@ -44,6 +44,7 @@ typedef enum
     FASTCH_PAGE,    // 设置快充输入页面
     FSW_PAGE,    // 设置开关频率页面
     PROTECT_PAGE,   //保护状态页面
+    ABOUT_PAGE,   //保护状态页面
 } OP_PAGE;
 
 typedef enum
@@ -82,5 +83,6 @@ void temperature_page_process(menu_u8 KeyValue);
 void fastch_page_process(menu_u8 KeyValue);
 void FSW_page_process(menu_u8 KeyValue);
 void protect_page_process(menu_u8 KeyValue);
+void about_page_process(menu_u8 KeyValue);
 
 #endif //__MENU_H

@@ -1,8 +1,8 @@
 #include "Hardware_setting.h"
 #include "Application_SC8815.h"
-#include "CH224K.h"
 #include "menu.h"
 #include "string.h"
+#include "husb238.h"
 
 /**
  * @brief …Ë÷√ ‰≥ˆµÁ—π
@@ -146,22 +146,37 @@ void set_iout(menu_u8 KeyValue)
  */
 void set_fastcharge(menu_u32 index)
 {
-    switch (index)
-    {
+    uint8_t count = 0;
+    HUSB238_Capability_t PDCapabilities[6];
+    HUSB238_ExtractCap(PDCapabilities);
+    for (int i = 0; i < 6; i++) {
+        if (PDCapabilities[i].detected == true) {
+            PDCapabilities[count].detected = PDCapabilities[i].detected;
+            PDCapabilities[count].current = PDCapabilities[i].current;
+            PDCapabilities[count].voltage = PDCapabilities[i].voltage;
+            count++;
+        }
+    }
+    APP_config.fastCharge_InVoltage = PDCapabilities[sub_index.fastch_current_index].voltage;
+    APP_config.fastCharge_InCurrent = PDCapabilities[sub_index.fastch_current_index].current;
+    switch (APP_config.fastCharge_InVoltage) {
     case 5:
-        CH224K_5V();
+        HUSB238_SelVoltage(PDO_5V);
         break;
     case 9:
-        CH224K_9V();
+        HUSB238_SelVoltage(PDO_9V);
         break;
     case 12:
-        CH224K_12V();
+        HUSB238_SelVoltage(PDO_12V);
         break;
     case 15:
-        CH224K_15V();
+        HUSB238_SelVoltage(PDO_15V);
+        break;
+    case 18:
+        HUSB238_SelVoltage(PDO_18V);
         break;
     case 20:
-        CH224K_20V();
+        HUSB238_SelVoltage(PDO_20V);
         break;
     default:
         break;

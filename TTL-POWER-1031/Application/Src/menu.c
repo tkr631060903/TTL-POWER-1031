@@ -4,6 +4,7 @@
 #include "Application.h"
 #include "Application_LCD.h"
 #include "string.h"
+#include "husb238.h"
 
 #define presset_menu_index 10
 
@@ -28,6 +29,7 @@ static OP_MENU_PAGE g_opStruct[] =
     {FASTCH_PAGE, fastch_page_process},
     {FSW_PAGE, FSW_page_process},
     {PROTECT_PAGE, protect_page_process},
+    {ABOUT_PAGE, about_page_process},
 };
 
 /**
@@ -520,41 +522,18 @@ void temperature_page_process(menu_u8 KeyValue)
  */
 void fastch_page_process(menu_u8 KeyValue)
 {
-    uint16_t fastch_temp[] = {5, 9, 12, 15, 20};
-    int i;
     switch (KeyValue)
     {
     case LEFT:
-        for(i = 0; i <= 5; i++)
-        {
-            if (fastch_temp[i] == sub_index.fastch_current_index)
-            {
-                break;
-            }
-        }
-        if (i - 1 >= 0)
-        {
-            fastch_page_ui_process(fastch_temp[i - 1]);
-        }
+        fastch_page_ui_process(LEFT, 0);
         break;
     case RIGHT:
-        for(i = 0; i <= 5; i++)
-        {
-            if (fastch_temp[i] == sub_index.fastch_current_index)
-            {
-                break;
-            }
-        }
-        if (i + 1 <= 4)
-        {
-            fastch_page_ui_process(fastch_temp[i + 1]);
-        }
+        fastch_page_ui_process(RIGHT, 0);
         break;
     case KEY3_SHORT:
         main_menu_page_ui_process(sub_index.main_menu_current_index, KeyValue);
         break;
     case KEY4_SHORT:
-        APP_config.fastCharge_InVoltage = sub_index.fastch_current_index;
         set_fastcharge(sub_index.fastch_current_index);
         main_page_init();
         break;
@@ -638,6 +617,21 @@ void FSW_page_process(menu_u8 KeyValue)
  * @param KeyValue ´¥·¢¼üÖµ
  */
 void protect_page_process(menu_u8 KeyValue)
+{
+    switch (KeyValue)
+    {
+    case KEY3_SHORT:
+        main_page_init();
+        break;
+    case KEY2_LONG:
+        main_page_init();
+        break;
+    default:
+        break;
+    }
+}
+
+void about_page_process(menu_u8 KeyValue)
 {
     switch (KeyValue)
     {

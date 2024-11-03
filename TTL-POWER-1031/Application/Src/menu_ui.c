@@ -5,6 +5,7 @@
 #include "string.h"
 #include "Application_SC8815.h"
 #include <math.h>
+#include "husb238.h"
 
 typedef struct
 {
@@ -20,7 +21,7 @@ static menu_u8 cursor_secondary_menu = 0; //二级菜单光标位置
 static uint8_t secondary_menu_indxe = 0; //二级菜单第一行显示索引
 static uint8_t main_menu_indxe = 0; //主菜单第一行显示索引
 static Menu_NameTypeDef menu_name[] = {
-    {0, gImage_presset, "预设配置"}, {1, gImage_start_presset, "开启预设"}, {2, gImage_temp, "过温保护"}, {3, gImage_PDinput, "快充输入"}, {4, gImage_buzzer, "蜂鸣器"}, {5, gImage_FSW, "开关频率"}
+    {0, gImage_presset, "预设配置"}, {1, gImage_start_presset, "开启预设"}, {2, gImage_temp, "过温保护"}, {3, gImage_PDinput, "快充输入"}, {4, gImage_buzzer, "蜂鸣器"}, {5, gImage_FSW, "开关频率"}, {6, gImage_FSW, "关于"}
 };
 
 /**
@@ -62,7 +63,9 @@ void Enter_Page(menu_i32 index, menu_u8 KeyValue)
         temperature_page_ui_process(APP_config.temperature);
         break;
     case 3:
-        fastch_page_ui_process(APP_config.fastCharge_InVoltage);
+        cursor_secondary_menu = 0;
+        secondary_menu_indxe = 0;
+        fastch_page_ui_process(0, APP_config.fastCharge_InVoltage);
         break;
     case 4:
         buzzer_page_ui_process(APP_config.lock_buzzer);
@@ -77,6 +80,9 @@ void Enter_Page(menu_i32 index, menu_u8 KeyValue)
             }
         }
         FSW_page_ui_process(FSW_temp[i]);
+        break;
+    case 6:
+        about_page_ui_process();
         break;
     default:
         break;
@@ -389,65 +395,76 @@ void temperature_page_ui_process(float index)
     }
 }
 
-void fastch_page_ui_process(menu_u8 index)
+void fastch_page_ui_process(menu_u8 KeyValue, uint16_t fastCharge_InVoltage)
 {
+    uint8_t count = 0;
+    char str[10];
+    int i;
     current_menu_index = FASTCH_PAGE;
-    sub_index.fastch_current_index = index;
     LCD_Clear();
-    switch (index)
-    {
-    case 5:
-        LCD_ShowChinese(0, 0, "快充输入", BLACK, LIGHTBLUE, 32, 0);
-        LCD_ShowString(128, 0, ":5V", BLACK, LIGHTBLUE, 32, 0);
-        LCD_ShowChinese(0, 33, "快充输入", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowString(128, 33, ":9V", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowChinese(0, 66, "快充输入", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowString(128, 66, ":12V", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowChinese(0, 99, "快充输入", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowString(128, 99, ":15V", LIGHTBLUE, BLACK, 32, 0);
-        break;
-    case 9:
-        LCD_ShowChinese(0, 0, "快充输入", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowString(128, 0, ":5V", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowChinese(0, 33, "快充输入", BLACK, LIGHTBLUE, 32, 0);
-        LCD_ShowString(128, 33, ":9V", BLACK, LIGHTBLUE, 32, 0);
-        LCD_ShowChinese(0, 66, "快充输入", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowString(128, 66, ":12V", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowChinese(0, 99, "快充输入", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowString(128, 99, ":15V", LIGHTBLUE, BLACK, 32, 0);
-        break;
-    case 12:
-        LCD_ShowChinese(0, 0, "快充输入", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowString(128, 0, ":5V", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowChinese(0, 33, "快充输入", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowString(128, 33, ":9V", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowChinese(0, 66, "快充输入", BLACK, LIGHTBLUE, 32, 0);
-        LCD_ShowString(128, 66, ":12V", BLACK, LIGHTBLUE, 32, 0);
-        LCD_ShowChinese(0, 99, "快充输入", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowString(128, 99, ":15V", LIGHTBLUE, BLACK, 32, 0);
-        break;
-    case 15:
-        LCD_ShowChinese(0, 0, "快充输入", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowString(128, 0, ":5V", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowChinese(0, 33, "快充输入", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowString(128, 33, ":9V", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowChinese(0, 66, "快充输入", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowString(128, 66, ":12V", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowChinese(0, 99, "快充输入", BLACK, LIGHTBLUE, 32, 0);
-        LCD_ShowString(128, 99, ":15V", BLACK, LIGHTBLUE, 32, 0);
-        break;
-    case 20:
-        LCD_ShowChinese(0, 0, "快充输入", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowString(128, 0, ":9V", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowChinese(0, 33, "快充输入", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowString(128, 33, ":12V", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowChinese(0, 66, "快充输入", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowString(128, 66, ":15V", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowChinese(0, 99, "快充输入", BLACK, LIGHTBLUE, 32, 0);
-        LCD_ShowString(128, 99, ":20V", BLACK, LIGHTBLUE, 32, 0);
-        break;
-    default:
-        break;
+    HUSB238_Capability_t PDCapabilities[6];
+    HUSB238_ExtractCap(PDCapabilities);
+    for (i = 0; i < 6; i++) {
+        if (PDCapabilities[i].detected == true) {
+            PDCapabilities[count].detected = PDCapabilities[i].detected;
+            PDCapabilities[count].current = PDCapabilities[i].current;
+            PDCapabilities[count].voltage = PDCapabilities[i].voltage;
+            count++;
+        }
+    }
+    if (count == 0) {
+        LCD_ShowChinese(36, 30, "未检测到", LIGHTBLUE, BLACK, 32, 0);
+        LCD_ShowChinese(68, 62, "快充输入", LIGHTBLUE, BLACK, 32, 0);
+        return;
+    }
+
+    if (KeyValue == 0) {
+        for (i = 0; i < count; i++) {
+            if (PDCapabilities[i].voltage == fastCharge_InVoltage) {
+                sub_index.fastch_current_index = i;
+            }
+        }
+        if (count < 4) {
+            secondary_menu_indxe = 0;
+            cursor_secondary_menu = sub_index.fastch_current_index;
+        } else if (count - sub_index.fastch_current_index >= 4) {
+            secondary_menu_indxe = sub_index.fastch_current_index;
+            cursor_secondary_menu = 0;
+        } else if (count - sub_index.fastch_current_index < 4) {
+            secondary_menu_indxe = count - 4;
+            cursor_secondary_menu = sub_index.fastch_current_index - 1;
+        }
+    }
+
+    if (cursor_secondary_menu == 3 && KeyValue == RIGHT && secondary_menu_indxe != (count - 4)) {
+        secondary_menu_indxe++;
+    } else if (cursor_secondary_menu == 0 && KeyValue == LEFT && secondary_menu_indxe != 0) {
+        secondary_menu_indxe--;
+    }
+    if (cursor_secondary_menu != 3 && KeyValue == RIGHT) {
+        cursor_secondary_menu++;
+    } else if (cursor_secondary_menu != 0 && KeyValue == LEFT) {
+        cursor_secondary_menu--;
+    }
+    if (KeyValue == LEFT) {
+        (sub_index.fastch_current_index > 0) ? (sub_index.fastch_current_index--) : (sub_index.fastch_current_index = 0);
+    } else if (KeyValue == RIGHT) {
+        (sub_index.fastch_current_index < (count - 1)) ? (sub_index.fastch_current_index++) : (sub_index.fastch_current_index = count - 1);
+    }
+
+    if (count >= 4) {
+        count = 4;
+    }
+    for (i = 0; i < count; i++) {
+        memset(str, 0, sizeof(str));
+        sprintf(str, ":%dV %.1fA", PDCapabilities[secondary_menu_indxe + i].voltage, PDCapabilities[secondary_menu_indxe + i].current);
+        if (i == cursor_secondary_menu) {
+            LCD_ShowChinese(0, i * 33, "快充", BLACK, LIGHTBLUE, 32, 0);
+            LCD_ShowString(64, i * 33, (uint8_t*)str, BLACK, LIGHTBLUE, 32, 0);
+        } else {
+            LCD_ShowChinese(0, i * 33, "快充", LIGHTBLUE, BLACK, 32, 0);
+            LCD_ShowString(64, i * 33, (uint8_t*)str, LIGHTBLUE, BLACK, 32, 0);
+        }
     }
 }
 
@@ -524,4 +541,11 @@ void protect_page_ui_process(menu_u8 index)
     default:
         break;
     }
+}
+
+void about_page_ui_process(void)
+{
+    current_menu_index = ABOUT_PAGE;
+    LCD_Clear();
+    LCD_ShowString(0, 0, "ver:1.1.0", LIGHTBLUE, BLACK, 32, 0);
 }

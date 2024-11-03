@@ -61,16 +61,18 @@ void APP_LCD_main_init(void)
     char str[10];
     float temp = SC8815_Config.SC8815_VBUS / 1000;
     sprintf(str, "%.2fV", temp);
-    if (temp < 10) {
+    if (temp >= 0 && temp < 10) {
         LCD_ShowString(15, 16, (const uint8_t*)str, LIGHTBLUE, BLACK, 16, 0);
-    } else {
+    } else if (temp >= 10 && temp < 100) {
         LCD_ShowString(7, 16, (const uint8_t*)str, LIGHTBLUE, BLACK, 16, 0);
     }
 
     memset(str, 0, 10);
     temp = SC8815_Config.SC8815_IBUS_Limit / 1000;
     sprintf(str, "%.2fA", temp);
-    LCD_ShowString(15, 51, (const uint8_t*)str, LIGHTBLUE, BLACK, 16, 0);
+		if (temp >= 0 && temp < 10) {
+			LCD_ShowString(15, 51, (const uint8_t*)str, LIGHTBLUE, BLACK, 16, 0);
+		}
 }
 
 /**
@@ -124,7 +126,7 @@ void APP_LCD_main_show(void)
         sprintf(str, "%.2f", powr);
         LCD_ShowString(80, 86, (const uint8_t*)str, ORANGE, BLACK, 48, 0);
     }
-    else if (powr >= 100)
+    else if (powr >= 100 && powr < 1000)
     {
         sprintf(str, "%.1f", powr);
         LCD_ShowString(80, 86, (const uint8_t*)str, ORANGE, BLACK, 48, 0);

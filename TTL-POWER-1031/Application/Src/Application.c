@@ -15,6 +15,7 @@
 #include "Application_LCD.h"
 #include "Application_ADC.h"
 #include "stmflash.h"
+#include "string.h"
 
 #define APP_CONFIG_FLASH_ADDR     STM32_FLASH_BASE+STM_SECTOR_SIZE*123
 
@@ -137,11 +138,11 @@ void Application_SoftwareDelay(uint16_t time)
  */
 void key4_button_process(void)
 {
-    if (HAL_GPIO_ReadPin(KEY4_GPIO_Port, KEY4_Pin) == RESET || APP_config.lock_key == 1)
-        return;
-    HAL_Delay(100);
-    if (HAL_GPIO_ReadPin(KEY4_GPIO_Port, KEY4_Pin) == RESET)
-        return;
+   if (HAL_GPIO_ReadPin(KEY4_GPIO_Port, KEY4_Pin) == RESET || APP_config.lock_key == 1)
+       return;
+   HAL_Delay(100);
+   if (HAL_GPIO_ReadPin(KEY4_GPIO_Port, KEY4_Pin) == RESET)
+       return;
     Menu_Select_Item(KEY4_SHORT);
     BUZZER_OPEN(100);
 }
@@ -298,7 +299,7 @@ void app_config_load(void)
         }
         i += sizeof(Application_SaveConfig);
     }
-    if (i > STM_SECTOR_SIZE)
+    if (i >= STM_SECTOR_SIZE)
     {
         i -= sizeof(Application_SaveConfig);
         STMFLASH_ReadBytes(APP_CONFIG_FLASH_ADDR + i, (uint8_t*)&app_config_save_config, sizeof(Application_SaveConfig));
@@ -326,8 +327,14 @@ void app_config_save(void)
         }
         i += sizeof(Application_SaveConfig);
     }
-    if (i > STM_SECTOR_SIZE)
+    if (i >= STM_SECTOR_SIZE)
     {
+        uint16_t data[128];
+        size_t datalen = sizeof(data);
+        memset(data, 0xFF, datalen);
+        for (i = 0; i < 4;i++) {
+            STMFLASH_Write(APP_CONFIG_FLASH_ADDR + datalen * i, data, datalen >> 1);
+        }
         STMFLASH_Write(APP_CONFIG_FLASH_ADDR, (uint16_t*)&app_config_save_config, sizeof(Application_SaveConfig) >> 1);
     }
 }

@@ -43,8 +43,6 @@ void Application_Init(void)
     app_config_load();
     Application_SC8815_Init();
     HAL_Delay(500);
-    Application_CH224K_init();
-    HAL_Delay(500);
     // Application_SC8815_Run();
     INA226_Init();
     LCD_Clear();

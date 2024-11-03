@@ -281,7 +281,7 @@
               <OCR_RVCT5>
                 <Type>1</Type>
                 <StartAddress>0x8004000</StartAddress>
-                <Size>0x19800</Size>
+                <Size>0x1a800</Size>
               </OCR_RVCT5>
               <OCR_RVCT6>
                 <Type>0</Type>
@@ -1087,11 +1087,6 @@
               <FileName>UART_Debug.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Application\Src\UART_Debug.c</FilePath>
-            </File>
-            <File>
-              <FileName>CH224K.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Application\Src\CH224K.c</FilePath>
             </File>
             <File>
               <FileName>SC8815.c</FileName>

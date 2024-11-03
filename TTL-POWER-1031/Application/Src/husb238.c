@@ -192,15 +192,17 @@ void husb238_init(void)
     }
     // printf("\n");
     if (PD_Power > 0) {
-        HUSB238_SelVoltage(votlage[index]);
         //HUSB238_GetCapabilities(&PD_Voltage, &PD_Current);
         LCD_ShowString(0, 16, " Maximum input", LIGHTBLUE, BLACK, 32, 0);
         LCD_ShowString(0, 48, "     power   ", LIGHTBLUE, BLACK, 32, 0);
         sprintf(str, "%dV %.1fA %.1fW", PDCapabilities[index].voltage, PDCapabilities[index].current, PD_Power);
         LCD_ShowString(6, 80, (const uint8_t*)str, LIGHTBLUE, BLACK, 32, 0);
+        APP_config.fastCharge_InVoltage = PDCapabilities[index].voltage;
+        APP_config.fastCharge_InCurrent = PDCapabilities[index].current;
+        HAL_Delay(500);
+        HUSB238_SelVoltage(votlage[index]);
     } else {
-        LCD_ShowString(0, 16, " Maximum input", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowString(0, 48, "     power   ", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowString(6, 80, " 5V 1.0A 5.0W", LIGHTBLUE, BLACK, 32, 0);
+        LCD_ShowChinese(36, 30, "Œ¥ºÏ≤‚µΩ", LIGHTBLUE, BLACK, 32, 0);
+        LCD_ShowChinese(68, 62, "øÏ≥‰ ‰»Î", LIGHTBLUE, BLACK, 32, 0);
     }
 }
