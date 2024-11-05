@@ -366,32 +366,32 @@ void temperature_page_ui_process(float index)
     current_menu_index = TEMPERATURE_PAGE;
     sub_index.temperature_current_index = index;
     LCD_Clear();
-    if (index == TEMPERATURE_45)
+    if (index == TEMPERATURE_50)
     {
         LCD_ShowChinese(0, 0, "过温保护", BLACK, LIGHTBLUE, 32, 0);
-        LCD_ShowString(128, 0, ":45", BLACK, LIGHTBLUE, 32, 0);
+        LCD_ShowString(128, 0, ":50", BLACK, LIGHTBLUE, 32, 0);
         LCD_ShowChinese(0, 33, "过温保护", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowString(128, 33, ":55", LIGHTBLUE, BLACK, 32, 0);
+        LCD_ShowString(128, 33, ":60", LIGHTBLUE, BLACK, 32, 0);
         LCD_ShowChinese(0, 66, "过温保护", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowString(128, 66, ":75", LIGHTBLUE, BLACK, 32, 0);
+        LCD_ShowString(128, 66, ":70", LIGHTBLUE, BLACK, 32, 0);
     }
-    else if (index == TEMPERATURE_55)
+    else if (index == TEMPERATURE_60)
     {
         LCD_ShowChinese(0, 0, "过温保护", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowString(128, 0, ":45", LIGHTBLUE, BLACK, 32, 0);
+        LCD_ShowString(128, 0, ":50", LIGHTBLUE, BLACK, 32, 0);
         LCD_ShowChinese(0, 33, "过温保护", BLACK, LIGHTBLUE, 32, 0);
-        LCD_ShowString(128, 33, ":55", BLACK, LIGHTBLUE, 32, 0);
+        LCD_ShowString(128, 33, ":60", BLACK, LIGHTBLUE, 32, 0);
         LCD_ShowChinese(0, 66, "过温保护", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowString(128, 66, ":75", LIGHTBLUE, BLACK, 32, 0);
+        LCD_ShowString(128, 66, ":70", LIGHTBLUE, BLACK, 32, 0);
     }
-    else if (index == TEMPERATURE_65)
+    else if (index == TEMPERATURE_70)
     {
         LCD_ShowChinese(0, 0, "过温保护", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowString(128, 0, ":45", LIGHTBLUE, BLACK, 32, 0);
+        LCD_ShowString(128, 0, ":50", LIGHTBLUE, BLACK, 32, 0);
         LCD_ShowChinese(0, 33, "过温保护", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowString(128, 33, ":55", LIGHTBLUE, BLACK, 32, 0);
+        LCD_ShowString(128, 33, ":60", LIGHTBLUE, BLACK, 32, 0);
         LCD_ShowChinese(0, 66, "过温保护", BLACK, LIGHTBLUE, 32, 0);
-        LCD_ShowString(128, 66, ":75", BLACK, LIGHTBLUE, 32, 0);
+        LCD_ShowString(128, 66, ":70", BLACK, LIGHTBLUE, 32, 0);
     }
 }
 

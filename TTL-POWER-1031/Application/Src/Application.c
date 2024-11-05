@@ -72,7 +72,7 @@ void Application_main()
 
         if ( APP_config.temperature > App_getTemp_V() && HAL_GPIO_ReadPin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin) == GPIO_PIN_RESET)
         {
-            HAL_Delay(100);
+            HAL_Delay(500);
             if (APP_config.temperature > App_getTemp_V())
             {
                 SC8815_Config.SC8815_Status = SC8815_Standby;
@@ -89,6 +89,7 @@ void Application_main()
 
         if (APP_config.app_config_save_flag && (HAL_GetTick() - APP_config.app_config_save_time) > APP_CONFIG_SAVE_TIME) {
             app_config_save();
+            APP_config.app_config_save_flag = 0;
         }
 
         // printf("temperature:%f\n", App_getTemp_V());
@@ -284,7 +285,7 @@ void app_config_load(void)
             {
                 app_config_save_config.SC8815_VBUS = 5000;
                 app_config_save_config.SC8815_IBUS_Limit = 1000;
-                app_config_save_config.temperature = TEMPERATURE_45;
+                app_config_save_config.temperature = TEMPERATURE_50;
                 app_config_save_config.lock_buzzer = 0;
                 app_config_save_config.SW_FREQ = SCHWI_FREQ_150KHz;
                 app_config_save_config.upgrade_flag = 0;

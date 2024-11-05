@@ -15,9 +15,9 @@ void set_vout(menu_u8 KeyValue)
     {
     case LEFT:
         SC8815_Config.SC8815_VBUS = SC8815_Config.SC8815_VBUS - SC8815_Config.SC8815_VBUS_IBUS_Step;
-        if (SC8815_Config.SC8815_VBUS <= 0)
+        if (SC8815_Config.SC8815_VBUS <= 2700)
         {
-            SC8815_Config.SC8815_VBUS = 0;
+            SC8815_Config.SC8815_VBUS = 2700;
         }
         SC8815_SetOutputVoltage(SC8815_Config.SC8815_VBUS);
         SC8815_Config.SC8815_VBUS_Old = SC8815_Config.SC8815_VBUS;

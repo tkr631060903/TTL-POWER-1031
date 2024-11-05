@@ -199,7 +199,7 @@ void husb238_init(void)
         LCD_ShowString(6, 80, (const uint8_t*)str, LIGHTBLUE, BLACK, 32, 0);
         APP_config.fastCharge_InVoltage = PDCapabilities[index].voltage;
         APP_config.fastCharge_InCurrent = PDCapabilities[index].current;
-        HAL_Delay(500);
+        HAL_Delay(1000);
         HUSB238_SelVoltage(votlage[index]);
     } else {
         LCD_ShowChinese(36, 30, "Î´¼ì²âµ½", LIGHTBLUE, BLACK, 32, 0);

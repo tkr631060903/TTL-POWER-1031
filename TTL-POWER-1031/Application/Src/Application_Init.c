@@ -36,7 +36,7 @@ void Application_Init(void)
     // 初始化串口中断输入
     HAL_UART_Receive_IT(&huart1, (uint8_t*)uart1_Cmd, Cmd_Length);
     HAL_TIM_Base_Start_IT(&htim3);
-    // APP_config.temperature = TEMPERATURE_45;
+    // APP_config.temperature = TEMPERATURE_50;
     current_menu_index = MAIN_PAGE;
     HAL_ADCEx_Calibration_Start(&hadc1);    // 校准ADC
     HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&ADC_Value, 4);    // 开始ADC DMA，会导致仿真报错

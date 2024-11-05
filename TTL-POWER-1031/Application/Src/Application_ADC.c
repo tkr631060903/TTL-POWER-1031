@@ -42,7 +42,7 @@ float App_getVBUS_V(void)
  */
 float App_getTemp_mV(void)
 {
-    return ((float)ADC_Value[1] * SAMPLING_RATE) * 1000;
+    return 1.02 * ((float)ADC_Value[1] * SAMPLING_RATE) * 1000;
 }
 
 /**
@@ -52,7 +52,7 @@ float App_getTemp_mV(void)
  */
 float App_getTemp_V(void)
 {
-    return ((float)ADC_Value[1] * SAMPLING_RATE);   //ADC=1.22V=3K=45℃ ADC=0.93V=2K=55℃  ADC=0.79V=1.6K=75℃
+    return 1.02 * ((float)ADC_Value[1] * SAMPLING_RATE);
 }
 
 /**

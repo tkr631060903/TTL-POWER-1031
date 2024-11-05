@@ -156,10 +156,21 @@ void vout_page_process(menu_u8 KeyValue)
         vout_page_ui_process(KeyValue);
         break;
     case KEY3_SHORT:
+    {
         //返回上一级
         set_vout(KeyValue);
-        main_page_init();
+        // main_page_init();
+        current_menu_index = MAIN_PAGE;
+        char str[10];
+        float temp = SC8815_Config.SC8815_VBUS / 1000;
+        sprintf(str, "%.2fV", temp);
+        if (temp >= 0 && temp < 10) {
+            LCD_ShowString(15, 16, (const uint8_t*)str, LIGHTBLUE, BLACK, 16, 0);
+        } else if (temp >= 10 && temp < 100) {
+            LCD_ShowString(7, 16, (const uint8_t*)str, LIGHTBLUE, BLACK, 16, 0);
+        }
         break;
+    }
     // case KEY4_SHORT:
     //     set_vout(KeyValue);
     //     main_page_init();
@@ -195,10 +206,19 @@ void iout_page_process(menu_u8 KeyValue)
         iout_page_ui_process(KeyValue);
         break;
     case KEY3_SHORT:
+    {
         //返回上一级
         set_iout(KeyValue);
-        main_page_init();
+        // main_page_init();
+        current_menu_index = MAIN_PAGE;
+        char str[10];
+        float temp = SC8815_Config.SC8815_IBUS_Limit / 1000;
+        sprintf(str, "%.2fA", temp);
+		if (temp >= 0 && temp < 10) {
+			LCD_ShowString(15, 51, (const uint8_t*)str, LIGHTBLUE, BLACK, 16, 0);
+		}
         break;
+    }
     // case KEY4_SHORT:
     //     set_iout(KeyValue);
     //     main_page_init();
@@ -468,7 +488,7 @@ void buzzer_page_process(menu_u8 KeyValue)
  */
 void temperature_page_process(menu_u8 KeyValue)
 {
-    float temperature[] = {TEMPERATURE_45, TEMPERATURE_55, TEMPERATURE_65};   //ADC=1.22V=3K=45℃ ADC=0.93V=2K=55℃  ADC=0.79V=1.6K=75℃
+    float temperature[] = {TEMPERATURE_50, TEMPERATURE_60, TEMPERATURE_70};
     int i;
     switch (KeyValue)
     {
