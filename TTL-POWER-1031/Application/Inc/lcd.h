@@ -26,6 +26,7 @@ void LCD_ShowFloatNum(uint16_t x, uint16_t y, float num, uint8_t len, uint16_t f
 
 void LCD_ShowPicture(uint16_t x, uint16_t y, uint16_t length, uint16_t width, const uint8_t pic[]);//ÏÔÊ¾Í¼Æ¬
 void LCD_Fill_DMA(uint16_t xsta, uint16_t ysta, uint16_t xend, uint16_t yend, uint16_t color);
+void LCD_RowClear(uint8_t row, uint8_t font_size,uint16_t clear_color);
 
 
 //»­±ÊÑÕÉ«

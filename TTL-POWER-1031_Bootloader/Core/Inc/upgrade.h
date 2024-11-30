@@ -11,6 +11,7 @@ typedef struct
     float temperature;     //ÎÂ¶È¼à¿ØÖµ
     float SC8815_IBUS_Limit;
     float SC8815_VBUS;
+	  float DC_IBAT_Limit;
 } Application_SaveConfig;
 
 extern Application_SaveConfig g_app_config_save_config;

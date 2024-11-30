@@ -45,6 +45,7 @@ typedef enum
     FSW_PAGE,    // 设置开关频率页面
     PROTECT_PAGE,   //保护状态页面
     ABOUT_PAGE,   //保护状态页面
+    DC_LIMIT_PAGE,  //DC电流限制页面
 } OP_PAGE;
 
 typedef enum
@@ -84,5 +85,6 @@ void fastch_page_process(menu_u8 KeyValue);
 void FSW_page_process(menu_u8 KeyValue);
 void protect_page_process(menu_u8 KeyValue);
 void about_page_process(menu_u8 KeyValue);
+void DC_limit_page_process(menu_u8 KeyValue);
 
 #endif //__MENU_H

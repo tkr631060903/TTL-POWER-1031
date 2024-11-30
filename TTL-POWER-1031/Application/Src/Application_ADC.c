@@ -10,8 +10,11 @@
  */
 #include "Application_ADC.h"
 #include "ina226.h"
+#include "Application_SC8815.h"
+#include "menu.h"
 
 uint16_t ADC_Value[4];
+extern presset_config_set_typeDef presset_config_set;
 
 /**
  *@brief 获取VBUS电压
@@ -21,7 +24,29 @@ uint16_t ADC_Value[4];
 float App_getVBUS_mV(void)
 {
     // return (12 * ((float)ADC_Value[0] * SAMPLING_RATE)) * 1000;
-    return INA226_ReadVoltage();
+    while (presset_config_set.set_time[SC8815_Config.sc8815_tim_work_step] != 0 && (presset_config_set.set_time[SC8815_Config.sc8815_tim_work_step] * 1000) - SC8815_Config.sc8815_tim_work_time <= 10);
+    float temp = INA226_ReadVoltage();
+    if (temp < 0) {
+        return 0;
+    } else {
+        return temp;
+    }
+}
+
+/**
+ *@brief 获取VBUS电压(get_msg专用函数)
+ *
+ * @return VBUS单位mV
+ */
+float App_get_msg_getVBUS_mV(void)
+{
+    // return (12 * ((float)ADC_Value[0] * SAMPLING_RATE)) * 1000;
+    static float voltage = 0;
+    if (presset_config_set.set_time[SC8815_Config.sc8815_tim_work_step] != 0 && (presset_config_set.set_time[SC8815_Config.sc8815_tim_work_step] * 1000) - SC8815_Config.sc8815_tim_work_time <= 10) {
+        return voltage;
+    } else {
+        return INA226_ReadVoltage();
+    }
 }
 
 /**
@@ -32,7 +57,13 @@ float App_getVBUS_mV(void)
 float App_getVBUS_V(void)
 {
     // return 12 * ((float)ADC_Value[0] * SAMPLING_RATE);
-    return INA226_ReadVoltage() / 1000;
+    while (presset_config_set.set_time[SC8815_Config.sc8815_tim_work_step] != 0 && (presset_config_set.set_time[SC8815_Config.sc8815_tim_work_step] * 1000) - SC8815_Config.sc8815_tim_work_time <= 10);
+    float temp = INA226_ReadVoltage();
+    if (temp < 0) {
+        return 0;
+    } else {
+        return temp / 1000;
+    }
 }
 
 /**
@@ -63,7 +94,29 @@ float App_getTemp_V(void)
 float App_getIBUS_mA(void)
 {
     // return (((float)ADC_Value[2] * SAMPLING_RATE) / 0.5 * 1000);
-    return INA226_ReadCurrent();
+    while (presset_config_set.set_time[SC8815_Config.sc8815_tim_work_step] != 0 && (presset_config_set.set_time[SC8815_Config.sc8815_tim_work_step] * 1000) - SC8815_Config.sc8815_tim_work_time <= 10);
+    float temp = INA226_ReadCurrent();
+    if (temp < 0) {
+        return 0;
+    } else {
+        return temp;
+    }
+}
+
+/**
+ *@brief 获取VBUS电流(get_msg专用函数)
+ *
+ * @return 单位mA
+ */
+float App_get_msg_getIBUS_mA(void)
+{
+    // return (((float)ADC_Value[2] * SAMPLING_RATE) / 0.5 * 1000);
+    static float current = 0;
+    if (presset_config_set.set_time[SC8815_Config.sc8815_tim_work_step] != 0 && (presset_config_set.set_time[SC8815_Config.sc8815_tim_work_step] * 1000) - SC8815_Config.sc8815_tim_work_time <= 10) {
+        return current;
+    } else {
+        return INA226_ReadCurrent();
+    }
 }
 
 /**
@@ -74,7 +127,13 @@ float App_getIBUS_mA(void)
 float App_getIBUS_A(void)
 {
     // return (((float)ADC_Value[2] * SAMPLING_RATE) / 0.5);
-    return INA226_ReadCurrent() / 1000;
+    while (presset_config_set.set_time[SC8815_Config.sc8815_tim_work_step] != 0 && (presset_config_set.set_time[SC8815_Config.sc8815_tim_work_step] * 1000) - SC8815_Config.sc8815_tim_work_time <= 10);
+    float temp = INA226_ReadCurrent();
+    if (temp < 0) {
+        return 0;
+    } else {
+        return temp / 1000;
+    }
 }
 
 /**

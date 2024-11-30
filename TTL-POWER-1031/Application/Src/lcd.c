@@ -598,4 +598,18 @@ void LCD_ShowPicture(uint16_t x, uint16_t y, uint16_t length, uint16_t width, co
 	}
 }
 
-
+/******************************************************************************
+	  函数说明：清除指定行
+	  入口数据：row 要清除的行号 0~n-1行
+				font_size 字号
+				clear_color 要清除的颜色
+	  返回值：  无
+******************************************************************************/
+void LCD_RowClear(uint8_t row, uint8_t font_size, uint16_t clear_color)
+{
+	uint16_t yend = (row + 1) * font_size;
+	if (LCD_H - yend <= font_size) {
+		yend = LCD_H;
+	}
+	LCD_Fill_DMA(0, row * font_size, LCD_W, yend, clear_color);
+}

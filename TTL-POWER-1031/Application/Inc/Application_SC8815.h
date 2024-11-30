@@ -70,9 +70,10 @@ typedef struct
     float SC8815_VBUS_CMD_Step;        // 8815 VBUS输出电压命令步进值
     float SC8815_IBUS_CMD_Step;        // 8815 VBUS输出电流命令步进值
     uint32_t VOUT_Open_Time;            // 8815 输出开启时间
-    uint32_t sc8815_tim_work_time;      // 8815 定时工作时间
+    uint32_t sc8815_tim_work_time;      // 8815 定时工作时间定时器增加值
     uint8_t sc8815_tim_work_step;       // 8815 定时工作当前循环第n个步骤
     uint8_t sc8815_tim_work_lcd_flush;  // 8815 定时工作LCD刷新标志位
+    uint8_t sc8815_pfm_delay_ms;  // 8815 关闭PFM延时ms
 } SC8815_ConfigTypeDef;                 // SC8815配置结构体
 
 typedef struct
@@ -102,6 +103,7 @@ void Application_SC8815_Standby(void);
 void Application_SC8815_Run(void);
 void Application_SC8815_loadStart(void);
 void SC8815_Soft_Protect(void);
+void SC8815_Preset_Read(void);
 void SC8815_Preset_Save(void);
 void i2c_Start(void);
 void i2c_WaitAck(void);
@@ -113,5 +115,8 @@ void i2c_NAck(void);
 void i2c_Ack(void);
 uint8_t I2C_ReadRegByte(uint8_t SlaveAddress, uint8_t RegAddress);
 void I2C_WriteRegByte(uint8_t SlaveAddress, uint8_t RegAddress, uint8_t ByteData);
+void SC8815_Preset_Mode_Quit(void);
+void App_SC8815_SetOutputVoltage(float voltage);
+void SC8815_output_calibration(void);
 
 #endif

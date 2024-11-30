@@ -37,7 +37,7 @@ void app_config_load(void)
         }
         i += sizeof(Application_SaveConfig);
     }
-    if (i > STM_SECTOR_SIZE)
+    if (i >= STM_SECTOR_SIZE)
     {
         i -= sizeof(Application_SaveConfig);
         STMFLASH_ReadBytes(APP_CONFIG_FLASH_ADDR + i, (uint8_t*)&g_app_config_save_config, sizeof(Application_SaveConfig));
@@ -58,8 +58,14 @@ void app_config_save(void)
         }
         i += sizeof(Application_SaveConfig);
     }
-    if (i > STM_SECTOR_SIZE)
+    if (i >= STM_SECTOR_SIZE)
     {
+				uint16_t data[128];
+        size_t datalen = sizeof(data);
+        memset(data, 0xFF, datalen);
+        for (i = 0; i < 4;i++) {
+            STMFLASH_Write(APP_CONFIG_FLASH_ADDR + datalen * i, data, datalen >> 1);
+        }
         STMFLASH_Write(APP_CONFIG_FLASH_ADDR, (uint16_t*)&g_app_config_save_config, sizeof(Application_SaveConfig) >> 1);
     }
 }

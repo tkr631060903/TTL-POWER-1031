@@ -19,5 +19,6 @@ void fastch_page_ui_process(menu_u8 KeyValue, uint16_t fastCharge_InVoltage);
 void FSW_page_ui_process(menu_u8 index);
 void protect_page_ui_process(menu_u8 index);
 void about_page_ui_process(void);
+void DC_limit_page_ui_process(menu_u8 KeyValue);
 
 #endif //__MENU_UI_H

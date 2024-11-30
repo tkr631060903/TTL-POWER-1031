@@ -70,9 +70,9 @@ void APP_LCD_main_init(void)
     memset(str, 0, 10);
     temp = SC8815_Config.SC8815_IBUS_Limit / 1000;
     sprintf(str, "%.2fA", temp);
-		if (temp >= 0 && temp < 10) {
-			LCD_ShowString(15, 51, (const uint8_t*)str, LIGHTBLUE, BLACK, 16, 0);
-		}
+    if (temp >= 0 && temp < 10) {
+        LCD_ShowString(15, 51, (const uint8_t*)str, LIGHTBLUE, BLACK, 16, 0);
+    }
 }
 
 /**
@@ -88,8 +88,8 @@ void APP_LCD_main_show(void)
     float temp = App_getVBAT_V();
     if (temp >= 0 && temp <= 25)
     {
-        sprintf(str, "%.2fV", temp);
-        LCD_ShowString(15, 84, (const uint8_t*)str, LIGHTBLUE, BLACK, 16, 0);
+        sprintf(str, "%.2fV ", temp);
+        LCD_ShowString(7, 84, (const uint8_t*)str, LIGHTBLUE, BLACK, 16, 0);
     }
 
     memset(str, 0, 10);
@@ -104,12 +104,18 @@ void APP_LCD_main_show(void)
     {
         sprintf(str, "%.2f", vbus);
         LCD_ShowString(80, 1, (const uint8_t*)str, MAGENTA, BLACK, 48, 0);
+    } else {
+        vbus = 0;
     }
 
     memset(str, 0, 10);
     float ibus = App_getIBUS_A();
     if (ibus >= 0 && ibus < 10)
     {
+        sprintf(str, "%.3f", ibus);
+        LCD_ShowString(80, 44, (const uint8_t*)str, GREEN, BLACK, 48, 0);
+    } else {
+        ibus = 0;
         sprintf(str, "%.3f", ibus);
         LCD_ShowString(80, 44, (const uint8_t*)str, GREEN, BLACK, 48, 0);
     }
@@ -126,7 +132,7 @@ void APP_LCD_main_show(void)
         sprintf(str, "%.2f", powr);
         LCD_ShowString(80, 86, (const uint8_t*)str, ORANGE, BLACK, 48, 0);
     }
-    else if (powr >= 100 && powr < 1000)
+    else if (powr >= 100 && powr < 105)
     {
         sprintf(str, "%.1f", powr);
         LCD_ShowString(80, 86, (const uint8_t*)str, ORANGE, BLACK, 48, 0);
@@ -179,7 +185,7 @@ void APP_LCD_presset_running_show(void)
     LCD_ShowString(41, 17, (const uint8_t*)str, LIGHTBLUE, BLACK, 16, 0);
 
     memset(str, 0, 10);
-    sprintf(str, "%d", presset_config_set.set_circular);
+    sprintf(str, "%d ", presset_config_set.set_circular);
     // LCD_ShowIntNum(15, 51, presset_config_set.set_circular, LIGHTBLUE, BLACK, 16, 0);
     LCD_ShowString(25, 51, (const uint8_t*)str, LIGHTBLUE, BLACK, 16, 0);
 
@@ -198,8 +204,10 @@ void APP_LCD_presset_running_show(void)
 
     memset(str, 0, 10);
     float ibus = App_getIBUS_A();
-    sprintf(str, "0%.2f", ibus);
-    LCD_ShowString(80, 44, (const uint8_t*)str, GREEN, BLACK, 48, 0);
+    sprintf(str, "%.3f", ibus);
+    if (strlen(str) <= 5) {
+        LCD_ShowString(80, 44, (const uint8_t*)str, GREEN, BLACK, 48, 0);
+    }
 
     memset(str, 0, 10);
     float powr = vbus * ibus;
@@ -237,11 +245,11 @@ inline void presset_config_set_page_show(void)
     extern presset_config_set_typeDef presset_config_set;
     if (presset_config_set.set_flag == PRESSET_SET_VOUT)
     {
-        sprintf(str, "vset:%.2fV", presset_config_set.set_vbus[presset_config_set.current_index] / 1000);
+        sprintf(str, "vset:%.2fV ", presset_config_set.set_vbus[presset_config_set.current_index] / 1000);
         LCD_ShowString(0, 0, (uint8_t *)str, BLACK, LIGHTBLUE, 32, 0);
     }
     else {
-        sprintf(str, "vset:%.2fV", presset_config_set.set_vbus[presset_config_set.current_index] / 1000);
+        sprintf(str, "vset:%.2fV ", presset_config_set.set_vbus[presset_config_set.current_index] / 1000);
         LCD_ShowString(0, 0, (uint8_t *)str, LIGHTBLUE, BLACK, 32, 0);
     }
     

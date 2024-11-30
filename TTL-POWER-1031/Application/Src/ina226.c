@@ -48,12 +48,16 @@ float INA226_ReadVoltage(void)
 
 float INA226_ReadCurrent(void)
 {
-    return INA226_Read2Byte(Current_Reg) * 0.1678;
+    if (INA226_ReadVoltage() >= APP_config.fastCharge_InVoltage - 0.2) {
+        return (INA226_Read2Byte(Current_Reg) * 0.1682) - 5.5;  //boost
+    } else {
+        return (INA226_Read2Byte(Current_Reg) * 0.169) - 5.5;   //buck
+    }
 }
 
 float INA226_ReadPower(void)
 {
-    return INA226_Read2Byte(Power_Reg) * 0.1678 * 25;
+    return INA226_Read2Byte(Power_Reg) * 0.169 * 25;
 }
 
 void INA226_Init(void)

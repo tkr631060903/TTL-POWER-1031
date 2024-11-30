@@ -41,7 +41,7 @@ typedef struct
     uint16_t msg_get_time;   //信息上报时间间隔
     uint32_t msg_get_timestamp;   //信息上报时间戳
     uint16_t fastCharge_InVoltage; // 快充输入电压v
-    uint16_t fastCharge_InCurrent; // 快充最大输入电流A
+    float fastCharge_InCurrent; // 快充最大输入电流A
     uint32_t app_config_save_time;   //应用参数保存时间
 } Application_Config;
 
@@ -53,6 +53,7 @@ typedef struct
     float temperature;     //温度监控值
     float SC8815_IBUS_Limit;
     float SC8815_VBUS;
+    float DC_IBAT_Limit;
 } Application_SaveConfig;
 
 extern Application_Config APP_config;

@@ -15,8 +15,14 @@
 #include "stmflash.h"
 #include <string.h>
 #include "menu_ui.h"
+#include <math.h>
+#include "Application_LCD.h"
 
 #define SC8815_TIM_WORK_FLASH_SAVE_ADDR     STM32_FLASH_BASE+STM_SECTOR_SIZE*124
+#define SC8815_OUTPUT_CALIBRATION_TABLE_ADDR    	STM32_FLASH_BASE+STM_SECTOR_SIZE*121
+#define ALPHA_PARAMETER 0.1
+#define CALIBRATION_TABLE_VALUE(calibration_table, voltage) calibration_table[((int)voltage - 2700) / 100]	//获取校准表值,-2700表示=>输出电压最小值为2.7V
+
 
 SC8815_ConfigTypeDef SC8815_Config;
 SC8815_TIM_WorkTypeDef SC8815_TIM_Work[SC8815_TIM_WORK_SIZE] = { 0 };
@@ -36,7 +42,8 @@ void IIC_delay(void)
 {
 	// uint8_t i;
 	// for (i = 0; i < 10; i++);
-	i2c_delay(5);
+	// i2c_delay(5);
+	i2c_delay(1);
 }
 
 /**
@@ -199,8 +206,8 @@ void Application_SC8815_loadStart(void)
 	{
 		Application_SC8815_Run();
 		SC8815_SFB_Disable();
-		HAL_Delay(50);
-		// Application_SoftwareDelay(50);
+		// HAL_Delay(10);
+		// Application_SoftwareDelay(10);
 		SC8815_SFB_Enable();
 		SC8815_Config.VOUT_Open_Time = HAL_GetTick();
 	}
@@ -263,7 +270,7 @@ void Application_SC8815_Init(void)
 	SC8815_ConfigInterruptMask(&SC8815_InterruptMaskInitStruct);
 
 	// 启用内部ADC采样，启用后寄存器中值为实时采样数据
-	SC8815_ADC_Enable();
+	SC8815_ADC_Disable();
 	SC8815_PGATE_Disable();
 
 	/***现在可以设置 PSTOP 引脚为低, 启动 SC8815 功率转换****/
@@ -282,14 +289,22 @@ void Application_SC8815_Init(void)
 	// SC8815_SetBatteryCurrLimit(5000);
 	// SC8815_SetBusCurrentLimit(3000);
 	// SC8815_SetOutputVoltage(12000);
-	SC8815_Config.SC8815_IBAT_Limit = 12000;
+	// SC8815_Config.SC8815_IBAT_Limit = 12000;
 	// SC8815_Config.SC8815_IBUS_Limit = 1000;
 	// SC8815_Config.SC8815_IBUS_Limit_Old = 1000;
 	// SC8815_Config.SC8815_VBUS = 5000;
 	// SC8815_Config.SC8815_VBUS_Old = 5000;
+	uint32_t in_power = APP_config.fastCharge_InVoltage * APP_config.fastCharge_InCurrent * 1000000;
+	while (in_power <= SC8815_Config.SC8815_IBUS_Limit * SC8815_Config.SC8815_VBUS) {
+		if (SC8815_Config.SC8815_IBUS_Limit > 300) {
+			SC8815_Config.SC8815_IBUS_Limit -= 100;
+		} else {
+			SC8815_Config.SC8815_VBUS -= 100;
+		}
+	}
 	SC8815_SetBatteryCurrLimit(SC8815_Config.SC8815_IBAT_Limit);
 	SC8815_SetBusCurrentLimit(SC8815_Config.SC8815_IBUS_Limit);
-	SC8815_SetOutputVoltage(SC8815_Config.SC8815_VBUS);
+	App_SC8815_SetOutputVoltage(SC8815_Config.SC8815_VBUS);
 	SC8815_OTG_Enable();
 
 	/*** 示例3, 读取 SC8815 ADC 数据 ****/
@@ -314,12 +329,8 @@ void Application_SC8815_Init(void)
 	SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
 	SC8815_Config.SC8815_Status = SC8815_Standby;
 	Application_SC8815_Standby();
-	STMFLASH_ReadBytes(SC8815_TIM_WORK_FLASH_SAVE_ADDR, (uint8_t*)&SC8815_TIM_Work, sizeof(SC8815_TIM_WorkTypeDef) * SC8815_TIM_WORK_SIZE);
-	if (SC8815_TIM_Work[0].circular == 0xffff)
-	{
-		memset(SC8815_TIM_Work, 0, sizeof(SC8815_TIM_WorkTypeDef) * SC8815_TIM_WORK_SIZE);
-		SC8815_Preset_Save();
-	}
+	SC8815_Preset_Read();
+    SC8815_output_calibration();
 	printf("SC8815 Init.\n");
 }
 
@@ -427,7 +438,94 @@ void Application_SC8815_Run(void)
 	HAL_GPIO_WritePin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin, GPIO_PIN_RESET);
 }
 
+void SC8815_Preset_Read(void)
+{
+	STMFLASH_ReadBytes(SC8815_TIM_WORK_FLASH_SAVE_ADDR, (uint8_t*)&SC8815_TIM_Work, sizeof(SC8815_TIM_WorkTypeDef)* SC8815_TIM_WORK_SIZE);
+	if (SC8815_TIM_Work[0].circular == 0xffff)
+	{
+		memset(SC8815_TIM_Work, 0, sizeof(SC8815_TIM_WorkTypeDef) * SC8815_TIM_WORK_SIZE);
+		SC8815_Preset_Save();
+	}
+}
+
 void SC8815_Preset_Save(void)
 {
 	STMFLASH_Write(SC8815_TIM_WORK_FLASH_SAVE_ADDR, (uint16_t*)SC8815_TIM_Work, (sizeof(SC8815_TIM_WorkTypeDef) * SC8815_TIM_WORK_SIZE) >> 1);
+}
+
+void SC8815_Preset_Mode_Quit(void)
+{
+  extern menu_i32 current_menu_index;
+	current_menu_index = MAIN_PAGE;
+	SC8815_Config.SC8815_Status = SC8815_Standby;
+	Application_SC8815_Standby();
+	SC8815_Config.sc8815_tim_work_lcd_flush = tim_work_lcd_main;
+	SC8815_SetOutputVoltage(SC8815_Config.SC8815_VBUS);
+	SC8815_SetBusCurrentLimit(SC8815_Config.SC8815_IBUS_Limit);
+}
+
+void App_SC8815_SetOutputVoltage(float voltage)
+{
+	float* calibration_table = (float*)((uint32_t)SC8815_OUTPUT_CALIBRATION_TABLE_ADDR);
+	float voltage_temp = SC8815_Config.SC8815_VBUS_Old;
+	float voltage_target = voltage;
+	if (SC8815_Config.SC8815_Status == SC8815_LoadStart) {
+		voltage = voltage + (float)CALIBRATION_TABLE_VALUE(calibration_table, voltage);
+		if (voltage_target - SC8815_Config.SC8815_VBUS_Old >= 9000) {
+			for (int i = 0; i < 40; i++) {
+				voltage_temp = ALPHA_PARAMETER * voltage + (1 - ALPHA_PARAMETER) * voltage_temp;
+				SC8815_SetOutputVoltage(voltage_temp);
+			}
+			SC8815_SetOutputVoltage(voltage);
+		} else if (SC8815_Config.SC8815_VBUS_Old - voltage_target >= 900 || App_getVBAT_V() <= 9.5) {
+			SC8815_PFM_Enable();
+			SC8815_SetOutputVoltage(voltage);
+			SC8815_Config.sc8815_pfm_delay_ms = 55;
+			if (SC8815_Config.SC8815_VBUS_Old - voltage_target >= 9000) {
+				SC8815_Config.sc8815_pfm_delay_ms = 250;
+			}
+			// SC8815_PFM_Disable();
+		} else {
+			SC8815_SetOutputVoltage(voltage);
+		}
+	} else {
+		SC8815_SetOutputVoltage(voltage);
+	}
+	
+}
+
+/**
+ * @brief 校准SC8815输出电压从2.7V到36V以0.1V的间隔校准，总共校准334个电压点
+ * 
+ */
+void SC8815_output_calibration(void)
+{
+	// float calibration_table_temp[334] = {0};
+	float* calibration_table_temp = (float*)SC8815_TIM_Work;
+	float voltage = 2700;
+	uint16_t* calibration_table = (uint16_t*)((uint32_t)SC8815_OUTPUT_CALIBRATION_TABLE_ADDR);
+	if (calibration_table[0] == 0xffff) {
+		printf("SC8815 output calibration table is empty.\n");
+		SC8815_Config.SC8815_Status = SC8815_Standby;
+    	Application_SC8815_Standby();
+		memset(SC8815_TIM_Work, 0, sizeof(SC8815_TIM_WorkTypeDef) * SC8815_TIM_WORK_SIZE);
+		while (App_getVBUS_mV() >= 100) {
+			HAL_Delay(10);
+		}
+		SC8815_SetOutputVoltage(voltage);
+		SC8815_Config.SC8815_Status = SC8815_LoadStart;
+		Application_SC8815_loadStart();
+		HAL_Delay(5000);
+		for (int i = 0; i < 334; i++) {
+			SC8815_SetOutputVoltage(voltage);
+			HAL_Delay(100);
+			calibration_table_temp[i] = voltage - App_getVBUS_mV();
+			voltage += 100;
+		}
+		SC8815_Config.SC8815_Status = SC8815_Standby;
+    	Application_SC8815_Standby();
+		SC8815_SetOutputVoltage(SC8815_Config.SC8815_VBUS);
+		STMFLASH_Write(SC8815_OUTPUT_CALIBRATION_TABLE_ADDR, (uint16_t*)calibration_table_temp, sizeof(float) * 334 >> 1);
+		SC8815_Preset_Read();
+	}
 }

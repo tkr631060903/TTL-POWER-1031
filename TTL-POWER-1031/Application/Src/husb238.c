@@ -2,6 +2,8 @@
 #include <string.h>
 #include "Application_SC8815.h"
 #include "Application_LCD.h"
+#include "Application_SC8815.h"
+#include "menu_ui.h"
 
 // 电压值
 uint16_t votlage_Table[] = { 0, 5, 9, 12, 15, 18, 20 };
@@ -199,10 +201,13 @@ void husb238_init(void)
         LCD_ShowString(6, 80, (const uint8_t*)str, LIGHTBLUE, BLACK, 32, 0);
         APP_config.fastCharge_InVoltage = PDCapabilities[index].voltage;
         APP_config.fastCharge_InCurrent = PDCapabilities[index].current;
+        SC8815_Config.SC8815_IBAT_Limit = PDCapabilities[index].current * 1000;
         HAL_Delay(1000);
         HUSB238_SelVoltage(votlage[index]);
     } else {
-        LCD_ShowChinese(36, 30, "未检测到", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowChinese(68, 62, "快充输入", LIGHTBLUE, BLACK, 32, 0);
+        SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
+        LCD_ShowString(0, 16, "   DC Input    ", LIGHTBLUE, BLACK, 32, 0);
+        LCD_ShowString(0, 48, "     Current   ", LIGHTBLUE, BLACK, 32, 0);
+        DC_limit_page_ui_process(KEY2_SHORT);
     }
 }

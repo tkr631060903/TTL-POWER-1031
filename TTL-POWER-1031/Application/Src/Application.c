@@ -44,7 +44,7 @@ void Application_main()
         key3_button_process();
         SET_LED1_Status();
 
-        if ((current_menu_index == MAIN_PAGE || current_menu_index == VOUT_PAGE || current_menu_index == IOUT_PAGE) && HAL_GetTick() - APP_LCD_main_show_time >= 250)
+        if ((current_menu_index == MAIN_PAGE || current_menu_index == VOUT_PAGE || current_menu_index == IOUT_PAGE) && HAL_GetTick() - APP_LCD_main_show_time >= 300)
         {
             APP_LCD_main_show();
             APP_LCD_main_show_time = HAL_GetTick();
@@ -58,15 +58,15 @@ void Application_main()
             APP_config.lock_key = 0;
             SC8815_Config.sc8815_tim_work_lcd_flush = tim_work_lcd_none;
         }
-        else if (SC8815_Config.sc8815_tim_work_lcd_flush == tim_work_lcd_running || current_menu_index == PRESSET_RUNNING_PAGE)
+        else if ((SC8815_Config.sc8815_tim_work_lcd_flush == tim_work_lcd_running || current_menu_index == PRESSET_RUNNING_PAGE) && HAL_GetTick() - APP_LCD_main_show_time >= 300)
         {
             presset_running_page_process(0);
+            APP_LCD_main_show_time = HAL_GetTick();
             // SC8815_Config.sc8815_tim_work_lcd_flush = tim_work_lcd_none;
         }
         else if (SC8815_Config.sc8815_tim_work_lcd_flush == tim_work_lcd_cmd)
         {
-            LCD_Clear();
-            presset_running_page_process(0);
+            presset_running_page_process(KEY4_SHORT);
             SC8815_Config.SC8815_Status = SC8815_TIM_WORK;
         }
 
@@ -75,8 +75,12 @@ void Application_main()
             HAL_Delay(500);
             if (APP_config.temperature > App_getTemp_V())
             {
-                SC8815_Config.SC8815_Status = SC8815_Standby;
-                Application_SC8815_Standby();
+                if (SC8815_Config.SC8815_Status == SC8815_TIM_WORK) {
+                    SC8815_Preset_Mode_Quit();
+                } else {
+                    SC8815_Config.SC8815_Status = SC8815_Standby;
+                    Application_SC8815_Standby();
+                }
                 protect_page_ui_process(1);
             }
         }
@@ -200,7 +204,7 @@ void key2_button_process(void)
 }
 
 uint32_t key3PressStartTime = 0;    //key3按下时间
-uint8_t key3_press = 0; //ket3是否按下标志位
+uint8_t key3_press = 0; //key3是否按下标志位
 /**
  *@brief 识别按键3单击并执行相应操作
  *
@@ -253,13 +257,13 @@ void rotary_knob_process(void)
         return;
     if (rotary_knob_value == LEFT)
     {
-        Menu_Select_Item(RIGHT);
+        Menu_Select_Item(RIGHT);    //向左旋转因为旋钮因为旋钮位置改动逻辑相反了
         BUZZER_OPEN(100);
         rotary_knob_value = 0;
     }
     else if (rotary_knob_value == RIGHT)
     {
-        Menu_Select_Item(LEFT);
+        Menu_Select_Item(LEFT);     //向右旋转因为旋钮因为旋钮位置改动逻辑相反了
         BUZZER_OPEN(100);
         rotary_knob_value = 0;
     }
@@ -285,6 +289,7 @@ void app_config_load(void)
             {
                 app_config_save_config.SC8815_VBUS = 5000;
                 app_config_save_config.SC8815_IBUS_Limit = 1000;
+				app_config_save_config.DC_IBAT_Limit = 3000;
                 app_config_save_config.temperature = TEMPERATURE_50;
                 app_config_save_config.lock_buzzer = 0;
                 app_config_save_config.SW_FREQ = SCHWI_FREQ_150KHz;

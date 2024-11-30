@@ -61,11 +61,13 @@ int setVBUS_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
     if (value > 36)
     {
         return 0;
+    } else if (value < 2.7) {
+        return 0;
     }
     value = value * 1000;
     SC8815_Config.SC8815_VBUS = value;
     SC8815_Config.SC8815_VBUS_Old = value;
-    SC8815_SetOutputVoltage(value);
+    App_SC8815_SetOutputVoltage(value);
     return 1;
 }
 
@@ -86,6 +88,8 @@ int setIBUS_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
     sscanf(param[1], "%f", &value);
     if (value > 6)
     {
+        return 0;
+    } else if (value < 0.3) {
         return 0;
     }
     value = value * 1000;
@@ -229,6 +233,8 @@ int setSW_FREQ_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
     SC8815_HardwareInitStruct.SW_FREQ = value;
     SC8815_SetSWFreq(value);
     SC8815_OTG_Enable();
+    app_config_save_config.SW_FREQ = SC8815_HardwareInitStruct.SW_FREQ;
+    app_config_save();
     return 1;
 }
 
@@ -423,6 +429,8 @@ int set_current_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
         if (value > 6)
         {
             return 0;
+        } else if (value < 0.3) {
+            return 0;
         }
         value = value * 1000;
         SC8815_Config.SC8815_IBUS_Limit = value;
@@ -474,7 +482,7 @@ int set_voltage_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
         }
         SC8815_Config.SC8815_VBUS += SC8815_Config.SC8815_VBUS_CMD_Step;
         SC8815_Config.SC8815_VBUS_Old = SC8815_Config.SC8815_VBUS;
-        SC8815_SetOutputVoltage(SC8815_Config.SC8815_VBUS);
+        App_SC8815_SetOutputVoltage(SC8815_Config.SC8815_VBUS);
     }
     else
     {
@@ -483,11 +491,13 @@ int set_voltage_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
         if (value > 36)
         {
             return 0;
+        } else if (value < 2.7) {
+            return 0;
         }
         value = value * 1000;
         SC8815_Config.SC8815_VBUS = value;
         SC8815_Config.SC8815_VBUS_Old = value;
-        SC8815_SetOutputVoltage(value);
+        App_SC8815_SetOutputVoltage(value);
     }
     return 1;
 }
@@ -599,14 +609,15 @@ int get_versions_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
 {
     if (cmd_source)
     {
-        CDC_Transmit_FS("1.1.1", strlen("1.1.1"));
+        CDC_Transmit_FS("1.1.0", strlen("1.1.0"));
     }
     else
     {
-        printf("1.1.1");
+        printf("1.1.0");
     }
     return 1;
 }
+
 
 int set_preset_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
 {

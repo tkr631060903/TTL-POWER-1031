@@ -30,6 +30,7 @@ static OP_MENU_PAGE g_opStruct[] =
     {FSW_PAGE, FSW_page_process},
     {PROTECT_PAGE, protect_page_process},
     {ABOUT_PAGE, about_page_process},
+    {DC_LIMIT_PAGE, DC_limit_page_process},
 };
 
 /**
@@ -140,17 +141,8 @@ void vout_page_process(menu_u8 KeyValue)
     switch (KeyValue)
     {
     case LEFT:
-        set_vout(KeyValue);
-        vout_page_ui_process(KeyValue);
-        break;
     case RIGHT:
-        set_vout(KeyValue);
-        vout_page_ui_process(KeyValue);
-        break;
     case KEY1_SHORT:
-        set_vout(KeyValue);
-        vout_page_ui_process(KeyValue);
-        break;
     case KEY2_SHORT:
         set_vout(KeyValue);
         vout_page_ui_process(KeyValue);
@@ -190,17 +182,8 @@ void iout_page_process(menu_u8 KeyValue)
     switch (KeyValue)
     {
     case LEFT:
-        set_iout(KeyValue);
-        iout_page_ui_process(KeyValue);
-        break;
     case RIGHT:
-        set_iout(KeyValue);
-        iout_page_ui_process(KeyValue);
-        break;
     case KEY1_SHORT:
-        set_iout(KeyValue);
-        iout_page_ui_process(KeyValue);
-        break;
     case KEY2_SHORT:
         set_iout(KeyValue);
         iout_page_ui_process(KeyValue);
@@ -255,6 +238,7 @@ void presset_page_process(menu_u8 KeyValue)
         break;
     case KEY4_SHORT:
         sub_index.presset_config_current_index = 0;
+        LCD_Clear();
         presset_config_page_ui_process(0);
         break;
     default:
@@ -290,7 +274,7 @@ void presset_config_page_process(menu_u8 KeyValue)
     case KEY4_SHORT:
         memset(&presset_config_set, 0, sizeof(presset_config_set_typeDef));
         presset_config_set.set_flag = PRESSET_SET_VOUT;
-        presset_config_set.set_setp = 100;
+        presset_config_set.set_setp = 1000;
         // extern SC8815_TIM_WorkTypeDef SC8815_TIM_Work[SC8815_TIM_WORK_SIZE];
         // for (size_t i = 0; i < SC8815_TIM_WORK_SIZE; i++)
         // {
@@ -299,6 +283,7 @@ void presset_config_page_process(menu_u8 KeyValue)
         //     presset_config_set.set_time[i] = SC8815_TIM_Work[sub_index.presset_current_index].SC8815_TIM_Work_second[i];
         // }
         // presset_config_set.set_circular = SC8815_TIM_Work[sub_index.presset_current_index].circular;
+        LCD_Clear();
         presset_config_set_page_ui_process(KeyValue);
         break;
     default:
@@ -363,7 +348,7 @@ void presset_config_set_page_process(menu_u8 KeyValue)
         }
         if (presset_config_set.set_flag == PRESSET_SET_VOUT || presset_config_set.set_flag == PRESSET_SET_IOUT)
         {
-            presset_config_set.set_setp = 100;
+            presset_config_set.set_setp = 1000;
         }
         else if (presset_config_set.set_flag == PRESSET_SET_TIME || presset_config_set.set_flag == PRESSET_SET_CIRCULAR)
         {
@@ -409,9 +394,8 @@ void presset_start_page_process(menu_u8 KeyValue)
         memcpy(&presset_config_set.set_time, &SC8815_TIM_Work[sub_index.presset_current_index].SC8815_TIM_Work_second, sizeof(uint16_t) * SC8815_TIM_WORK_STEP);
         memcpy(&presset_config_set.set_ibus, &SC8815_TIM_Work[sub_index.presset_current_index].SC8815_IBUS_Limit, sizeof(float) * SC8815_TIM_WORK_STEP);
         memcpy(&presset_config_set.set_vbus, &SC8815_TIM_Work[sub_index.presset_current_index].SC8815_VBUS, sizeof(float) * SC8815_TIM_WORK_STEP);
-        LCD_Clear();
         APP_config.lock_key = 1;
-        presset_running_page_process(0);
+        presset_running_page_process(KEY4_SHORT);
         SC8815_Config.SC8815_Status = SC8815_TIM_WORK;
         break;
     default:
@@ -429,18 +413,22 @@ void presset_running_page_process(menu_u8 KeyValue)
     switch (KeyValue)
     {
     case 0:
+        current_menu_index = PRESSET_RUNNING_PAGE;
+        APP_LCD_presset_running_show();
+        break;
     case KEY4_SHORT:
         current_menu_index = PRESSET_RUNNING_PAGE;
+        LCD_Clear();
         APP_LCD_presset_running_init();
         APP_LCD_presset_running_show();
         break;
     case KEY3_LONG:
-        SC8815_SetOutputVoltage(SC8815_Config.SC8815_VBUS);
-        SC8815_SetBusCurrentLimit(SC8815_Config.SC8815_IBUS_Limit);
         current_menu_index = MAIN_PAGE;
         SC8815_Config.SC8815_Status = SC8815_Standby;
         Application_SC8815_Standby();
         SC8815_Config.sc8815_tim_work_lcd_flush = tim_work_lcd_main;
+        SC8815_SetOutputVoltage(SC8815_Config.SC8815_VBUS);
+        SC8815_SetBusCurrentLimit(SC8815_Config.SC8815_IBUS_Limit);
         break;
     default:
         break;
@@ -656,11 +644,33 @@ void about_page_process(menu_u8 KeyValue)
     switch (KeyValue)
     {
     case KEY3_SHORT:
-        main_page_init();
+        main_menu_page_ui_process(sub_index.main_menu_current_index, KeyValue);
         break;
     case KEY2_LONG:
         main_page_init();
         break;
+    default:
+        break;
+    }
+}
+
+void DC_limit_page_process(menu_u8 KeyValue)
+{
+    switch (KeyValue) {
+    case LEFT:
+    case RIGHT:
+    case KEY1_SHORT:
+    case KEY2_SHORT:
+        set_dc_limit(KeyValue);
+        DC_limit_page_ui_process(KeyValue);
+        break;
+    case KEY4_SHORT:
+    {
+        set_dc_limit(KeyValue);
+        current_menu_index = MAIN_PAGE;
+        LCD_Clear();
+        APP_LCD_main_init();
+    }
     default:
         break;
     }

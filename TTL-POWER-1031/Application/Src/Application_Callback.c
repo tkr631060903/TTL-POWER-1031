@@ -82,10 +82,17 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
 {
     if (htim->Instance == htim3.Instance)
     {
+        // 1ms定时器
         extern uint8_t rotary_knob_value;
         if (APP_config.msg_get_time > 0)
         {
             APP_config.msg_get_timestamp++;
+        }
+        if (SC8815_Config.sc8815_pfm_delay_ms) {
+            SC8815_Config.sc8815_pfm_delay_ms--;
+            if (SC8815_Config.sc8815_pfm_delay_ms == 0) {
+			    SC8815_PFM_Disable();
+            }
         }
         sc8815_tim_work();
         get_msg();
@@ -114,12 +121,12 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
 
 static void get_msg(void)
 {
-    extern Application_Config APP_config;
-    uint32_t temp[6];
     if (APP_config.msg_get_timestamp > APP_config.msg_get_time * 1000)
     {
-        temp[0] = App_getVBUS_mV();
-        temp[1] = App_getIBUS_mA();
+        extern Application_Config APP_config;
+        uint32_t temp[6];
+        temp[0] = App_get_msg_getVBUS_mV();
+        temp[1] = App_get_msg_getIBUS_mA();
         temp[2] = (temp[0] / 1000) * (temp[1] / 1000);
         if (HAL_GPIO_ReadPin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin) == GPIO_PIN_SET)
         {
@@ -144,28 +151,24 @@ static void sc8815_tim_work(void)
 {
     if (SC8815_Config.SC8815_Status == SC8815_TIM_WORK)
     {
-        extern menu_i32 current_menu_index;
         extern presset_config_set_typeDef presset_config_set;
         if (presset_config_set.set_circular <= 0)
         {
-            SC8815_SetOutputVoltage(SC8815_Config.SC8815_VBUS);
-            SC8815_SetBusCurrentLimit(SC8815_Config.SC8815_IBUS_Limit);
-            current_menu_index = MAIN_PAGE;
-            SC8815_Config.SC8815_Status = SC8815_Standby;
-            Application_SC8815_Standby();
-            SC8815_Config.sc8815_tim_work_lcd_flush = tim_work_lcd_main;
+            SC8815_Preset_Mode_Quit();
             return;
         }
         if (SC8815_Config.sc8815_tim_work_time >= SC8815_TIM_WORK_TIME_FAST) //判断当前开启是否为首次
         {
             if (presset_config_set.set_vbus[SC8815_Config.sc8815_tim_work_step] > 0 && presset_config_set.set_ibus[SC8815_Config.sc8815_tim_work_step] >= 300)
             {
-                SC8815_SetOutputVoltage(presset_config_set.set_vbus[SC8815_Config.sc8815_tim_work_step]);
+                App_SC8815_SetOutputVoltage(presset_config_set.set_vbus[SC8815_Config.sc8815_tim_work_step]);
                 SC8815_SetBusCurrentLimit(presset_config_set.set_ibus[SC8815_Config.sc8815_tim_work_step]);
-                Application_SC8815_Run();
-                SC8815_SFB_Disable();
-                SoftwareDelay(50);
-                SC8815_SFB_Enable();
+                if (HAL_GPIO_ReadPin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin) == SET) {
+                    Application_SC8815_Run();
+                    SC8815_SFB_Disable();
+                    // SoftwareDelay(10);
+                    SC8815_SFB_Enable();
+                }
             }
             else
             {
@@ -199,12 +202,14 @@ static void sc8815_tim_work(void)
                     }
                     if (presset_config_set.set_vbus[SC8815_Config.sc8815_tim_work_step] > 0 && presset_config_set.set_ibus[SC8815_Config.sc8815_tim_work_step] >= 300)
                     {
-                        SC8815_SetOutputVoltage(presset_config_set.set_vbus[SC8815_Config.sc8815_tim_work_step]);
+                        App_SC8815_SetOutputVoltage(presset_config_set.set_vbus[SC8815_Config.sc8815_tim_work_step]);
                         SC8815_SetBusCurrentLimit(presset_config_set.set_ibus[SC8815_Config.sc8815_tim_work_step]);
-                        Application_SC8815_Run();
-                        SC8815_SFB_Disable();
-                        SoftwareDelay(50);
-                        SC8815_SFB_Enable();
+                        if (HAL_GPIO_ReadPin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin) == SET) {
+                            Application_SC8815_Run();
+                            SC8815_SFB_Disable();
+                            // SoftwareDelay(10);
+                            SC8815_SFB_Enable();
+                        }
                     }
                     else
                     {
