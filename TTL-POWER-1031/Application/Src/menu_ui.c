@@ -74,7 +74,7 @@ void Enter_Page(menu_i32 index, menu_u8 KeyValue)
         buzzer_page_ui_process(APP_config.lock_buzzer);
         break;
     case 5:
-        sub_index.FSW_current_index = SCHWI_FREQ_150KHz;
+        sub_index.VBUS_calibration_current_index = SCHWI_FREQ_150KHz;
         for(i = 0; i < 4; i++)
         {
             if (FSW_temp[i] == app_config_save_config.SW_FREQ)
@@ -83,7 +83,7 @@ void Enter_Page(menu_i32 index, menu_u8 KeyValue)
             }
         }
         LCD_Clear();
-        FSW_page_ui_process(FSW_temp[i]);
+        VBUS_calibration_page_ui_process(FSW_temp[i]);
         break;
     case 6:
         about_page_ui_process();
@@ -509,51 +509,19 @@ void fastch_page_ui_process(menu_u8 KeyValue, uint16_t fastCharge_InVoltage)
     }
 }
 
-void FSW_page_ui_process(menu_u8 index)
+void VBUS_calibration_page_ui_process(menu_u8 index)
 {
-    current_menu_index = FSW_PAGE;
-    sub_index.FSW_current_index = index;
+    current_menu_index = VBUS_CALIBRATION_PAGE;
     switch (index)
     {
-    case SCHWI_FREQ_150KHz:
-        LCD_ShowChinese(0, 0, "ÉýÑ¹½µÑ¹", BLACK, LIGHTBLUE, 32, 0);
-        LCD_ShowString(128, 0, ":150KHz", BLACK, LIGHTBLUE, 32, 0);
-        LCD_ShowChinese(0, 33, "Éý½µ", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowString(64, 33, ":300/150KHz", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowChinese(0, 66, "ÉýÑ¹½µÑ¹", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowString(128, 66, ":300KHz", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowChinese(0, 99, "ÉýÑ¹½µÑ¹", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowString(128, 99, ":450KHz", LIGHTBLUE, BLACK, 32, 0);
+    case 0:
+        LCD_ShowChinese(60, 32, "¿ªÆôÐ£×¼", LIGHTBLUE, BLACK, 32, 0);
+        LCD_ShowString(60, 64, "Yes", BLACK, LIGHTBLUE, 32, 0);
+        LCD_ShowString(156, 64, "No", LIGHTBLUE, BLACK, 32, 0);
         break;
-    case SCHWI_FREQ_300KHz_1:
-        LCD_ShowChinese(0, 0, "ÉýÑ¹½µÑ¹", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowString(128, 0, ":150KHz", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowChinese(0, 33, "Éý½µ", BLACK, LIGHTBLUE, 32, 0);
-        LCD_ShowString(64, 33, ":300/150KHz", BLACK, LIGHTBLUE, 32, 0);
-        LCD_ShowChinese(0, 66, "ÉýÑ¹½µÑ¹", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowString(128, 66, ":300KHz", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowChinese(0, 99, "ÉýÑ¹½µÑ¹", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowString(128, 99, ":450KHz", LIGHTBLUE, BLACK, 32, 0);
-        break;
-    case SCHWI_FREQ_300KHz_2:
-        LCD_ShowChinese(0, 0, "ÉýÑ¹½µÑ¹", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowString(128, 0, ":150KHz", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowChinese(0, 33, "Éý½µ", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowString(64, 33, ":300/150KHz", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowChinese(0, 66, "ÉýÑ¹½µÑ¹", BLACK, LIGHTBLUE, 32, 0);
-        LCD_ShowString(128, 66, ":300KHz", BLACK, LIGHTBLUE, 32, 0);
-        LCD_ShowChinese(0, 99, "ÉýÑ¹½µÑ¹", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowString(128, 99, ":450KHz", LIGHTBLUE, BLACK, 32, 0);
-        break;
-    case SCHWI_FREQ_450KHz:
-        LCD_ShowChinese(0, 0, "ÉýÑ¹½µÑ¹", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowString(128, 0, ":150KHz", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowChinese(0, 33, "Éý½µ", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowString(64, 33, ":300/150KHz", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowChinese(0, 66, "ÉýÑ¹½µÑ¹", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowString(128, 66, ":300KHz", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowChinese(0, 99, "ÉýÑ¹½µÑ¹", BLACK, LIGHTBLUE, 32, 0);
-        LCD_ShowString(128, 99, ":450KHz", BLACK, LIGHTBLUE, 32, 0);
+    case 1:
+        LCD_ShowString(60, 64, "Yes", LIGHTBLUE, BLACK, 32, 0);
+        LCD_ShowString(156, 64, "No", BLACK, LIGHTBLUE, 32, 0);
         break;
     default:
         break;

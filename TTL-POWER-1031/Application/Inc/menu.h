@@ -16,7 +16,7 @@ typedef struct Menu_Key_Index
     menu_u8 buzzer_current_index;
     float temperature_current_index;
     menu_u8 fastch_current_index;
-    menu_u8 FSW_current_index;
+    menu_u8 VBUS_calibration_current_index;
     menu_u8 Current_Page;
 } Key_Index;
 extern Key_Index sub_index;
@@ -42,7 +42,7 @@ typedef enum
     BUZZER_PAGE,    // 设置蜂鸣器页面
     TEMPERATURE_PAGE,      // 设置温度预警页面
     FASTCH_PAGE,    // 设置快充输入页面
-    FSW_PAGE,    // 设置开关频率页面
+    VBUS_CALIBRATION_PAGE,    // vbus校准页面
     PROTECT_PAGE,   //保护状态页面
     ABOUT_PAGE,   //保护状态页面
     DC_LIMIT_PAGE,  //DC电流限制页面
@@ -82,7 +82,7 @@ void presset_running_page_process(menu_u8 KeyValue);
 void buzzer_page_process(menu_u8 KeyValue);
 void temperature_page_process(menu_u8 KeyValue);
 void fastch_page_process(menu_u8 KeyValue);
-void FSW_page_process(menu_u8 KeyValue);
+void VBUS_calibration_page_process(menu_u8 KeyValue);
 void protect_page_process(menu_u8 KeyValue);
 void about_page_process(menu_u8 KeyValue);
 void DC_limit_page_process(menu_u8 KeyValue);

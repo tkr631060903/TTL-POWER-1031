@@ -152,9 +152,9 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>510</LineNumber>
+          <LineNumber>508</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134270056</Address>
+          <Address>134269212</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -163,14 +163,14 @@
           <BreakIfRCount>1</BreakIfRCount>
           <Filename>..\Application\Src\Application_SC8815.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\TTL_POWER_1031\Application/Src/Application_SC8815.c\510</Expression>
+          <Expression>\\\../Application/Src/Application_SC8815.c\508</Expression>
         </Bp>
         <Bp>
           <Number>1</Number>
           <Type>0</Type>
           <LineNumber>531</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134270230</Address>
+          <Address>134269466</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -179,7 +179,7 @@
           <BreakIfRCount>1</BreakIfRCount>
           <Filename>..\Application\Src\Application_SC8815.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\TTL_POWER_1031\Application/Src/Application_SC8815.c\531</Expression>
+          <Expression>\\TTL_POWER_1031\../Application/Src/Application_SC8815.c\531</Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>
@@ -213,7 +213,7 @@
         <Mm>
           <WinNumber>1</WinNumber>
           <SubType>0</SubType>
-          <ItemText>calibration_table</ItemText>
+          <ItemText>0x0801E400</ItemText>
           <AccSizeX>0</AccSizeX>
         </Mm>
       </MemoryWindow1>

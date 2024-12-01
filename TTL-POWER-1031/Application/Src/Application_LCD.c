@@ -291,3 +291,26 @@ inline void presset_config_set_page_show(void)
     sprintf(str, "step:%d/29", presset_config_set.current_index);
     LCD_ShowString(100, 99, (uint8_t *)str, LIGHTBLUE, BLACK, 16, 0);
 }
+
+void LCD_show_vset(void)
+{
+    char str[10] = {0};
+    float temp = SC8815_Config.SC8815_VBUS / 1000;
+    if (temp >= 0 && temp < 10) {
+        sprintf(str, " %.2fV", temp);
+        LCD_ShowString(7, 16, (const uint8_t*)str, LIGHTBLUE, BLACK, 16, 0);
+    } else if (temp >= 10 && temp < 100) {
+        sprintf(str, "%.2fV", temp);
+        LCD_ShowString(7, 16, (const uint8_t*)str, LIGHTBLUE, BLACK, 16, 0);
+    }
+}
+
+void LCD_show_iset(void)
+{
+    char str[10] = {0};
+    float temp = SC8815_Config.SC8815_IBUS_Limit / 1000;
+    sprintf(str, "%.2fA", temp);
+    if (temp >= 0 && temp < 10) {
+        LCD_ShowString(15, 51, (const uint8_t*)str, LIGHTBLUE, BLACK, 16, 0);
+    }
+}

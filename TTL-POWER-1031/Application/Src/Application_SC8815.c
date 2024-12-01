@@ -1,7 +1,7 @@
 /**
  *@file Application_SC8815.c
  * @author TanKairong (tkr631060903@gmail.com)
- * @brief SC8815åº”ç”¨ç¨‹åºå®ç°
+ * @brief SC8815Ó¦ÓÃ³ÌĞòÊµÏÖ
  * @version 0.1
  * @date 2024-01-31
  *
@@ -21,23 +21,23 @@
 #define SC8815_TIM_WORK_FLASH_SAVE_ADDR     STM32_FLASH_BASE+STM_SECTOR_SIZE*124
 #define SC8815_OUTPUT_CALIBRATION_TABLE_ADDR    	STM32_FLASH_BASE+STM_SECTOR_SIZE*121
 #define ALPHA_PARAMETER 0.1
-#define CALIBRATION_TABLE_VALUE(calibration_table, voltage) calibration_table[((int)voltage - 2700) / 100]	//è·å–æ ¡å‡†è¡¨å€¼,-2700è¡¨ç¤º=>è¾“å‡ºç”µå‹æœ€å°å€¼ä¸º2.7V
+#define CALIBRATION_TABLE_VALUE(calibration_table, voltage) calibration_table[((int)voltage - 2700) / 100]	//»ñÈ¡Ğ£×¼±íÖµ,-2700±íÊ¾=>Êä³öµçÑ¹×îĞ¡ÖµÎª2.7V
 
 
 SC8815_ConfigTypeDef SC8815_Config;
 SC8815_TIM_WorkTypeDef SC8815_TIM_Work[SC8815_TIM_WORK_SIZE] = { 0 };
 
 /**
- *@brief è½¯ä»¶å»¶æ—¶
+ *@brief Èí¼şÑÓÊ±
  *
- * @param ms æ¯«ç§’
+ * @param ms ºÁÃë
  */
 void SoftwareDelay(uint8_t ms)
 {
 	Application_SoftwareDelay(ms);
 }
 
-//å»¶æ—¶
+//ÑÓÊ±
 void IIC_delay(void)
 {
 	// uint8_t i;
@@ -47,7 +47,7 @@ void IIC_delay(void)
 }
 
 /**
- *@brief SC8815è½¯ä»¶I2Cèµ·å§‹ä¿¡å·
+ *@brief SC8815Èí¼şI2CÆğÊ¼ĞÅºÅ
  *
  */
 void i2c_Start(void)
@@ -61,7 +61,7 @@ void i2c_Start(void)
 	IIC_delay();
 }
 
-//ç»“æŸä¿¡å·
+//½áÊøĞÅºÅ
 void i2c_Stop(void)
 {
 	SC8815_SDA_Clr();
@@ -70,8 +70,8 @@ void i2c_Stop(void)
 	SC8815_SDA_Set();
 }
 
-//ç­‰å¾…ä¿¡å·å“åº”
-void i2c_WaitAck(void) //æµ‹æ•°æ®ä¿¡å·çš„ç”µå¹³
+//µÈ´ıĞÅºÅÏìÓ¦
+void i2c_WaitAck(void) //²âÊı¾İĞÅºÅµÄµçÆ½
 {
 	SC8815_SDA_Set();
 	IIC_delay();
@@ -82,41 +82,41 @@ void i2c_WaitAck(void) //æµ‹æ•°æ®ä¿¡å·çš„ç”µå¹³
 }
 
 /**
- *@brief SC8815è½¯ä»¶I2Céåº”ç­”ä¿¡å·
+ *@brief SC8815Èí¼şI2C·ÇÓ¦´ğĞÅºÅ
  *
  */
 void i2c_NAck(void)
 {
-	SC8815_I2C_SDA_1();    //cpué©±åŠ¨SDA=1
+	SC8815_I2C_SDA_1();    //cpuÇı¶¯SDA=1
 	IIC_delay();
-	SC8815_I2C_SCL_1();    //äº§ç”Ÿä¸€ä¸ªé«˜ç”µå¹³æ—¶é’Ÿ
+	SC8815_I2C_SCL_1();    //²úÉúÒ»¸ö¸ßµçÆ½Ê±ÖÓ
 	IIC_delay();
 	SC8815_I2C_SCL_0();
 	IIC_delay();
 }
 
 /**
- *@brief SC8815è½¯ä»¶I2Cåº”ç­”ä¿¡å·
+ *@brief SC8815Èí¼şI2CÓ¦´ğĞÅºÅ
  *
  */
 void i2c_Ack(void)
 {
-    SC8815_I2C_SDA_0(); /* CPUé©±åŠ¨SDA = 0 */
+    SC8815_I2C_SDA_0(); /* CPUÇı¶¯SDA = 0 */
     IIC_delay();
-    SC8815_I2C_SCL_1(); /* CPUäº§ç”Ÿ1ä¸ªæ—¶é’Ÿ */
+    SC8815_I2C_SCL_1(); /* CPU²úÉú1¸öÊ±ÖÓ */
     IIC_delay();
     SC8815_I2C_SCL_0();
     IIC_delay();
-    SC8815_I2C_SDA_1(); /* CPUé‡Šæ”¾SDAæ€»çº¿ */
+    SC8815_I2C_SDA_1(); /* CPUÊÍ·ÅSDA×ÜÏß */
 }
 
-//å†™å…¥ä¸€ä¸ªå­—èŠ‚
+//Ğ´ÈëÒ»¸ö×Ö½Ú
 void i2c_SendByte(uint8_t dat)
 {
 	uint8_t i;
 	for (i = 0;i < 8;i++)
 	{
-		if (dat & 0x80)//å°†datçš„8ä½ä»æœ€é«˜ä½ä¾æ¬¡å†™å…¥
+		if (dat & 0x80)//½«datµÄ8Î»´Ó×î¸ßÎ»ÒÀ´ÎĞ´Èë
 		{
 			SC8815_SDA_Set();
 		}
@@ -127,21 +127,21 @@ void i2c_SendByte(uint8_t dat)
 		IIC_delay();
 		SC8815_SCL_Set();
 		IIC_delay();
-		SC8815_SCL_Clr();//å°†æ—¶é’Ÿä¿¡å·è®¾ç½®ä¸ºä½ç”µå¹³
+		SC8815_SCL_Clr();//½«Ê±ÖÓĞÅºÅÉèÖÃÎªµÍµçÆ½
 		dat <<= 1;
 	}
 }
 
 /**
- *@brief SC8815è½¯ä»¶I2Cè¯»å–ä¸€ä¸ªå­—èŠ‚
+ *@brief SC8815Èí¼şI2C¶ÁÈ¡Ò»¸ö×Ö½Ú
  *
- * @return uint8_t è¯»å–åˆ°çš„æ•°æ®
+ * @return uint8_t ¶ÁÈ¡µ½µÄÊı¾İ
  */
 uint8_t i2c_ReadByte(void)
 {
 	uint8_t i;
 	uint8_t value = 0;
-	/*è¯»å–åˆ°ç¬¬ä¸€ä¸ªbitä¸ºæ•°æ®çš„bit7*/
+	/*¶ÁÈ¡µ½µÚÒ»¸öbitÎªÊı¾İµÄbit7*/
 	for (i = 0;i < 8;i++)
 	{
 		value <<= 1;
@@ -190,14 +190,14 @@ void I2C_WriteRegByte(uint8_t SlaveAddress, uint8_t RegAddress, uint8_t ByteData
 	if (check_timeout >= 1000)
 	{
 		printf("SysRest-->SC8815 Write Reg Error!\r\n");
-		// __set_FAULTMASK(1); //å…³é—­æ‰€æœ‰ä¸­æ–­
-		// NVIC_SystemReset(); //è¿›è¡Œè½¯ä»¶å¤ä½
+		// __set_FAULTMASK(1); //¹Ø±ÕËùÓĞÖĞ¶Ï
+		// NVIC_SystemReset(); //½øĞĞÈí¼ş¸´Î»
 	}
 }
 
 
 /**
- *@brief SC8815å¸¦è½½å¯åŠ¨
+ *@brief SC8815´øÔØÆô¶¯
  *
  */
 void Application_SC8815_loadStart(void)
@@ -216,23 +216,23 @@ void Application_SC8815_loadStart(void)
 void Application_SC8815_Init(void)
 {
 	extern SC8815_BatteryConfigTypeDef SC8815_BatteryConfigStruct;
-	/****å¯åŠ¨ SC8815...****/
-	//->è®¾ç½® PSTOP ä¸ºé«˜
+	/****Æô¶¯ SC8815...****/
+	//->ÉèÖÃ PSTOP Îª¸ß
 	HAL_GPIO_WritePin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin, GPIO_PIN_SET);
-	//->è®¾ç½® CE ä¸ºä½
+	//->ÉèÖÃ CE ÎªµÍ
 	HAL_GPIO_WritePin(SC8815_CE_GPIO_Port, SC8815_CE_Pin, GPIO_PIN_RESET);
-	SoftwareDelay(50);   //å¿…è¦çš„å¯åŠ¨å»¶æ—¶
+	SoftwareDelay(50);   //±ØÒªµÄÆô¶¯ÑÓÊ±
 
-	//é…ç½® SC8815 ç”µæ± å‚æ•°é€‰é¡¹
+	//ÅäÖÃ SC8815 µç³Ø²ÎÊıÑ¡Ïî
 	SC8815_BatteryConfigStruct.IRCOMP = SCBAT_IRCOMP_20mR;
-	// SCBAT_VBAT_SEL_Internal å†…éƒ¨åé¦ˆ
-	// SCBAT_VBAT_SEL_External å¤–éƒ¨åé¦ˆ
+	// SCBAT_VBAT_SEL_Internal ÄÚ²¿·´À¡
+	// SCBAT_VBAT_SEL_External Íâ²¿·´À¡
 	SC8815_BatteryConfigStruct.VBAT_SEL = SCBAT_VBAT_SEL_External;
 	SC8815_BatteryConfigStruct.CSEL = SCBAT_CSEL_3S;
 	SC8815_BatteryConfigStruct.VCELL = SCBAT_VCELL_4v10;
 	SC8815_BatteryConfig(&SC8815_BatteryConfigStruct);
 
-	//é…ç½® SC8815 ç¡¬ä»¶å‚æ•°é€‰é¡¹
+	//ÅäÖÃ SC8815 Ó²¼ş²ÎÊıÑ¡Ïî
 	SC8815_HardwareInitStruct.IBAT_RATIO = SCHWI_IBAT_RATIO_12x;
 	SC8815_HardwareInitStruct.IBUS_RATIO = SCHWI_IBUS_RATIO_6x;
 	SC8815_HardwareInitStruct.VBAT_RATIO = SCHWI_VBAT_RATIO_12_5x;
@@ -243,9 +243,9 @@ void Application_SC8815_Init(void)
 	SC8815_HardwareInitStruct.ICHAR = SCHWI_ICHAR_IBAT;
 	SC8815_HardwareInitStruct.TRICKLE = SCHWI_TRICKLE_Disable;
 	SC8815_HardwareInitStruct.TERM = SCHWI_TERM_Enable;
-	// VBUSç”µå‹åé¦ˆæ¨¡å¼: 
-	//   SCHWI_FB_Internal å†…éƒ¨åé¦ˆ(æœ€é«˜ç”µå‹25.6V)
-	//   SCHWI_FB_External å¤–éƒ¨åˆ†å‹ç”µé˜»åé¦ˆ(æœ€å¤§è¾“å‡ºä¸å»ºè®®è¶…è¿‡36V[æ‰‹å†Œä¸Šæœ€å¤§è¾“å‡ºç”µå‹ä¸”éœ€è€ƒè™‘å¤–å›´å…ƒä»¶è€å‹å€¼]) 
+	// VBUSµçÑ¹·´À¡Ä£Ê½: 
+	//   SCHWI_FB_Internal ÄÚ²¿·´À¡(×î¸ßµçÑ¹25.6V)
+	//   SCHWI_FB_External Íâ²¿·ÖÑ¹µç×è·´À¡(×î´óÊä³ö²»½¨Òé³¬¹ı36V[ÊÖ²áÉÏ×î´óÊä³öµçÑ¹ÇÒĞè¿¼ÂÇÍâÎ§Ôª¼şÄÍÑ¹Öµ]) 
 	SC8815_HardwareInitStruct.FB_Mode = SCHWI_FB_External;
 	SC8815_HardwareInitStruct.TRICKLE_SET = SCHWI_TRICKLE_SET_60;
 	SC8815_HardwareInitStruct.OVP = SCHWI_OVP_Enable;
@@ -254,13 +254,13 @@ void Application_SC8815_Init(void)
 	SC8815_HardwareInitStruct.ADC_SCAN = SCHWI_ADC_Enable;
 	SC8815_HardwareInitStruct.ILIM_BW = SCHWI_ILIM_BW_1_25KHz;
 	SC8815_HardwareInitStruct.LOOP = SCHWI_LOOP_Improved;
-	SC8815_HardwareInitStruct.ShortFoldBack = SCHWI_SFB_Enable;	// éœ€å¼€å¯çŸ­è·¯ä¿æŠ¤é¿å…çƒ§å™¨ä»¶
+	SC8815_HardwareInitStruct.ShortFoldBack = SCHWI_SFB_Enable;	// Ğè¿ªÆô¶ÌÂ·±£»¤±ÜÃâÉÕÆ÷¼ş
 	SC8815_HardwareInitStruct.EOC = SCHWI_EOC_1_10;
 	SC8815_HardwareInitStruct.PFM = SCHWI_PFM_Disable;
 	// SC8815_HardwareInitStruct.PFM = SCHWI_PFM_Enable;
 	SC8815_HardwareInit(&SC8815_HardwareInitStruct);
 
-	//é…ç½® SC8815 ä¸­æ–­å±è”½é€‰é¡¹
+	//ÅäÖÃ SC8815 ÖĞ¶ÏÆÁ±ÎÑ¡Ïî
 	extern SC8815_InterruptStatusTypeDef SC8815_InterruptMaskInitStruct;
 	SC8815_InterruptMaskInitStruct.AC_OK = sENABLE;
 	SC8815_InterruptMaskInitStruct.INDET = sENABLE;
@@ -269,23 +269,23 @@ void Application_SC8815_Init(void)
 	SC8815_InterruptMaskInitStruct.EOC = sENABLE;
 	SC8815_ConfigInterruptMask(&SC8815_InterruptMaskInitStruct);
 
-	// å¯ç”¨å†…éƒ¨ADCé‡‡æ ·ï¼Œå¯ç”¨åå¯„å­˜å™¨ä¸­å€¼ä¸ºå®æ—¶é‡‡æ ·æ•°æ®
+	// ÆôÓÃÄÚ²¿ADC²ÉÑù£¬ÆôÓÃºó¼Ä´æÆ÷ÖĞÖµÎªÊµÊ±²ÉÑùÊı¾İ
 	SC8815_ADC_Disable();
 	SC8815_PGATE_Disable();
 
-	/***ç°åœ¨å¯ä»¥è®¾ç½® PSTOP å¼•è„šä¸ºä½, å¯åŠ¨ SC8815 åŠŸç‡è½¬æ¢****/
+	/***ÏÖÔÚ¿ÉÒÔÉèÖÃ PSTOP Òı½ÅÎªµÍ, Æô¶¯ SC8815 ¹¦ÂÊ×ª»»****/
 	// HAL_GPIO_WritePin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin, GPIO_PIN_RESET);
 
 
-	/*** ç¤ºä¾‹1, è®¾ç½®ä¸ºå……ç”µæ¨¡å¼,ç”µæ± å’Œ VBUS é™æµ 1.2A, VINREG è®¾ç½®ä¸º 10V ****/
+	/*** Ê¾Àı1, ÉèÖÃÎª³äµçÄ£Ê½,µç³ØºÍ VBUS ÏŞÁ÷ 1.2A, VINREG ÉèÖÃÎª 10V ****/
 	//SC8815_SetBatteryCurrLimit(sys_config.charge_current);
 	//SC8815_SetBusCurrentLimit(sys_config.charge_current);
-	// è®¾ç½®å¯¹ç”µæ± å……ç”µæ—¶å¤–éƒ¨æœ€ä½ç”µå‹å€¼ï¼Œä»¥è·å–æœ€å¤§å……ç”µç”µæµ
+	// ÉèÖÃ¶Ôµç³Ø³äµçÊ±Íâ²¿×îµÍµçÑ¹Öµ£¬ÒÔ»ñÈ¡×î´ó³äµçµçÁ÷
 	// SC8815_VINREG_SetVoltage(4000);
 	// SC8815_OTG_Disable();
 
 
-	/*** ç¤ºä¾‹2, è®¾ç½®ä¸ºåå‘æ”¾ç”µæ¨¡å¼,ç”µæ± å’Œ VBUS é™æµ 3A, è¾“å‡ºç”µå‹ è®¾ç½®ä¸º 12V ****/
+	/*** Ê¾Àı2, ÉèÖÃÎª·´Ïò·ÅµçÄ£Ê½,µç³ØºÍ VBUS ÏŞÁ÷ 3A, Êä³öµçÑ¹ ÉèÖÃÎª 12V ****/
 	// SC8815_SetBatteryCurrLimit(5000);
 	// SC8815_SetBusCurrentLimit(3000);
 	// SC8815_SetOutputVoltage(12000);
@@ -295,34 +295,38 @@ void Application_SC8815_Init(void)
 	// SC8815_Config.SC8815_VBUS = 5000;
 	// SC8815_Config.SC8815_VBUS_Old = 5000;
 	uint32_t in_power = APP_config.fastCharge_InVoltage * APP_config.fastCharge_InCurrent * 1000000;
-	while (in_power <= SC8815_Config.SC8815_IBUS_Limit * SC8815_Config.SC8815_VBUS) {
-		if (SC8815_Config.SC8815_IBUS_Limit > 300) {
-			SC8815_Config.SC8815_IBUS_Limit -= 100;
-		} else {
-			SC8815_Config.SC8815_VBUS -= 100;
+	if (in_power > 0) {
+		while (in_power <= SC8815_Config.SC8815_IBUS_Limit * SC8815_Config.SC8815_VBUS) {
+			if (SC8815_Config.SC8815_IBUS_Limit > 300) {
+				SC8815_Config.SC8815_IBUS_Limit -= 100;
+			} else {
+				SC8815_Config.SC8815_VBUS -= 100;
+			}
 		}
 	}
+	SC8815_Config.SC8815_IBUS_Limit_Old = SC8815_Config.SC8815_IBUS_Limit;
+	SC8815_Config.SC8815_VBUS_Old = SC8815_Config.SC8815_VBUS;
 	SC8815_SetBatteryCurrLimit(SC8815_Config.SC8815_IBAT_Limit);
 	SC8815_SetBusCurrentLimit(SC8815_Config.SC8815_IBUS_Limit);
 	App_SC8815_SetOutputVoltage(SC8815_Config.SC8815_VBUS);
 	SC8815_OTG_Enable();
 
-	/*** ç¤ºä¾‹3, è¯»å– SC8815 ADC æ•°æ® ****/
+	/*** Ê¾Àı3, ¶ÁÈ¡ SC8815 ADC Êı¾İ ****/
 	//uint16_t VbusVolt = SC8815_Read_VBUS_Voltage();
 	//uint16_t VbusCurr = SC8815_Read_VBUS_Current();
 	//uint16_t BattVolt = SC8815_Read_BATT_Voltage();
 	//uint16_t BattCurr = SC8815_Read_BATT_Current();
 
 
-	/*** ç¤ºä¾‹4, è¯»å– SC8815 ä¸­æ–­çŠ¶æ€ ****/
-//	SC8815_ReadInterrupStatus(&SC8815_InterruptMaskInitStruct);     //MCU æ”¶åˆ° SC8815 ä¸­æ–­åè°ƒç”¨æ­¤å‡½æ•°è¯» SC8815 ä¸­æ–­ (è¯»ä¸­æ–­çŠ¶æ€åå°†æ¸…é™¤ä¸­æ–­çŠ¶æ€ä½)
-//	if (SC8815_InterruptMaskInitStruct.AC_OK == 1)                  //æ£€æŸ¥ AC_OK ä¸­æ–­æ˜¯å¦è§¦å‘
+	/*** Ê¾Àı4, ¶ÁÈ¡ SC8815 ÖĞ¶Ï×´Ì¬ ****/
+//	SC8815_ReadInterrupStatus(&SC8815_InterruptMaskInitStruct);     //MCU ÊÕµ½ SC8815 ÖĞ¶Ïºóµ÷ÓÃ´Ëº¯Êı¶Á SC8815 ÖĞ¶Ï (¶ÁÖĞ¶Ï×´Ì¬ºó½«Çå³ıÖĞ¶Ï×´Ì¬Î»)
+//	if (SC8815_InterruptMaskInitStruct.AC_OK == 1)                  //¼ì²é AC_OK ÖĞ¶ÏÊÇ·ñ´¥·¢
 //	{
-//			// AC_OK ä¸­æ–­å¤„ç†ä»£ç 
+//			// AC_OK ÖĞ¶Ï´¦Àí´úÂë
 //	}
 //	else if (SC8815_InterruptMaskInitStruct.EOC == 1)
 //	{
-//			// EOC ä¸­æ–­å¤„ç†ä»£ç 
+//			// EOC ÖĞ¶Ï´¦Àí´úÂë
 //	}
 	// Application_SC8815_Run();
 
@@ -330,13 +334,13 @@ void Application_SC8815_Init(void)
 	SC8815_Config.SC8815_Status = SC8815_Standby;
 	Application_SC8815_Standby();
 	SC8815_Preset_Read();
-    SC8815_output_calibration();
+    SC8815_output_calibration(0);
 	printf("SC8815 Init.\n");
 }
 
 
 /**
- *@brief SC8815è½¯ä»¶ä¿æŠ¤
+ *@brief SC8815Èí¼ş±£»¤
  *
  */
 void SC8815_Soft_Protect(void)
@@ -345,7 +349,7 @@ void SC8815_Soft_Protect(void)
 	{
 		return;
 	}
-	if ((App_getVBAT_mV() <= APP_config.fastCharge_InVoltage - (APP_config.fastCharge_InVoltage * 0.1))) // è¾“å…¥ä¿æŠ¤
+	if ((App_getVBAT_mV() <= APP_config.fastCharge_InVoltage - (APP_config.fastCharge_InVoltage * 0.1))) // ÊäÈë±£»¤
 	{
 		// uint16_t VBAT = 0;
 		// for (uint8_t i = 0; i < 5; i++)
@@ -372,7 +376,7 @@ void SC8815_Soft_Protect(void)
 	}
 	// if (HAL_GetTick() - SC8815_Config.VOUT_Open_Time >= 100)
 	// {
-	// 	if (App_getIBUS_mA() >= SC8815_Config.SC8815_IBUS_Limit || App_getVBUS_mV() <= SC8815_Config.SC8815_VBUS - (SC8815_Config.SC8815_VBUS * 0.1)) // è¾“å‡ºä¿æŠ¤
+	// 	if (App_getIBUS_mA() >= SC8815_Config.SC8815_IBUS_Limit || App_getVBUS_mV() <= SC8815_Config.SC8815_VBUS - (SC8815_Config.SC8815_VBUS * 0.1)) // Êä³ö±£»¤
 	// 	{
 	// 		// uint16_t VBUS = 0, IBUS = 0;
 	// 		// for (uint8_t i = 0; i < 5; i++)
@@ -392,7 +396,7 @@ void SC8815_Soft_Protect(void)
 	// 		// if (IBUS >= SC8815_Config.SC8815_IBUS_Limit || VBUS <= SC8815_Config.SC8815_VBUS - (SC8815_Config.SC8815_VBUS * 0.1))
 	// 		// {
 	// 		//     printf("VBUS/5:%dmV, IBUS/5:%dmA\r\n", VBUS, IBUS);
-	// 		//     // printf("è§¦å‘é™æµä¿æŠ¤\r\n");
+	// 		//     // printf("´¥·¢ÏŞÁ÷±£»¤\r\n");
 	// 		//     Application_SC8815_Standby();
 	// 		//     APP_config.Sys_Mode = VOUTProtectMode;
 	// 		//     BUZZER_OPEN(200);
@@ -406,29 +410,29 @@ void SC8815_Soft_Protect(void)
 }
 
 /**
- *@brief è®¾ç½®SC8815è¿›å…¥Shutdown Mode
+ *@brief ÉèÖÃSC8815½øÈëShutdown Mode
  *
  */
 void Application_SC8815_Shutdown(void)
 {
 	HAL_GPIO_WritePin(SC8815_CE_GPIO_Port, SC8815_CE_Pin, GPIO_PIN_SET);
 	// HAL_GPIO_WritePin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin, GPIO_PIN_SET);
-	HAL_GPIO_WritePin(POWER_RELEASE_GPIO_Port, POWER_RELEASE_Pin, GPIO_PIN_SET);	//æ”¾ç”µ
+	HAL_GPIO_WritePin(POWER_RELEASE_GPIO_Port, POWER_RELEASE_Pin, GPIO_PIN_SET);	//·Åµç
 }
 
 /**
- *@brief è®¾ç½®SC8815è¿›å…¥Standby Mode
+ *@brief ÉèÖÃSC8815½øÈëStandby Mode
  *
  */
 void Application_SC8815_Standby(void)
 {
 	HAL_GPIO_WritePin(SC8815_CE_GPIO_Port, SC8815_CE_Pin, GPIO_PIN_RESET);
 	HAL_GPIO_WritePin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin, GPIO_PIN_SET);
-	HAL_GPIO_WritePin(POWER_RELEASE_GPIO_Port, POWER_RELEASE_Pin, GPIO_PIN_SET);	//æ”¾ç”µ
+	HAL_GPIO_WritePin(POWER_RELEASE_GPIO_Port, POWER_RELEASE_Pin, GPIO_PIN_SET);	//·Åµç
 }
 
 /**
- *@brief è®¾ç½®SC8815è¿›å…¥æ­£å¸¸å·¥ä½œæ¨¡å¼
+ *@brief ÉèÖÃSC8815½øÈëÕı³£¹¤×÷Ä£Ê½
  *
  */
 void Application_SC8815_Run(void)
@@ -460,7 +464,7 @@ void SC8815_Preset_Mode_Quit(void)
 	SC8815_Config.SC8815_Status = SC8815_Standby;
 	Application_SC8815_Standby();
 	SC8815_Config.sc8815_tim_work_lcd_flush = tim_work_lcd_main;
-	SC8815_SetOutputVoltage(SC8815_Config.SC8815_VBUS);
+	App_SC8815_SetOutputVoltage(SC8815_Config.SC8815_VBUS);
 	SC8815_SetBusCurrentLimit(SC8815_Config.SC8815_IBUS_Limit);
 }
 
@@ -480,10 +484,10 @@ void App_SC8815_SetOutputVoltage(float voltage)
 		} else if (SC8815_Config.SC8815_VBUS_Old - voltage_target >= 900 || App_getVBAT_V() <= 9.5) {
 			SC8815_PFM_Enable();
 			SC8815_SetOutputVoltage(voltage);
-			SC8815_Config.sc8815_pfm_delay_ms = 55;
-			if (SC8815_Config.SC8815_VBUS_Old - voltage_target >= 9000) {
-				SC8815_Config.sc8815_pfm_delay_ms = 250;
-			}
+			SC8815_Config.sc8815_pfm_delay_ms = 200;
+			// if (SC8815_Config.SC8815_VBUS_Old - voltage_target >= 9000) {
+			// 	SC8815_Config.sc8815_pfm_delay_ms = 250;
+			// }
 			// SC8815_PFM_Disable();
 		} else {
 			SC8815_SetOutputVoltage(voltage);
@@ -495,17 +499,22 @@ void App_SC8815_SetOutputVoltage(float voltage)
 }
 
 /**
- * @brief æ ¡å‡†SC8815è¾“å‡ºç”µå‹ä»2.7Våˆ°36Vä»¥0.1Vçš„é—´éš”æ ¡å‡†ï¼Œæ€»å…±æ ¡å‡†334ä¸ªç”µå‹ç‚¹
+ *@brief Ğ£×¼SC8815Êä³öµçÑ¹´Ó2.7Vµ½36VÒÔ0.1VµÄ¼ä¸ôĞ£×¼£¬×Ü¹²Ğ£×¼334¸öµçÑ¹µã
  * 
+ * @param calibration ÊÇ·ñ¿ªÆôĞ£×¼±êÖ¾Î»
  */
-void SC8815_output_calibration(void)
+void SC8815_output_calibration(uint8_t calibration)
 {
 	// float calibration_table_temp[334] = {0};
 	float* calibration_table_temp = (float*)SC8815_TIM_Work;
 	float voltage = 2700;
 	uint16_t* calibration_table = (uint16_t*)((uint32_t)SC8815_OUTPUT_CALIBRATION_TABLE_ADDR);
-	if (calibration_table[0] == 0xffff) {
+	if (calibration_table[0] == 0xffff || calibration == 1) {
 		printf("SC8815 output calibration table is empty.\n");
+		char percentage_str[5] = {0};
+		int percentage;
+		LCD_Clear();
+		LCD_ShowChinese(30, 50, "Ğ£×¼µçÑ¹", LIGHTBLUE, BLACK, 32, 0);
 		SC8815_Config.SC8815_Status = SC8815_Standby;
     	Application_SC8815_Standby();
 		memset(SC8815_TIM_Work, 0, sizeof(SC8815_TIM_WorkTypeDef) * SC8815_TIM_WORK_SIZE);
@@ -521,6 +530,13 @@ void SC8815_output_calibration(void)
 			HAL_Delay(100);
 			calibration_table_temp[i] = voltage - App_getVBUS_mV();
 			voltage += 100;
+			percentage = i * 0.3;
+			sprintf(percentage_str, "%d%%", percentage);
+			LCD_ShowString(172, 50, (const uint8_t*)percentage_str, LIGHTBLUE, BLACK, 32, 0);
+			LCD_Fill_DMA(0, LCD_H - 10, percentage * 2.4, LCD_H, LIGHTBLUE);
+			if (percentage >= 100) {
+				LCD_Fill_DMA(0, LCD_H - 10, LCD_W, LCD_H, LIGHTBLUE);
+			}
 		}
 		SC8815_Config.SC8815_Status = SC8815_Standby;
     	Application_SC8815_Standby();

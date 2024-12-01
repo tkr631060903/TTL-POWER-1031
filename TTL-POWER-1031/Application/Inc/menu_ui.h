@@ -16,7 +16,7 @@ void presset_config_set_page_ui_process(menu_u8 KeyValue);
 void buzzer_page_ui_process(menu_u8 KeyValue);
 void temperature_page_ui_process(float index);
 void fastch_page_ui_process(menu_u8 KeyValue, uint16_t fastCharge_InVoltage);
-void FSW_page_ui_process(menu_u8 index);
+void VBUS_calibration_page_ui_process(menu_u8 index);
 void protect_page_ui_process(menu_u8 index);
 void about_page_ui_process(void);
 void DC_limit_page_ui_process(menu_u8 KeyValue);

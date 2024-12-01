@@ -117,6 +117,6 @@ uint8_t I2C_ReadRegByte(uint8_t SlaveAddress, uint8_t RegAddress);
 void I2C_WriteRegByte(uint8_t SlaveAddress, uint8_t RegAddress, uint8_t ByteData);
 void SC8815_Preset_Mode_Quit(void);
 void App_SC8815_SetOutputVoltage(float voltage);
-void SC8815_output_calibration(void);
+void SC8815_output_calibration(uint8_t calibration);
 
 #endif

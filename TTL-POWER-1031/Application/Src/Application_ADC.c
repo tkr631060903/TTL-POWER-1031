@@ -24,7 +24,9 @@ extern presset_config_set_typeDef presset_config_set;
 float App_getVBUS_mV(void)
 {
     // return (12 * ((float)ADC_Value[0] * SAMPLING_RATE)) * 1000;
-    while (presset_config_set.set_time[SC8815_Config.sc8815_tim_work_step] != 0 && (presset_config_set.set_time[SC8815_Config.sc8815_tim_work_step] * 1000) - SC8815_Config.sc8815_tim_work_time <= 10);
+    while (presset_config_set.set_time[SC8815_Config.sc8815_tim_work_step] != 0 &&
+        (presset_config_set.set_time[SC8815_Config.sc8815_tim_work_step] * 1000) - SC8815_Config.sc8815_tim_work_time <= 10 &&
+        (SC8815_Config.sc8815_pfm_delay_ms <= 5 && SC8815_Config.sc8815_pfm_delay_ms != 0));
     float temp = INA226_ReadVoltage();
     if (temp < 0) {
         return 0;
@@ -57,7 +59,9 @@ float App_get_msg_getVBUS_mV(void)
 float App_getVBUS_V(void)
 {
     // return 12 * ((float)ADC_Value[0] * SAMPLING_RATE);
-    while (presset_config_set.set_time[SC8815_Config.sc8815_tim_work_step] != 0 && (presset_config_set.set_time[SC8815_Config.sc8815_tim_work_step] * 1000) - SC8815_Config.sc8815_tim_work_time <= 10);
+    while (presset_config_set.set_time[SC8815_Config.sc8815_tim_work_step] != 0 &&
+        (presset_config_set.set_time[SC8815_Config.sc8815_tim_work_step] * 1000) - SC8815_Config.sc8815_tim_work_time <= 10 &&
+        (SC8815_Config.sc8815_pfm_delay_ms <= 5 && SC8815_Config.sc8815_pfm_delay_ms != 0));
     float temp = INA226_ReadVoltage();
     if (temp < 0) {
         return 0;

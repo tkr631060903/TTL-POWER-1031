@@ -27,7 +27,7 @@ static OP_MENU_PAGE g_opStruct[] =
     {BUZZER_PAGE, buzzer_page_process},
     {TEMPERATURE_PAGE, temperature_page_process},
     {FASTCH_PAGE, fastch_page_process},
-    {FSW_PAGE, FSW_page_process},
+    {VBUS_CALIBRATION_PAGE, VBUS_calibration_page_process},
     {PROTECT_PAGE, protect_page_process},
     {ABOUT_PAGE, about_page_process},
     {DC_LIMIT_PAGE, DC_limit_page_process},
@@ -151,16 +151,8 @@ void vout_page_process(menu_u8 KeyValue)
     {
         //返回上一级
         set_vout(KeyValue);
-        // main_page_init();
         current_menu_index = MAIN_PAGE;
-        char str[10];
-        float temp = SC8815_Config.SC8815_VBUS / 1000;
-        sprintf(str, "%.2fV", temp);
-        if (temp >= 0 && temp < 10) {
-            LCD_ShowString(15, 16, (const uint8_t*)str, LIGHTBLUE, BLACK, 16, 0);
-        } else if (temp >= 10 && temp < 100) {
-            LCD_ShowString(7, 16, (const uint8_t*)str, LIGHTBLUE, BLACK, 16, 0);
-        }
+        LCD_show_vset();
         break;
     }
     // case KEY4_SHORT:
@@ -192,14 +184,8 @@ void iout_page_process(menu_u8 KeyValue)
     {
         //返回上一级
         set_iout(KeyValue);
-        // main_page_init();
         current_menu_index = MAIN_PAGE;
-        char str[10];
-        float temp = SC8815_Config.SC8815_IBUS_Limit / 1000;
-        sprintf(str, "%.2fA", temp);
-		if (temp >= 0 && temp < 10) {
-			LCD_ShowString(15, 51, (const uint8_t*)str, LIGHTBLUE, BLACK, 16, 0);
-		}
+        LCD_show_iset();
         break;
     }
     // case KEY4_SHORT:
@@ -427,7 +413,7 @@ void presset_running_page_process(menu_u8 KeyValue)
         SC8815_Config.SC8815_Status = SC8815_Standby;
         Application_SC8815_Standby();
         SC8815_Config.sc8815_tim_work_lcd_flush = tim_work_lcd_main;
-        SC8815_SetOutputVoltage(SC8815_Config.SC8815_VBUS);
+        App_SC8815_SetOutputVoltage(SC8815_Config.SC8815_VBUS);
         SC8815_SetBusCurrentLimit(SC8815_Config.SC8815_IBUS_Limit);
         break;
     default:
@@ -558,58 +544,28 @@ void fastch_page_process(menu_u8 KeyValue)
  * 
  * @param KeyValue 触发键值
  */
-void FSW_page_process(menu_u8 KeyValue)
+void VBUS_calibration_page_process(menu_u8 KeyValue)
 {
-    uint8_t FSW_temp[] = {SCHWI_FREQ_150KHz, SCHWI_FREQ_300KHz_1, SCHWI_FREQ_300KHz_2, SCHWI_FREQ_450KHz};
-    int i;
     switch (KeyValue)
     {
     case LEFT:
-        for(i = 0; i < 4; i++)
-        {
-            if (FSW_temp[i] == sub_index.FSW_current_index)
-            {
-                break;
-            }
-        }
-        if (i - 1 >= 0)
-        {
-            FSW_page_ui_process(FSW_temp[i - 1]);
-        }
+        (sub_index.VBUS_calibration_current_index > 0) ? (sub_index.VBUS_calibration_current_index--) : (sub_index.VBUS_calibration_current_index = 0);
+        VBUS_calibration_page_ui_process(sub_index.VBUS_calibration_current_index);
         break;
     case RIGHT:
-        for(i = 0; i < 4; i++)
-        {
-            if (FSW_temp[i] == sub_index.FSW_current_index)
-            {
-                break;
-            }
-        }
-        if (i + 1 <= 3)
-        {
-            FSW_page_ui_process(FSW_temp[i + 1]);
-        }
+        (sub_index.VBUS_calibration_current_index < 1) ? (sub_index.VBUS_calibration_current_index++) : (sub_index.VBUS_calibration_current_index = 1);
+        VBUS_calibration_page_ui_process(sub_index.VBUS_calibration_current_index);
         break;
     case KEY3_SHORT:
         main_menu_page_ui_process(sub_index.main_menu_current_index, KeyValue);
         break;
     case KEY4_SHORT:
-        SC8815_Config.SC8815_Status = SC8815_Standby;
-        Application_SC8815_Standby();
-        extern SC8815_HardwareInitTypeDef SC8815_HardwareInitStruct;
-        for(i = 0; i < 4; i++)
-        {
-            if (FSW_temp[i] == sub_index.FSW_current_index)
-            {
-                break;
-            }
+        if (sub_index.VBUS_calibration_current_index == 0) {
+            SC8815_output_calibration(1);
+            main_page_init();
+        } else {
+            main_menu_page_ui_process(sub_index.main_menu_current_index, KeyValue);
         }
-        SC8815_HardwareInitStruct.SW_FREQ = FSW_temp[i];
-        SC8815_SetSWFreq(FSW_temp[i]);
-        SC8815_OTG_Enable();
-        app_config_save_config.SW_FREQ = SC8815_HardwareInitStruct.SW_FREQ;
-        app_config_save();
-        main_page_init();
         break;
     case KEY2_LONG:
         main_page_init();

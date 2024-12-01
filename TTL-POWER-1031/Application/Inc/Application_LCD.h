@@ -12,5 +12,7 @@ void APP_LCD_main_show(void);
 void APP_LCD_presset_running_init(void);
 void APP_LCD_presset_running_show(void);
 void presset_config_set_page_show(void);
+void LCD_show_vset(void);
+void LCD_show_iset(void);
 
 #endif
