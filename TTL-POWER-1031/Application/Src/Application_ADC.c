@@ -13,8 +13,13 @@
 #include "Application_SC8815.h"
 #include "menu.h"
 
+#define WAIT_PRESSET (presset_config_set.set_time[SC8815_Config.sc8815_tim_work_step] != 0 && \
+                    (presset_config_set.set_time[SC8815_Config.sc8815_tim_work_step] * 1000) - SC8815_Config.sc8815_tim_work_time <= 5)
+
 uint16_t ADC_Value[4];
 extern presset_config_set_typeDef presset_config_set;
+float ina226_voltage = 0;
+float ina226_current = 0;
 
 /**
  *@brief 获取VBUS电压
@@ -24,15 +29,12 @@ extern presset_config_set_typeDef presset_config_set;
 float App_getVBUS_mV(void)
 {
     // return (12 * ((float)ADC_Value[0] * SAMPLING_RATE)) * 1000;
-    while (presset_config_set.set_time[SC8815_Config.sc8815_tim_work_step] != 0 &&
-        (presset_config_set.set_time[SC8815_Config.sc8815_tim_work_step] * 1000) - SC8815_Config.sc8815_tim_work_time <= 10 &&
-        (SC8815_Config.sc8815_pfm_delay_ms <= 5 && SC8815_Config.sc8815_pfm_delay_ms != 0));
-    float temp = INA226_ReadVoltage();
-    if (temp < 0) {
-        return 0;
-    } else {
-        return temp;
+    while (WAIT_PRESSET || get_i2c_mutex());
+    ina226_voltage = INA226_ReadVoltage();
+    if (ina226_voltage < 0) {
+        ina226_voltage = 0;
     }
+    return ina226_voltage;
 }
 
 /**
@@ -43,12 +45,13 @@ float App_getVBUS_mV(void)
 float App_get_msg_getVBUS_mV(void)
 {
     // return (12 * ((float)ADC_Value[0] * SAMPLING_RATE)) * 1000;
-    static float voltage = 0;
-    if (presset_config_set.set_time[SC8815_Config.sc8815_tim_work_step] != 0 && (presset_config_set.set_time[SC8815_Config.sc8815_tim_work_step] * 1000) - SC8815_Config.sc8815_tim_work_time <= 10) {
-        return voltage;
-    } else {
-        return INA226_ReadVoltage();
+    if (!(WAIT_PRESSET || get_i2c_mutex())) {
+        ina226_voltage = INA226_ReadVoltage();
+        if (ina226_voltage < 0) {
+            ina226_voltage = 0;
+        }
     }
+    return ina226_voltage;
 }
 
 /**
@@ -59,15 +62,12 @@ float App_get_msg_getVBUS_mV(void)
 float App_getVBUS_V(void)
 {
     // return 12 * ((float)ADC_Value[0] * SAMPLING_RATE);
-    while (presset_config_set.set_time[SC8815_Config.sc8815_tim_work_step] != 0 &&
-        (presset_config_set.set_time[SC8815_Config.sc8815_tim_work_step] * 1000) - SC8815_Config.sc8815_tim_work_time <= 10 &&
-        (SC8815_Config.sc8815_pfm_delay_ms <= 5 && SC8815_Config.sc8815_pfm_delay_ms != 0));
-    float temp = INA226_ReadVoltage();
-    if (temp < 0) {
-        return 0;
-    } else {
-        return temp / 1000;
+    while (WAIT_PRESSET || get_i2c_mutex());
+    ina226_voltage = INA226_ReadVoltage();
+    if (ina226_voltage < 0) {
+        ina226_voltage = 0;
     }
+    return ina226_voltage / 1000;
 }
 
 /**
@@ -98,13 +98,12 @@ float App_getTemp_V(void)
 float App_getIBUS_mA(void)
 {
     // return (((float)ADC_Value[2] * SAMPLING_RATE) / 0.5 * 1000);
-    while (presset_config_set.set_time[SC8815_Config.sc8815_tim_work_step] != 0 && (presset_config_set.set_time[SC8815_Config.sc8815_tim_work_step] * 1000) - SC8815_Config.sc8815_tim_work_time <= 10);
-    float temp = INA226_ReadCurrent();
-    if (temp < 0) {
-        return 0;
-    } else {
-        return temp;
+    while (WAIT_PRESSET || get_i2c_mutex());
+    ina226_current = INA226_ReadCurrent();
+    if (ina226_current < 0) {
+        ina226_current = 0;
     }
+    return ina226_current;
 }
 
 /**
@@ -115,12 +114,13 @@ float App_getIBUS_mA(void)
 float App_get_msg_getIBUS_mA(void)
 {
     // return (((float)ADC_Value[2] * SAMPLING_RATE) / 0.5 * 1000);
-    static float current = 0;
-    if (presset_config_set.set_time[SC8815_Config.sc8815_tim_work_step] != 0 && (presset_config_set.set_time[SC8815_Config.sc8815_tim_work_step] * 1000) - SC8815_Config.sc8815_tim_work_time <= 10) {
-        return current;
-    } else {
-        return INA226_ReadCurrent();
+    if (!(WAIT_PRESSET || get_i2c_mutex())) {
+        ina226_current = INA226_ReadCurrent();
+        if (ina226_current < 0) {
+            ina226_current = 0;
+        }
     }
+    return ina226_current;
 }
 
 /**
@@ -131,13 +131,12 @@ float App_get_msg_getIBUS_mA(void)
 float App_getIBUS_A(void)
 {
     // return (((float)ADC_Value[2] * SAMPLING_RATE) / 0.5);
-    while (presset_config_set.set_time[SC8815_Config.sc8815_tim_work_step] != 0 && (presset_config_set.set_time[SC8815_Config.sc8815_tim_work_step] * 1000) - SC8815_Config.sc8815_tim_work_time <= 10);
-    float temp = INA226_ReadCurrent();
-    if (temp < 0) {
-        return 0;
-    } else {
-        return temp / 1000;
+    while (WAIT_PRESSET || get_i2c_mutex());
+    ina226_current = INA226_ReadCurrent();
+    if (ina226_current < 0) {
+        ina226_current = 0;
     }
+    return ina226_current / 1000;
 }
 
 /**

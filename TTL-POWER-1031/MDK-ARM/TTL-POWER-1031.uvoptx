@@ -154,7 +154,7 @@
           <Type>0</Type>
           <LineNumber>508</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134269212</Address>
+          <Address>134268754</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -170,7 +170,7 @@
           <Type>0</Type>
           <LineNumber>531</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134269466</Address>
+          <Address>134269036</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -179,7 +179,23 @@
           <BreakIfRCount>1</BreakIfRCount>
           <Filename>..\Application\Src\Application_SC8815.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\TTL_POWER_1031\../Application/Src/Application_SC8815.c\531</Expression>
+          <Expression>\\\../Application/Src/Application_SC8815.c\531</Expression>
+        </Bp>
+        <Bp>
+          <Number>2</Number>
+          <Type>0</Type>
+          <LineNumber>38</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>134241670</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>..\Application\Src\Application_Init.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\TTL_POWER_1031\../Application/Src/Application_Init.c\38</Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>

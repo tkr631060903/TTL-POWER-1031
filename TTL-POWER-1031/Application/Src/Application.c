@@ -23,6 +23,7 @@ Application_Config APP_config;
 Application_SaveConfig app_config_save_config;
 
 uint32_t APP_LCD_main_show_time = 0;
+extern menu_i32 current_menu_index;
 
 /**
  *@brief 系统运行
@@ -31,7 +32,6 @@ uint32_t APP_LCD_main_show_time = 0;
 void Application_main()
 {
     // uint32_t starttick = 0;
-    extern menu_i32 current_menu_index;
     SC8815_Config.sc8815_tim_work_lcd_flush = tim_work_lcd_none;
     while (1)
     {
@@ -81,9 +81,10 @@ void Application_main()
                     SC8815_Config.SC8815_Status = SC8815_Standby;
                     Application_SC8815_Standby();
                 }
-                protect_page_ui_process(1);
+                protect_page_ui_process(TEMP_PROTECT);
             }
         }
+        SC8815_Soft_Protect();
 
         if (SC8815_Config.SC8815_Status == SC8815_PORT)
         {
@@ -159,8 +160,10 @@ uint8_t key1_press = 0; //ket1是否按下标志位
  */
 void key1_button_process(void)
 {
-    if (APP_config.lock_key == 1)
+    if (APP_config.lock_key == 1) {
+        key1_press = 0;
         return;
+    }
     if (key1_press)
     {
         key1_press = 0;
@@ -177,8 +180,11 @@ uint8_t key2_press = 0; //ket2是否按下标志位
  */
 void key2_button_process(void)
 {
-    if (APP_config.lock_key == 1)
+    if (APP_config.lock_key == 1) {
+        key2_press = 0;
+        key2PressStartTime = 0; // 重置计时器
         return;
+    }
     if (key2_press)
     {
         if (HAL_GPIO_ReadPin(KEY2_GPIO_Port, KEY2_Pin) == SET)
@@ -211,6 +217,11 @@ uint8_t key3_press = 0; //key3是否按下标志位
  */
 void key3_button_process(void)
 {
+    if (APP_config.lock_key == 1 && current_menu_index != PRESSET_RUNNING_PAGE) {
+        key3_press = 0;
+        key3PressStartTime = 0; // 重置计时器
+        return;
+    }
     if (key3_press)
     {
         if (HAL_GPIO_ReadPin(KEY3_GPIO_Port, KEY3_Pin) == SET && APP_config.lock_key == 0)
@@ -253,8 +264,10 @@ void SET_LED1_Status(void)
 uint8_t rotary_knob_value = 0;
 void rotary_knob_process(void)
 {
-    if (APP_config.lock_key == 1)
+    if (APP_config.lock_key == 1) {
+        rotary_knob_value = 0;
         return;
+    }
     if (rotary_knob_value == LEFT)
     {
         Menu_Select_Item(RIGHT);    //向左旋转因为旋钮因为旋钮位置改动逻辑相反了

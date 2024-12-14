@@ -10,8 +10,10 @@ extern TIM_HandleTypeDef htim1;
  */
 void BUZZER_OPEN(uint32_t time)
 {
-    if (APP_config.lock_buzzer == 1)
+    if (APP_config.lock_buzzer == 1) {
+        HAL_Delay(100);
         return;
+    }
     HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
     Application_SoftwareDelay(time);
     HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_1);

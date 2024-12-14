@@ -44,7 +44,6 @@ void Application_Init(void)
     INA226_Init();
     HAL_Delay(500);
     Application_SC8815_Init();
-    // Application_SC8815_Run();
     if (current_menu_index != DC_LIMIT_PAGE) {
         LCD_Clear();
         current_menu_index = MAIN_PAGE;

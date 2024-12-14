@@ -66,7 +66,6 @@ int setVBUS_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
     }
     value = value * 1000;
     SC8815_Config.SC8815_VBUS = value;
-    SC8815_Config.SC8815_VBUS_Old = value;
     App_SC8815_SetOutputVoltage(value);
     return 1;
 }
@@ -94,7 +93,6 @@ int setIBUS_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
     }
     value = value * 1000;
     SC8815_Config.SC8815_IBUS_Limit = value;
-    SC8815_Config.SC8815_IBUS_Limit_Old = value;
     SC8815_SetBusCurrentLimit(value);
     return 1;
 }
@@ -388,13 +386,8 @@ int set_switch_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
     extern uint8_t key3_press;
     if (strstr(param[1], "ON") != NULL && HAL_GPIO_ReadPin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin) == SET)
     {
-        // SC8815_Config.SC8815_Status = SC8815_LoadStart;
-        Application_SC8815_Run();
-		SC8815_SFB_Disable();
-		// HAL_Delay(50);
-		Application_SoftwareDelay(50);
-		SC8815_SFB_Enable();
-		SC8815_Config.VOUT_Open_Time = HAL_GetTick();
+        SC8815_Config.SC8815_Status = SC8815_LoadStart;
+        Application_SC8815_loadStart();
     }
     else if (strstr(param[1], "OFF") != NULL && HAL_GPIO_ReadPin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin) == RESET)
     {

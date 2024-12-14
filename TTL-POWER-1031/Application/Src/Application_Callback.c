@@ -92,6 +92,19 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
             SC8815_Config.sc8815_pfm_delay_ms--;
             if (SC8815_Config.sc8815_pfm_delay_ms == 0) {
 			    SC8815_PFM_Disable();
+                set_i2c_mutex(0);
+	            // HAL_GPIO_WritePin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin, GPIO_PIN_RESET);
+            } else if (SC8815_Config.sc8815_pfm_delay_ms <= I2C_MUTEX_TIME_MS) {
+                set_i2c_mutex(1);
+            }
+        }
+        if (SC8815_Config.sc8815_sfb_delay_ms) {
+            SC8815_Config.sc8815_sfb_delay_ms--;
+            if (SC8815_Config.sc8815_sfb_delay_ms == 0) {
+		        SC8815_SFB_Enable();
+                set_i2c_mutex(0);
+            } else if (SC8815_Config.sc8815_sfb_delay_ms <= I2C_MUTEX_TIME_MS) {
+                set_i2c_mutex(1);
             }
         }
         sc8815_tim_work();
@@ -167,7 +180,8 @@ static void sc8815_tim_work(void)
                     Application_SC8815_Run();
                     SC8815_SFB_Disable();
                     // SoftwareDelay(10);
-                    SC8815_SFB_Enable();
+                    // SC8815_SFB_Enable();
+                    SC8815_Config.sc8815_sfb_delay_ms = 50;	//最小值为1
                 }
             }
             else
@@ -178,7 +192,7 @@ static void sc8815_tim_work(void)
         }
         else
         {
-            if (SC8815_Config.sc8815_tim_work_time >= presset_config_set.set_time[SC8815_Config.sc8815_tim_work_step] * 1000)
+            if (SC8815_Config.sc8815_tim_work_time >= presset_config_set.set_time[SC8815_Config.sc8815_tim_work_step] * 1000)   //判断是否到时间切换下一步
             {
                 if (SC8815_Config.sc8815_tim_work_step < SC8815_TIM_WORK_STEP - 1)
                 {
@@ -208,7 +222,8 @@ static void sc8815_tim_work(void)
                             Application_SC8815_Run();
                             SC8815_SFB_Disable();
                             // SoftwareDelay(10);
-                            SC8815_SFB_Enable();
+                            // SC8815_SFB_Enable();
+                            SC8815_Config.sc8815_sfb_delay_ms = 50;	//最小值为1
                         }
                     }
                     else

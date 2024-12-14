@@ -13,8 +13,8 @@
  */
 void set_vout(menu_u8 KeyValue)
 {
-    uint32_t in_power = (APP_config.fastCharge_InVoltage * APP_config.fastCharge_InCurrent) * 1000000;
-    uint32_t out_power = SC8815_Config.SC8815_VBUS * SC8815_Config.SC8815_IBUS_Limit;
+    uint32_t in_power = 0;
+    uint32_t out_power = 0;
     switch (KeyValue)
     {
     case LEFT:
@@ -31,19 +31,20 @@ void set_vout(menu_u8 KeyValue)
         break;
     case RIGHT:
         SC8815_Config.SC8815_VBUS = SC8815_Config.SC8815_VBUS + SC8815_Config.SC8815_VBUS_IBUS_Step;
+        in_power = (APP_config.fastCharge_InVoltage * APP_config.fastCharge_InCurrent) * 1000000;
+        out_power = SC8815_Config.SC8815_VBUS * SC8815_Config.SC8815_IBUS_Limit;
         if (SC8815_Config.SC8815_VBUS >= 36000)
         {
             SC8815_Config.SC8815_VBUS = 36000;
-        } else if (out_power > in_power) {
-            if (SC8815_Config.SC8815_IBUS_Limit > 300) {
-                SC8815_Config.SC8815_IBUS_Limit = in_power / SC8815_Config.SC8815_VBUS;
-                if (SC8815_Config.SC8815_IBUS_Limit >= 300) {
-                    SC8815_Config.SC8815_IBUS_Limit_Old = SC8815_Config.SC8815_IBUS_Limit;
-                    SC8815_SetBusCurrentLimit(SC8815_Config.SC8815_IBUS_Limit);
-                    LCD_show_iset();
-                } else {
-                    SC8815_Config.SC8815_IBUS_Limit = SC8815_Config.SC8815_IBUS_Limit_Old;
+        }
+        if (out_power > in_power) {
+            if (SC8815_Config.SC8815_VBUS * 300 <= in_power) {
+                while (in_power <= SC8815_Config.SC8815_IBUS_Limit * SC8815_Config.SC8815_VBUS) {
+                    SC8815_Config.SC8815_IBUS_Limit -= 100;
                 }
+                SC8815_Config.SC8815_IBUS_Limit_Old = SC8815_Config.SC8815_IBUS_Limit;
+                SC8815_SetBusCurrentLimit(SC8815_Config.SC8815_IBUS_Limit);
+                LCD_show_iset();
             } else {
                 SC8815_Config.SC8815_VBUS = SC8815_Config.SC8815_VBUS - SC8815_Config.SC8815_VBUS_IBUS_Step;
             }
@@ -55,18 +56,14 @@ void set_vout(menu_u8 KeyValue)
         APP_config.app_config_save_time = HAL_GetTick();
         break;
     case KEY1_SHORT:
-        if (SC8815_Config.SC8815_VBUS_IBUS_Step == 100) {
-            SC8815_Config.SC8815_VBUS_IBUS_Step = 10;
-        } else if (SC8815_Config.SC8815_VBUS_IBUS_Step == 1000) {
+        if (SC8815_Config.SC8815_VBUS_IBUS_Step == 1000) {
             SC8815_Config.SC8815_VBUS_IBUS_Step = 100;
         } else if (SC8815_Config.SC8815_VBUS_IBUS_Step == 10000) {
             SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
         }
         break;
     case KEY2_SHORT:
-        if (SC8815_Config.SC8815_VBUS_IBUS_Step == 10) {
-            SC8815_Config.SC8815_VBUS_IBUS_Step = 100;
-        } else if (SC8815_Config.SC8815_VBUS_IBUS_Step == 100) {
+        if (SC8815_Config.SC8815_VBUS_IBUS_Step == 100) {
             SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
         } else if (SC8815_Config.SC8815_VBUS_IBUS_Step == 1000) {
             SC8815_Config.SC8815_VBUS_IBUS_Step = 10000;
@@ -95,8 +92,8 @@ void set_vout(menu_u8 KeyValue)
  */
 void set_iout(menu_u8 KeyValue)
 {
-    uint32_t in_power = (APP_config.fastCharge_InVoltage * APP_config.fastCharge_InCurrent) * 1000000;
-    uint32_t out_power = SC8815_Config.SC8815_VBUS * SC8815_Config.SC8815_IBUS_Limit;
+    uint32_t in_power = 0;
+    uint32_t out_power = 0;
     switch (KeyValue)
     {
     case LEFT:
@@ -113,19 +110,20 @@ void set_iout(menu_u8 KeyValue)
         break;
     case RIGHT:
         SC8815_Config.SC8815_IBUS_Limit = SC8815_Config.SC8815_IBUS_Limit + SC8815_Config.SC8815_VBUS_IBUS_Step;
+        in_power = (APP_config.fastCharge_InVoltage * APP_config.fastCharge_InCurrent) * 1000000;
+        out_power = SC8815_Config.SC8815_VBUS * SC8815_Config.SC8815_IBUS_Limit;
         if (SC8815_Config.SC8815_IBUS_Limit >= 6000)
         {
             SC8815_Config.SC8815_IBUS_Limit = 6000;
-        } else if (out_power > in_power) {
-            if (SC8815_Config.SC8815_VBUS > 2700) {
-                SC8815_Config.SC8815_VBUS = in_power / SC8815_Config.SC8815_IBUS_Limit;
-                if (SC8815_Config.SC8815_VBUS >= 2700) {
-                    SC8815_Config.SC8815_VBUS_Old = SC8815_Config.SC8815_VBUS;
-                    App_SC8815_SetOutputVoltage(SC8815_Config.SC8815_VBUS);
-                    LCD_show_vset();
-                } else {
-                    SC8815_Config.SC8815_VBUS = SC8815_Config.SC8815_VBUS_Old;
+        }
+        if (out_power > in_power) {
+            if (SC8815_Config.SC8815_IBUS_Limit * 2700 <= in_power) {
+                while (in_power <= SC8815_Config.SC8815_IBUS_Limit * SC8815_Config.SC8815_VBUS) {
+                    SC8815_Config.SC8815_VBUS -= 100;
                 }
+                SC8815_Config.SC8815_VBUS_Old = SC8815_Config.SC8815_VBUS;
+                App_SC8815_SetOutputVoltage(SC8815_Config.SC8815_VBUS);
+                LCD_show_vset();
             } else {
                 SC8815_Config.SC8815_IBUS_Limit = SC8815_Config.SC8815_IBUS_Limit - SC8815_Config.SC8815_VBUS_IBUS_Step;
             }
@@ -189,14 +187,7 @@ void set_fastcharge(menu_u32 index)
     APP_config.fastCharge_InVoltage = PDCapabilities[sub_index.fastch_current_index].voltage;
     APP_config.fastCharge_InCurrent = PDCapabilities[sub_index.fastch_current_index].current;
     SC8815_Config.SC8815_IBAT_Limit = PDCapabilities[sub_index.fastch_current_index].current * 1000;
-    uint32_t in_power = APP_config.fastCharge_InVoltage * APP_config.fastCharge_InCurrent * 1000000;
-	while (in_power <= SC8815_Config.SC8815_IBUS_Limit * SC8815_Config.SC8815_VBUS) {
-		if (SC8815_Config.SC8815_IBUS_Limit > 300) {
-			SC8815_Config.SC8815_IBUS_Limit -= 100;
-		} else {
-			SC8815_Config.SC8815_VBUS -= 100;
-		}
-    }
+    SC8815_auto_output();
     SC8815_Config.SC8815_IBUS_Limit_Old = SC8815_Config.SC8815_IBUS_Limit;
 	SC8815_Config.SC8815_VBUS_Old = SC8815_Config.SC8815_VBUS;
     SC8815_Config.SC8815_Status = SC8815_Standby;
@@ -398,18 +389,14 @@ void set_dc_limit(menu_u8 KeyValue)
         SC8815_Config.SC8815_IBAT_Limit = app_config_save_config.DC_IBAT_Limit;
         APP_config.fastCharge_InCurrent = app_config_save_config.DC_IBAT_Limit / 1000;
         APP_config.fastCharge_InVoltage = App_getVBAT_V();
-        while ((APP_config.fastCharge_InVoltage * APP_config.fastCharge_InCurrent * 1000000) <= SC8815_Config.SC8815_IBUS_Limit * SC8815_Config.SC8815_VBUS) {
-			if (SC8815_Config.SC8815_IBUS_Limit > 300) {
-				SC8815_Config.SC8815_IBUS_Limit -= 100;
-			} else {
-				SC8815_Config.SC8815_VBUS -= 100;
-			}
-		}
         app_config_load();
         if (DC_IBAT_Limit_temp != app_config_save_config.DC_IBAT_Limit) {
             app_config_save_config.DC_IBAT_Limit = DC_IBAT_Limit_temp;
             app_config_save();
         }
+        SC8815_auto_output();
+        App_SC8815_SetOutputVoltage(SC8815_Config.SC8815_VBUS);
+        SC8815_SetBusCurrentLimit(SC8815_Config.SC8815_IBUS_Limit);
         SC8815_SetBatteryCurrLimit(SC8815_Config.SC8815_IBAT_Limit);
         break;
     default:

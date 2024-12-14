@@ -177,23 +177,14 @@ void main_menu_page_ui_process(menu_u8 index, menu_u8 KeyValue)
 void vout_page_ui_process(menu_u8 KeyValue)
 {
     current_menu_index = VOUT_PAGE;
-    float temp = 0;
     int number = 0, length = 0, digits[5] = {0};
-    char str[10] = {0};
     switch (KeyValue)
     {
     case LEFT:
     case RIGHT:
     case KEY1_SHORT:
     case KEY2_SHORT:
-        temp = SC8815_Config.SC8815_VBUS / 1000;
-        LCD_Fill_DMA(7, 16, 66, 32, BLACK);
-        sprintf(str, "%.2fV", temp);
-        if (temp < 10) {
-            LCD_ShowString(15, 16, (const uint8_t*)str, LIGHTBLUE, BLACK, 16, 0);
-        } else {
-            LCD_ShowString(7, 16, (const uint8_t*)str, LIGHTBLUE, BLACK, 16, 0);
-        }
+        LCD_show_vset();
         if (SC8815_Config.SC8815_VBUS >= SC8815_Config.SC8815_VBUS_IBUS_Step) {
             // Take the tens, thousands, and hundreds values and store them in variate digits
             number = SC8815_Config.SC8815_VBUS;
@@ -207,9 +198,7 @@ void vout_page_ui_process(menu_u8 KeyValue)
                 number %= (int)pow(10, i);
             }
         }
-        if (SC8815_Config.SC8815_VBUS_IBUS_Step == 10) {
-            LCD_ShowIntNum(16 * 2.5, 16, digits[1], 1, BLACK, LIGHTBLUE, 16);
-        } else if (SC8815_Config.SC8815_VBUS_IBUS_Step == 100) {
+        if (SC8815_Config.SC8815_VBUS_IBUS_Step == 100) {
             LCD_ShowIntNum(16 * 2, 16, digits[2], 1, BLACK, LIGHTBLUE, 16);
         } else if (SC8815_Config.SC8815_VBUS_IBUS_Step == 1000) {
             LCD_ShowIntNum(16, 16, digits[3], 1, BLACK, LIGHTBLUE, 16);
@@ -225,23 +214,14 @@ void vout_page_ui_process(menu_u8 KeyValue)
 void iout_page_ui_process(menu_u8 KeyValue)
 {
     current_menu_index = IOUT_PAGE;
-    float temp;
     int number = 0, length = 0, digits[5] = {0};
-    char str[10] = {0};
     switch (KeyValue)
     {
     case LEFT:
     case RIGHT:
     case KEY1_SHORT:
     case KEY2_SHORT:
-        temp = SC8815_Config.SC8815_IBUS_Limit / 1000;
-        LCD_Fill_DMA(15, 51, 66, 67, BLACK);
-        sprintf(str, "%.2fA", temp);
-        if (temp < 10) {
-            LCD_ShowString(15, 51, (const uint8_t*)str, LIGHTBLUE, BLACK, 16, 0);
-        } else {
-            LCD_ShowString(7, 51, (const uint8_t*)str, LIGHTBLUE, BLACK, 16, 0);
-        }
+        LCD_show_iset();
         if (SC8815_Config.SC8815_IBUS_Limit >= SC8815_Config.SC8815_VBUS_IBUS_Step) {
             // Take the tens, thousands, and hundreds values and store them in variate digits
             number = SC8815_Config.SC8815_IBUS_Limit;
@@ -534,13 +514,13 @@ void protect_page_ui_process(menu_u8 index)
     LCD_Clear();
     switch (index)
     {
-    case 0:
-        LCD_ShowString(50, 50, "VBUSPORT!", RED, BLACK, 32, 0);
+    case VBUS_PROTECT:
+        LCD_ShowString(50, 50, "SCP", RED, BLACK, 32, 0);
         break;
-    case 1:
+    case TEMP_PROTECT:
         LCD_ShowString(50, 50, "TEMPPORT!", RED, BLACK, 32, 0);
         break;
-    case 2:
+    case VBAT_PROTECT:
         LCD_ShowString(50, 50, "VBATPORT!", RED, BLACK, 32, 0);
         break;
     default:

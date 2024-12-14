@@ -39,6 +39,7 @@
 #define i2c_delay(us) TIM2_Delay1us(us)
 
 #define SC8815_TIM_WORK_TIME_FAST 0xFFFFFFFF //判断当前开启是否为首次
+#define I2C_MUTEX_TIME_MS  3  //I2C互斥锁时间单位ms
 
 typedef enum
 {
@@ -74,6 +75,7 @@ typedef struct
     uint8_t sc8815_tim_work_step;       // 8815 定时工作当前循环第n个步骤
     uint8_t sc8815_tim_work_lcd_flush;  // 8815 定时工作LCD刷新标志位
     uint8_t sc8815_pfm_delay_ms;  // 8815 关闭PFM延时ms
+    uint8_t sc8815_sfb_delay_ms;  // 8815 开启SFB延时ms
 } SC8815_ConfigTypeDef;                 // SC8815配置结构体
 
 typedef struct
@@ -105,6 +107,8 @@ void Application_SC8815_loadStart(void);
 void SC8815_Soft_Protect(void);
 void SC8815_Preset_Read(void);
 void SC8815_Preset_Save(void);
+uint8_t get_i2c_mutex(void);
+void set_i2c_mutex(uint8_t status);
 void i2c_Start(void);
 void i2c_WaitAck(void);
 void i2c_SendByte(uint8_t dat);
@@ -118,5 +122,6 @@ void I2C_WriteRegByte(uint8_t SlaveAddress, uint8_t RegAddress, uint8_t ByteData
 void SC8815_Preset_Mode_Quit(void);
 void App_SC8815_SetOutputVoltage(float voltage);
 void SC8815_output_calibration(uint8_t calibration);
+void SC8815_auto_output(void);
 
 #endif

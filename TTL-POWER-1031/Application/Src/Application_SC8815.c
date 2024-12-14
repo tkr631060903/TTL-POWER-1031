@@ -26,6 +26,17 @@
 
 SC8815_ConfigTypeDef SC8815_Config;
 SC8815_TIM_WorkTypeDef SC8815_TIM_Work[SC8815_TIM_WORK_SIZE] = { 0 };
+static uint8_t i2c_mutex = 0;	//I2C总线互斥信号,0表示总线空闲，1表示总线忙
+
+uint8_t get_i2c_mutex(void)
+{
+	return i2c_mutex;
+}
+
+void set_i2c_mutex(uint8_t status)
+{
+	i2c_mutex = status;
+}
 
 /**
  *@brief 软件延时
@@ -208,7 +219,8 @@ void Application_SC8815_loadStart(void)
 		SC8815_SFB_Disable();
 		// HAL_Delay(10);
 		// Application_SoftwareDelay(10);
-		SC8815_SFB_Enable();
+		// SC8815_SFB_Enable();
+		SC8815_Config.sc8815_sfb_delay_ms = 50;	//最小值为1
 		SC8815_Config.VOUT_Open_Time = HAL_GetTick();
 	}
 }
@@ -294,16 +306,7 @@ void Application_SC8815_Init(void)
 	// SC8815_Config.SC8815_IBUS_Limit_Old = 1000;
 	// SC8815_Config.SC8815_VBUS = 5000;
 	// SC8815_Config.SC8815_VBUS_Old = 5000;
-	uint32_t in_power = APP_config.fastCharge_InVoltage * APP_config.fastCharge_InCurrent * 1000000;
-	if (in_power > 0) {
-		while (in_power <= SC8815_Config.SC8815_IBUS_Limit * SC8815_Config.SC8815_VBUS) {
-			if (SC8815_Config.SC8815_IBUS_Limit > 300) {
-				SC8815_Config.SC8815_IBUS_Limit -= 100;
-			} else {
-				SC8815_Config.SC8815_VBUS -= 100;
-			}
-		}
-	}
+	SC8815_auto_output();
 	SC8815_Config.SC8815_IBUS_Limit_Old = SC8815_Config.SC8815_IBUS_Limit;
 	SC8815_Config.SC8815_VBUS_Old = SC8815_Config.SC8815_VBUS;
 	SC8815_SetBatteryCurrLimit(SC8815_Config.SC8815_IBAT_Limit);
@@ -349,30 +352,17 @@ void SC8815_Soft_Protect(void)
 	{
 		return;
 	}
-	if ((App_getVBAT_mV() <= APP_config.fastCharge_InVoltage - (APP_config.fastCharge_InVoltage * 0.1))) // 输入保护
-	{
-		// uint16_t VBAT = 0;
-		// for (uint8_t i = 0; i < 5; i++)
-		// {
-		//     if (VBAT == 0)
-		//     {
-		//         VBAT = App_getVBAT_mV();
-		//     }
-		//     else {
-		//         VBAT = (VBAT + App_getVBAT_mV()) / 2;
-		//     }
-		//     HAL_Delay(10);
-		// }
-		// if ((VBAT <= APP_config.fastCharge_InVoltage - (APP_config.fastCharge_InVoltage * 0.1)))
-		// {
-		//     Application_SC8815_Standby();
-		//     APP_config.Sys_Mode = VINProtectMode;
-		//     BUZZER_OPEN(200);
-		// }
-		SC8815_Config.SC8815_Status = SC8815_PORT;
-		Application_SC8815_Standby();
-        // protect_page_ui_process(2);
-		// BUZZER_OPEN(500);
+	if (App_getVBUS_V() < 1) {	// 输入保护 
+		HAL_Delay(500);
+		if (App_getVBUS_V() < 1) {
+			if (SC8815_Config.SC8815_Status == SC8815_TIM_WORK) {
+				SC8815_Preset_Mode_Quit();
+			} else {
+				SC8815_Config.SC8815_Status = SC8815_Standby;
+				Application_SC8815_Standby();
+			}
+			protect_page_ui_process(VBUS_PROTECT);
+		}
 	}
 	// if (HAL_GetTick() - SC8815_Config.VOUT_Open_Time >= 100)
 	// {
@@ -473,18 +463,21 @@ void App_SC8815_SetOutputVoltage(float voltage)
 	float* calibration_table = (float*)((uint32_t)SC8815_OUTPUT_CALIBRATION_TABLE_ADDR);
 	float voltage_temp = SC8815_Config.SC8815_VBUS_Old;
 	float voltage_target = voltage;
+	voltage = voltage + (float)CALIBRATION_TABLE_VALUE(calibration_table, voltage);
 	if (SC8815_Config.SC8815_Status == SC8815_LoadStart) {
-		voltage = voltage + (float)CALIBRATION_TABLE_VALUE(calibration_table, voltage);
 		if (voltage_target - SC8815_Config.SC8815_VBUS_Old >= 9000) {
+			SC8815_PFM_Enable();
 			for (int i = 0; i < 40; i++) {
 				voltage_temp = ALPHA_PARAMETER * voltage + (1 - ALPHA_PARAMETER) * voltage_temp;
 				SC8815_SetOutputVoltage(voltage_temp);
 			}
 			SC8815_SetOutputVoltage(voltage);
+			SC8815_PFM_Disable();
 		} else if (SC8815_Config.SC8815_VBUS_Old - voltage_target >= 900 || App_getVBAT_V() <= 9.5) {
 			SC8815_PFM_Enable();
 			SC8815_SetOutputVoltage(voltage);
-			SC8815_Config.sc8815_pfm_delay_ms = 200;
+			SC8815_Config.sc8815_pfm_delay_ms = 250;	//最小值为1
+			// HAL_GPIO_WritePin(POWER_RELEASE_GPIO_Port, POWER_RELEASE_Pin, GPIO_PIN_SET);	//放电
 			// if (SC8815_Config.SC8815_VBUS_Old - voltage_target >= 9000) {
 			// 	SC8815_Config.sc8815_pfm_delay_ms = 250;
 			// }
@@ -527,7 +520,7 @@ void SC8815_output_calibration(uint8_t calibration)
 		HAL_Delay(5000);
 		for (int i = 0; i < 334; i++) {
 			SC8815_SetOutputVoltage(voltage);
-			HAL_Delay(100);
+			HAL_Delay(300);
 			calibration_table_temp[i] = voltage - App_getVBUS_mV();
 			voltage += 100;
 			percentage = i * 0.3;
@@ -543,5 +536,19 @@ void SC8815_output_calibration(uint8_t calibration)
 		SC8815_SetOutputVoltage(SC8815_Config.SC8815_VBUS);
 		STMFLASH_Write(SC8815_OUTPUT_CALIBRATION_TABLE_ADDR, (uint16_t*)calibration_table_temp, sizeof(float) * 334 >> 1);
 		SC8815_Preset_Read();
+	}
+}
+
+void SC8815_auto_output(void)
+{
+	uint32_t in_power = APP_config.fastCharge_InVoltage * APP_config.fastCharge_InCurrent * 1000000;
+	if (in_power > 0) {
+		while (in_power <= SC8815_Config.SC8815_IBUS_Limit * SC8815_Config.SC8815_VBUS) {
+			if (SC8815_Config.SC8815_IBUS_Limit > 300) {
+				SC8815_Config.SC8815_IBUS_Limit -= 100;
+			} else {
+				SC8815_Config.SC8815_VBUS -= 100;
+			}
+		}
 	}
 }

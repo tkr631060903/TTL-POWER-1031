@@ -32,6 +32,13 @@ typedef enum
     APP_TIMEOUT = 0x03U
 } APP_StatusTypeDef;
 
+typedef enum
+{
+    VBUS_PROTECT = 0x00U,
+    TEMP_PROTECT,
+    VBAT_PROTECT,
+} ProtectTypeDef;
+
 typedef struct
 {
     uint8_t lock_key;   //锁定按键 1锁 0不锁

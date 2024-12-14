@@ -58,20 +58,55 @@ void APP_LCD_main_init(void)
     // else {
     //     LCD_ShowString(1, 102, " ON ", BLACK, GREEN, 32, 0);
     // }
-    char str[10];
-    float temp = SC8815_Config.SC8815_VBUS / 1000;
-    sprintf(str, "%.2fV", temp);
-    if (temp >= 0 && temp < 10) {
-        LCD_ShowString(15, 16, (const uint8_t*)str, LIGHTBLUE, BLACK, 16, 0);
-    } else if (temp >= 10 && temp < 100) {
-        LCD_ShowString(7, 16, (const uint8_t*)str, LIGHTBLUE, BLACK, 16, 0);
+    LCD_show_vset();
+    LCD_show_iset();
+}
+
+static void LCD_show_main_page_status(void)
+{
+    char str[10] = {0};
+    float vbus = App_getVBUS_V();
+    // vbus = 10;
+    if (vbus >= 0 && vbus < 10) {
+        sprintf(str, "0%.2f", vbus);
+        LCD_ShowString(80, 1, (const uint8_t*)str, MAGENTA, BLACK, 48, 0);
+    } else if (vbus >= 10 && vbus < 40) {
+        sprintf(str, "%.2f", vbus);
+        LCD_ShowString(80, 1, (const uint8_t*)str, MAGENTA, BLACK, 48, 0);
+    } else {
+        vbus = 0;
     }
 
     memset(str, 0, 10);
-    temp = SC8815_Config.SC8815_IBUS_Limit / 1000;
-    sprintf(str, "%.2fA", temp);
-    if (temp >= 0 && temp < 10) {
-        LCD_ShowString(15, 51, (const uint8_t*)str, LIGHTBLUE, BLACK, 16, 0);
+    float ibus = App_getIBUS_A();
+    if (ibus >= 0 && ibus < 10) {
+        sprintf(str, "%.3f", ibus);
+        LCD_ShowString(80, 44, (const uint8_t*)str, GREEN, BLACK, 48, 0);
+    } else {
+        ibus = 0;
+        sprintf(str, "%.3f", ibus);
+        LCD_ShowString(80, 44, (const uint8_t*)str, GREEN, BLACK, 48, 0);
+    }
+
+    memset(str, 0, 10);
+    float powr = vbus * ibus;
+    if (powr >= 0 && powr < 10) {
+        sprintf(str, "0%.2f", powr);
+        LCD_ShowString(80, 86, (const uint8_t*)str, ORANGE, BLACK, 48, 0);
+    } else if (powr >= 10 && powr < 100) {
+        sprintf(str, "%.2f", powr);
+        LCD_ShowString(80, 86, (const uint8_t*)str, ORANGE, BLACK, 48, 0);
+    } else if (powr >= 100 && powr < 105) {
+        sprintf(str, "%.1f", powr);
+        LCD_ShowString(80, 86, (const uint8_t*)str, ORANGE, BLACK, 48, 0);
+    }
+
+    if (HAL_GPIO_ReadPin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin) == SET) {
+        LCD_ShowString(10, 102, "OFF", BLACK, GRAY, 32, 0);
+        LCD_Fill_DMA(1, 102, 10, LCD_H - 1, GRAY);
+        LCD_Fill_DMA(56, 102, 66, LCD_H - 1, GRAY);
+    } else {
+        LCD_ShowString(1, 102, " ON ", BLACK, GREEN, 32, 0);
     }
 }
 
@@ -84,69 +119,24 @@ void APP_LCD_main_init(void)
  */
 void APP_LCD_main_show(void)
 {
-    char str[10];
+    char str[10] = {0};
     float temp = App_getVBAT_V();
-    if (temp >= 0 && temp <= 25)
-    {
-        sprintf(str, "%.2fV ", temp);
-        LCD_ShowString(7, 84, (const uint8_t*)str, LIGHTBLUE, BLACK, 16, 0);
+    if (temp >= 0 && temp < 10) {
+        sprintf(str, " %.2fV", temp);
+    } else if (temp >= 10 && temp < 36) {
+        sprintf(str, "%.2fV", temp);
     }
+    LCD_ShowString(7, 84, (const uint8_t*)str, LIGHTBLUE, BLACK, 16, 0);
 
-    memset(str, 0, 10);
-    float vbus = App_getVBUS_V();
-    // vbus = 10;
-    if (vbus >= 0 && vbus < 10)
-    {
-        sprintf(str, "0%.2f", vbus);
-        LCD_ShowString(80, 1, (const uint8_t*)str, MAGENTA, BLACK, 48, 0);
-    }
-    else if (vbus >= 10 && vbus < 40)
-    {
-        sprintf(str, "%.2f", vbus);
-        LCD_ShowString(80, 1, (const uint8_t*)str, MAGENTA, BLACK, 48, 0);
-    } else {
-        vbus = 0;
-    }
+    LCD_show_main_page_status();
 
-    memset(str, 0, 10);
-    float ibus = App_getIBUS_A();
-    if (ibus >= 0 && ibus < 10)
-    {
-        sprintf(str, "%.3f", ibus);
-        LCD_ShowString(80, 44, (const uint8_t*)str, GREEN, BLACK, 48, 0);
-    } else {
-        ibus = 0;
-        sprintf(str, "%.3f", ibus);
-        LCD_ShowString(80, 44, (const uint8_t*)str, GREEN, BLACK, 48, 0);
+    if (SC8815_Config.SC8815_VBUS_Old != SC8815_Config.SC8815_VBUS) {
+        LCD_show_vset();
+        SC8815_Config.SC8815_VBUS_Old = SC8815_Config.SC8815_VBUS;
     }
-
-    memset(str, 0, 10);
-    float powr = vbus * ibus;
-    if (powr >= 0 && powr < 10)
-    {
-        sprintf(str, "0%.2f", powr);
-        LCD_ShowString(80, 86, (const uint8_t*)str, ORANGE, BLACK, 48, 0);
-    }
-    else if (powr >= 10 && powr < 100)
-    {
-        sprintf(str, "%.2f", powr);
-        LCD_ShowString(80, 86, (const uint8_t*)str, ORANGE, BLACK, 48, 0);
-    }
-    else if (powr >= 100 && powr < 105)
-    {
-        sprintf(str, "%.1f", powr);
-        LCD_ShowString(80, 86, (const uint8_t*)str, ORANGE, BLACK, 48, 0);
-    }
-
-    if (HAL_GPIO_ReadPin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin) == SET)
-    {
-        LCD_ShowString(10, 102, "OFF", BLACK, GRAY, 32, 0);
-        LCD_Fill_DMA(1, 102, 10, LCD_H - 1, GRAY);
-        LCD_Fill_DMA(56, 102, 66, LCD_H - 1, GRAY);
-    }
-    else
-    {
-        LCD_ShowString(1, 102, " ON ", BLACK, GREEN, 32, 0);
+    if (SC8815_Config.SC8815_IBUS_Limit_Old != SC8815_Config.SC8815_IBUS_Limit) {
+        LCD_show_iset();
+        SC8815_Config.SC8815_IBUS_Limit_Old = SC8815_Config.SC8815_IBUS_Limit;
     }
 }
 
@@ -188,55 +178,7 @@ void APP_LCD_presset_running_show(void)
     sprintf(str, "%d ", presset_config_set.set_circular);
     // LCD_ShowIntNum(15, 51, presset_config_set.set_circular, LIGHTBLUE, BLACK, 16, 0);
     LCD_ShowString(25, 51, (const uint8_t*)str, LIGHTBLUE, BLACK, 16, 0);
-
-    memset(str, 0, 10);
-    float vbus = App_getVBUS_V();
-    if (vbus < 10)
-    {
-        sprintf(str, "0%.2f", vbus);
-        LCD_ShowString(80, 1, (const uint8_t*)str, MAGENTA, BLACK, 48, 0);
-    }
-    else
-    {
-        sprintf(str, "%.2f", vbus);
-        LCD_ShowString(80, 1, (const uint8_t*)str, MAGENTA, BLACK, 48, 0);
-    }
-
-    memset(str, 0, 10);
-    float ibus = App_getIBUS_A();
-    sprintf(str, "%.3f", ibus);
-    if (strlen(str) <= 5) {
-        LCD_ShowString(80, 44, (const uint8_t*)str, GREEN, BLACK, 48, 0);
-    }
-
-    memset(str, 0, 10);
-    float powr = vbus * ibus;
-    if (powr < 10)
-    {
-        sprintf(str, "0%.2f", powr);
-        LCD_ShowString(80, 86, (const uint8_t*)str, ORANGE, BLACK, 48, 0);
-    }
-    else if (powr < 100)
-    {
-        sprintf(str, "%.2f", powr);
-        LCD_ShowString(80, 86, (const uint8_t*)str, ORANGE, BLACK, 48, 0);
-    }
-    else
-    {
-        sprintf(str, "%.1f", powr);
-        LCD_ShowString(80, 86, (const uint8_t*)str, ORANGE, BLACK, 48, 0);
-    }
-
-    if (HAL_GPIO_ReadPin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin) == SET)
-    {
-        LCD_ShowString(10, 102, "OFF", BLACK, GRAY, 32, 0);
-        LCD_Fill_DMA(1, 102, 10, LCD_H - 1, GRAY);
-        LCD_Fill_DMA(56, 102, 66, LCD_H - 1, GRAY);
-    }
-    else
-    {
-        LCD_ShowString(1, 102, " ON ", BLACK, GREEN, 32, 0);
-    }
+    LCD_show_main_page_status();
 }
 
 inline void presset_config_set_page_show(void)
@@ -298,11 +240,10 @@ void LCD_show_vset(void)
     float temp = SC8815_Config.SC8815_VBUS / 1000;
     if (temp >= 0 && temp < 10) {
         sprintf(str, " %.2fV", temp);
-        LCD_ShowString(7, 16, (const uint8_t*)str, LIGHTBLUE, BLACK, 16, 0);
     } else if (temp >= 10 && temp < 100) {
         sprintf(str, "%.2fV", temp);
-        LCD_ShowString(7, 16, (const uint8_t*)str, LIGHTBLUE, BLACK, 16, 0);
     }
+    LCD_ShowString(7, 16, (const uint8_t*)str, LIGHTBLUE, BLACK, 16, 0);
 }
 
 void LCD_show_iset(void)
