@@ -523,6 +523,9 @@ void protect_page_ui_process(menu_u8 index)
     case VBAT_PROTECT:
         LCD_ShowString(50, 50, "VBATPORT!", RED, BLACK, 32, 0);
         break;
+    case PRESSET_PROTECT:
+        LCD_ShowString(10, 50, "NeedInput>=9V", RED, BLACK, 32, 0);
+        break;
     default:
         break;
     }

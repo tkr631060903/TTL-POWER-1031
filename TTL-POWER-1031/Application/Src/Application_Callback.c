@@ -172,7 +172,7 @@ static void sc8815_tim_work(void)
         }
         if (SC8815_Config.sc8815_tim_work_time >= SC8815_TIM_WORK_TIME_FAST) //判断当前开启是否为首次
         {
-            if (presset_config_set.set_vbus[SC8815_Config.sc8815_tim_work_step] > 0 && presset_config_set.set_ibus[SC8815_Config.sc8815_tim_work_step] >= 300)
+            if (presset_config_set.set_vbus[SC8815_Config.sc8815_tim_work_step] > 0 && presset_config_set.set_ibus[SC8815_Config.sc8815_tim_work_step] >= SC8815_IBUS_MIN)
             {
                 App_SC8815_SetOutputVoltage(presset_config_set.set_vbus[SC8815_Config.sc8815_tim_work_step]);
                 SC8815_SetBusCurrentLimit(presset_config_set.set_ibus[SC8815_Config.sc8815_tim_work_step]);
@@ -214,7 +214,7 @@ static void sc8815_tim_work(void)
                     {
                         SC8815_Config.sc8815_tim_work_lcd_flush = tim_work_lcd_running;
                     }
-                    if (presset_config_set.set_vbus[SC8815_Config.sc8815_tim_work_step] > 0 && presset_config_set.set_ibus[SC8815_Config.sc8815_tim_work_step] >= 300)
+                    if (presset_config_set.set_vbus[SC8815_Config.sc8815_tim_work_step] > 0 && presset_config_set.set_ibus[SC8815_Config.sc8815_tim_work_step] >= SC8815_IBUS_MIN)
                     {
                         App_SC8815_SetOutputVoltage(presset_config_set.set_vbus[SC8815_Config.sc8815_tim_work_step]);
                         SC8815_SetBusCurrentLimit(presset_config_set.set_ibus[SC8815_Config.sc8815_tim_work_step]);

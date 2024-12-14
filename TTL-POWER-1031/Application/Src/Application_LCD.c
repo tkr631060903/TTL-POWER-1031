@@ -3,6 +3,7 @@
 #include "Application_SC8815.h"
 #include <string.h>
 #include "menu.h"
+#include "math.h"
 
 extern Application_Config APP_config;
 
@@ -105,8 +106,14 @@ static void LCD_show_main_page_status(void)
         LCD_ShowString(10, 102, "OFF", BLACK, GRAY, 32, 0);
         LCD_Fill_DMA(1, 102, 10, LCD_H - 1, GRAY);
         LCD_Fill_DMA(56, 102, 66, LCD_H - 1, GRAY);
+        LCD_Fill_DMA(220, 2, 236, 18, BLACK);
     } else {
         LCD_ShowString(1, 102, " ON ", BLACK, GREEN, 32, 0);
+        if (fabs(vbus - SC8815_Config.SC8815_VBUS) > 0.2) {
+            LCD_ShowString(220, 2, "CC", MAGENTA, BLACK, 16, 0);
+        } else {
+            LCD_ShowString(220, 2, "CV", GREEN, BLACK, 16, 0);
+        }
     }
 }
 

@@ -37,6 +37,7 @@ typedef enum
     VBUS_PROTECT = 0x00U,
     TEMP_PROTECT,
     VBAT_PROTECT,
+    PRESSET_PROTECT,
 } ProtectTypeDef;
 
 typedef struct

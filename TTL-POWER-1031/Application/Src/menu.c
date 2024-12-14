@@ -374,6 +374,10 @@ void presset_start_page_process(menu_u8 KeyValue)
         main_menu_Init();
         break;
     case KEY4_SHORT:
+        if (APP_config.fastCharge_InVoltage < 8.8) { //低于8.8V不允许启动预设
+            protect_page_ui_process(PRESSET_PROTECT);
+            break;
+        }
         SC8815_Config.sc8815_tim_work_time = SC8815_TIM_WORK_TIME_FAST;
         SC8815_Config.sc8815_tim_work_step = 0;
         memcpy(&presset_config_set.set_circular, &SC8815_TIM_Work[sub_index.presset_current_index].circular, sizeof(uint16_t));

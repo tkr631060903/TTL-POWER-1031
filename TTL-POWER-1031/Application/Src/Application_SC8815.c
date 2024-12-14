@@ -21,7 +21,7 @@
 #define SC8815_TIM_WORK_FLASH_SAVE_ADDR     STM32_FLASH_BASE+STM_SECTOR_SIZE*124
 #define SC8815_OUTPUT_CALIBRATION_TABLE_ADDR    	STM32_FLASH_BASE+STM_SECTOR_SIZE*121
 #define ALPHA_PARAMETER 0.1
-#define CALIBRATION_TABLE_VALUE(calibration_table, voltage) calibration_table[((int)voltage - 2700) / 100]	//获取校准表值,-2700表示=>输出电压最小值为2.7V
+#define CALIBRATION_TABLE_VALUE(calibration_table, voltage) calibration_table[((int)voltage - SC8815_VBUS_MIN) / 100]	//获取校准表值,-2700表示=>输出电压最小值为2.7V
 
 
 SC8815_ConfigTypeDef SC8815_Config;
@@ -500,7 +500,7 @@ void SC8815_output_calibration(uint8_t calibration)
 {
 	// float calibration_table_temp[334] = {0};
 	float* calibration_table_temp = (float*)SC8815_TIM_Work;
-	float voltage = 2700;
+	float voltage = SC8815_VBUS_MIN;
 	uint16_t* calibration_table = (uint16_t*)((uint32_t)SC8815_OUTPUT_CALIBRATION_TABLE_ADDR);
 	if (calibration_table[0] == 0xffff || calibration == 1) {
 		printf("SC8815 output calibration table is empty.\n");
@@ -544,7 +544,7 @@ void SC8815_auto_output(void)
 	uint32_t in_power = APP_config.fastCharge_InVoltage * APP_config.fastCharge_InCurrent * 1000000;
 	if (in_power > 0) {
 		while (in_power <= SC8815_Config.SC8815_IBUS_Limit * SC8815_Config.SC8815_VBUS) {
-			if (SC8815_Config.SC8815_IBUS_Limit > 300) {
+			if (SC8815_Config.SC8815_IBUS_Limit > SC8815_IBUS_MIN) {
 				SC8815_Config.SC8815_IBUS_Limit -= 100;
 			} else {
 				SC8815_Config.SC8815_VBUS -= 100;

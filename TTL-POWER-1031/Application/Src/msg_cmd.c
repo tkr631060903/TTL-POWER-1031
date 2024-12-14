@@ -405,7 +405,7 @@ int set_current_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
     }
     if (strstr(param[1], "UP") != NULL)
     {
-        if ((SC8815_Config.SC8815_IBUS_Limit + SC8815_Config.SC8815_IBUS_CMD_Step) > 6000)
+        if ((SC8815_Config.SC8815_IBUS_Limit + SC8815_Config.SC8815_IBUS_CMD_Step) > SC8815_IBUS_MAX)
         {
             return 0;
         }
@@ -469,7 +469,7 @@ int set_voltage_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
     }
     if (strstr(param[1], "UP") != NULL)
     {
-        if ((SC8815_Config.SC8815_VBUS + SC8815_Config.SC8815_VBUS_CMD_Step) > 36000)
+        if ((SC8815_Config.SC8815_VBUS + SC8815_Config.SC8815_VBUS_CMD_Step) > SC8815_VBUS_MAX)
         {
             return 0;
         }

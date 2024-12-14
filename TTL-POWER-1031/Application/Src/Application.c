@@ -44,7 +44,7 @@ void Application_main()
         key3_button_process();
         SET_LED1_Status();
 
-        if ((current_menu_index == MAIN_PAGE || current_menu_index == VOUT_PAGE || current_menu_index == IOUT_PAGE) && HAL_GetTick() - APP_LCD_main_show_time >= 300)
+        if ((current_menu_index == MAIN_PAGE || current_menu_index == VOUT_PAGE || current_menu_index == IOUT_PAGE) && HAL_GetTick() - APP_LCD_main_show_time >= SC8815_IBUS_MIN)
         {
             APP_LCD_main_show();
             APP_LCD_main_show_time = HAL_GetTick();
@@ -58,7 +58,7 @@ void Application_main()
             APP_config.lock_key = 0;
             SC8815_Config.sc8815_tim_work_lcd_flush = tim_work_lcd_none;
         }
-        else if ((SC8815_Config.sc8815_tim_work_lcd_flush == tim_work_lcd_running || current_menu_index == PRESSET_RUNNING_PAGE) && HAL_GetTick() - APP_LCD_main_show_time >= 300)
+        else if ((SC8815_Config.sc8815_tim_work_lcd_flush == tim_work_lcd_running || current_menu_index == PRESSET_RUNNING_PAGE) && HAL_GetTick() - APP_LCD_main_show_time >= SC8815_IBUS_MIN)
         {
             presset_running_page_process(0);
             APP_LCD_main_show_time = HAL_GetTick();

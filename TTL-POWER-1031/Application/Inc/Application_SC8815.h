@@ -37,7 +37,10 @@
 #define SC8815_SDA_Set() HAL_GPIO_WritePin(SC8815_GPIO_PORT_I2C, SC8815_I2C_SDA_Pin, GPIO_PIN_SET)
 
 #define i2c_delay(us) TIM2_Delay1us(us)
-
+#define SC8815_VBUS_MAX 36000
+#define SC8815_VBUS_MIN 2700
+#define SC8815_IBUS_MAX 6000
+#define SC8815_IBUS_MIN 500
 #define SC8815_TIM_WORK_TIME_FAST 0xFFFFFFFF //判断当前开启是否为首次
 #define I2C_MUTEX_TIME_MS  3  //I2C互斥锁时间单位ms
 
