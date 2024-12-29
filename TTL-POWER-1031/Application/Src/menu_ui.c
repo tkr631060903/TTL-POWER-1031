@@ -329,6 +329,8 @@ void presset_config_set_page_ui_process(menu_u8 KeyValue)
     {
     case LEFT:
     case RIGHT:
+    case KEY1_SHORT:
+    case KEY2_SHORT:
     case KEY3_SHORT:
         presset_config_set_page_show();
         break;
@@ -515,10 +517,10 @@ void protect_page_ui_process(menu_u8 index)
     switch (index)
     {
     case VBUS_PROTECT:
-        LCD_ShowString(50, 50, "SCP", RED, BLACK, 32, 0);
+        LCD_ShowString(100, 50, "SCP", RED, BLACK, 32, 0);
         break;
     case TEMP_PROTECT:
-        LCD_ShowString(50, 50, "TEMPPORT!", RED, BLACK, 32, 0);
+        LCD_ShowChinese(50, 50, "过温保护", RED, BLACK, 32, 0);
         break;
     case VBAT_PROTECT:
         LCD_ShowString(50, 50, "VBATPORT!", RED, BLACK, 32, 0);
@@ -534,11 +536,16 @@ void protect_page_ui_process(menu_u8 index)
 void about_page_ui_process(void)
 {
     current_menu_index = ABOUT_PAGE;
+    char name[sizeof(APP_config.device_name) + 1] = ":";
     LCD_Clear();
-    LCD_ShowString(0, 0, "Pocket Power Supply", LIGHTBLUE, BLACK, 32, 0);
-    LCD_ShowString(0, 33, "PPS-100W", LIGHTBLUE, BLACK, 32, 0);
-    LCD_ShowString(0, 66, "versions:1.1.0", LIGHTBLUE, BLACK, 32, 0);
-    LCD_ShowString(0, 99, "PPSS Studio", LIGHTBLUE, BLACK, 32, 0);
+    LCD_ShowChinese(0, 0, "名称", LIGHTBLUE, BLACK, 32, 0);
+    strcat(name, APP_config.device_name);
+    LCD_ShowString(64, 0, (uint8_t*)name, LIGHTBLUE, BLACK, 32, 0);
+    LCD_ShowChinese(0, 33, "型号", LIGHTBLUE, BLACK, 32, 0);
+    LCD_ShowString(64, 33, ":PD  POCKET", LIGHTBLUE, BLACK, 32, 0);
+    LCD_ShowChinese(0, 66, "版本", LIGHTBLUE, BLACK, 32, 0);
+    LCD_ShowString(64, 66, ":1.1.0", LIGHTBLUE, BLACK, 32, 0);
+    // LCD_ShowString(0, 0, "PD Pocket", LIGHTBLUE, BLACK, 32, 0);
 }
 
 void DC_limit_page_ui_process(menu_u8 KeyValue)

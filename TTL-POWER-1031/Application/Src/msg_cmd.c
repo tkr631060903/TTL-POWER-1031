@@ -24,7 +24,7 @@ static ascii_handler_fn
     set_switch_handler, set_current_handler, set_current_port_handler, set_current_step_handler,
     set_voltage_handler, set_voltage_step_handler, set_voltage_prot_handler, set_voltage_limit_handler,
     get_fetch_current_handler, get_fetch_voltage_handler, get_fetch_power_handler, get_versions_handler,
-    set_preset_handler, save_config_handler, upgrade_app_handler;
+    set_preset_handler, save_config_handler, upgrade_app_handler, set_power_limit_handler, set_name_handler;
 typedef struct lookup_table
 {
     const char *desc;
@@ -38,7 +38,8 @@ static const lookup_table_t handler_map_static[] = {
     {"OUTP", set_switch_handler}, {"CURR", set_current_handler}, {"CURR:PROT", set_current_port_handler}, {"CURR:STEP", set_current_step_handler},
     {"VOLT", set_voltage_handler}, {"VOLT:STEP", set_voltage_step_handler}, {"VOLT:PROT", set_voltage_prot_handler},
     {"VOLT:LIMIT", set_voltage_limit_handler}, {"MEAS:CURR?", get_fetch_current_handler}, {"MEAS:VOLT?", get_fetch_voltage_handler},
-    {"MEAS:POW?", get_fetch_power_handler}, {"SYST:VERS?", get_versions_handler}, {"preset", set_preset_handler}, {"save", save_config_handler}, {"upgrade", upgrade_app_handler}
+    {"MEAS:POW?", get_fetch_power_handler}, {"SYST:VERS?", get_versions_handler}, {"preset", set_preset_handler}, {"save", save_config_handler}, {"upgrade", upgrade_app_handler},
+    {"setpower", set_power_limit_handler}, {"setname", set_name_handler}
 };
 const lookup_table_t* handler_map = handler_map_static;
 
@@ -66,6 +67,7 @@ int setVBUS_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
     }
     value = value * 1000;
     SC8815_Config.SC8815_VBUS = value;
+    SC8815_Config.SC8815_VBUS_Old = value;
     App_SC8815_SetOutputVoltage(value);
     return 1;
 }
@@ -93,6 +95,7 @@ int setIBUS_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
     }
     value = value * 1000;
     SC8815_Config.SC8815_IBUS_Limit = value;
+    SC8815_Config.SC8815_IBUS_Limit_Old = value;
     SC8815_SetBusCurrentLimit(value);
     return 1;
 }
@@ -611,6 +614,19 @@ int get_versions_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
     return 1;
 }
 
+int set_power_limit_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
+{
+    if (param_cnt == 1) {
+        return 0;
+    }
+    int value;
+    sscanf(param[1], "%d", &value);
+    if (value > 255) {
+        return 0;
+    }
+    set_sc8815_power(value);
+    return 1;
+}
 
 int set_preset_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
 {
@@ -699,6 +715,19 @@ int start_preset_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
     memcpy(&presset_config_set.set_vbus, &SC8815_TIM_Work[value].SC8815_VBUS, sizeof(float) * SC8815_TIM_WORK_STEP);
     APP_config.lock_key = 1;
     SC8815_Config.sc8815_tim_work_lcd_flush = tim_work_lcd_cmd;
+    return 1;
+}
+
+int set_name_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
+{
+    if (param_cnt == 1) {
+        return 0;
+    }
+    if (strlen(param[1]) > 10) {
+        return 0;
+    }
+    memcpy(APP_config.device_name, param[1], strlen(param[1]));
+    app_config_save();
     return 1;
 }
 

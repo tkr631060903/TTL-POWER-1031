@@ -27,6 +27,7 @@
 SC8815_ConfigTypeDef SC8815_Config;
 SC8815_TIM_WorkTypeDef SC8815_TIM_Work[SC8815_TIM_WORK_SIZE] = { 0 };
 static uint8_t i2c_mutex = 0;	//I2C总线互斥信号,0表示总线空闲，1表示总线忙
+uint8_t sc8815_power = 100; //SC8815输出功率值
 
 uint8_t get_i2c_mutex(void)
 {
@@ -36,6 +37,16 @@ uint8_t get_i2c_mutex(void)
 void set_i2c_mutex(uint8_t status)
 {
 	i2c_mutex = status;
+}
+
+uint8_t get_sc8815_power(void)
+{
+	return sc8815_power;
+}
+
+void set_sc8815_power(uint8_t power)
+{
+	sc8815_power = power;
 }
 
 /**
@@ -51,10 +62,10 @@ void SoftwareDelay(uint8_t ms)
 //延时
 void IIC_delay(void)
 {
-	// uint8_t i;
-	// for (i = 0; i < 10; i++);
+	uint8_t i;
+	for (i = 0; i < 10; i++);
 	// i2c_delay(5);
-	i2c_delay(1);
+	// i2c_delay(1);
 }
 
 /**
@@ -220,7 +231,7 @@ void Application_SC8815_loadStart(void)
 		// HAL_Delay(10);
 		// Application_SoftwareDelay(10);
 		// SC8815_SFB_Enable();
-		SC8815_Config.sc8815_sfb_delay_ms = 50;	//最小值为1
+		SC8815_Config.sc8815_sfb_delay_ms = 20;	//最小值为1
 		SC8815_Config.VOUT_Open_Time = HAL_GetTick();
 	}
 }
@@ -352,7 +363,7 @@ void SC8815_Soft_Protect(void)
 	{
 		return;
 	}
-	if (App_getVBUS_V() < 1) {	// 输入保护 
+	if (App_getVBUS_V() < 1) {
 		HAL_Delay(500);
 		if (App_getVBUS_V() < 1) {
 			if (SC8815_Config.SC8815_Status == SC8815_TIM_WORK) {
@@ -520,7 +531,7 @@ void SC8815_output_calibration(uint8_t calibration)
 		HAL_Delay(5000);
 		for (int i = 0; i < 334; i++) {
 			SC8815_SetOutputVoltage(voltage);
-			HAL_Delay(300);
+			HAL_Delay(500);
 			calibration_table_temp[i] = voltage - App_getVBUS_mV();
 			voltage += 100;
 			percentage = i * 0.3;

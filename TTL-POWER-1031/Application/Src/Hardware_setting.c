@@ -34,12 +34,16 @@ void set_vout(menu_u8 KeyValue)
         if (SC8815_Config.SC8815_VBUS > APP_config.fastCharge_InVoltage * 1000 * 5) {
             SC8815_Config.SC8815_VBUS = APP_config.fastCharge_InVoltage * 1000 * 5;
         }
-        if (SC8815_Config.SC8815_VBUS >= SC8815_VBUS_MAX)
-        {
-            SC8815_Config.SC8815_VBUS = SC8815_VBUS_MAX;
+        if (SC8815_Config.SC8815_VBUS > SC8815_VBUS_MAX) {
+            SC8815_Config.SC8815_VBUS -= SC8815_Config.SC8815_VBUS_IBUS_Step;
+            break;
         }
         in_power = (APP_config.fastCharge_InVoltage * APP_config.fastCharge_InCurrent) * 1000000;
         out_power = SC8815_Config.SC8815_VBUS * SC8815_Config.SC8815_IBUS_Limit;
+        if (out_power > get_sc8815_power() * 1000000) {
+            SC8815_Config.SC8815_VBUS -= SC8815_Config.SC8815_VBUS_IBUS_Step;
+            break;
+        }
         if (out_power > in_power) {
             if (SC8815_Config.SC8815_VBUS * SC8815_IBUS_MIN <= in_power) {
                 while (in_power <= SC8815_Config.SC8815_IBUS_Limit * SC8815_Config.SC8815_VBUS) {
@@ -113,12 +117,16 @@ void set_iout(menu_u8 KeyValue)
         break;
     case RIGHT:
         SC8815_Config.SC8815_IBUS_Limit = SC8815_Config.SC8815_IBUS_Limit + SC8815_Config.SC8815_VBUS_IBUS_Step;
-        if (SC8815_Config.SC8815_IBUS_Limit >= SC8815_IBUS_MAX)
-        {
-            SC8815_Config.SC8815_IBUS_Limit = SC8815_IBUS_MAX;
+        if (SC8815_Config.SC8815_IBUS_Limit > SC8815_IBUS_MAX) {
+            SC8815_Config.SC8815_IBUS_Limit -= SC8815_Config.SC8815_VBUS_IBUS_Step;
+            break;
         }
         in_power = (APP_config.fastCharge_InVoltage * APP_config.fastCharge_InCurrent) * 1000000;
         out_power = SC8815_Config.SC8815_VBUS * SC8815_Config.SC8815_IBUS_Limit;
+        if (out_power > get_sc8815_power() * 1000000) {
+            SC8815_Config.SC8815_IBUS_Limit -= SC8815_Config.SC8815_VBUS_IBUS_Step;
+            break;
+        }
         if (out_power > in_power) {
             if (SC8815_Config.SC8815_IBUS_Limit * SC8815_VBUS_MIN <= in_power) {
                 while (in_power <= SC8815_Config.SC8815_IBUS_Limit * SC8815_Config.SC8815_VBUS) {
@@ -138,20 +146,10 @@ void set_iout(menu_u8 KeyValue)
         APP_config.app_config_save_time = HAL_GetTick();
         break;
     case KEY1_SHORT:
-        if (SC8815_Config.SC8815_VBUS_IBUS_Step == 1000)
-        {
-            SC8815_Config.SC8815_VBUS_IBUS_Step = 100;
-        }
-        else if (SC8815_Config.SC8815_VBUS_IBUS_Step == 10000)
-        {
-            SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
-        }
+        SC8815_Config.SC8815_VBUS_IBUS_Step = 100;
         break;
     case KEY2_SHORT:
-        if (SC8815_Config.SC8815_VBUS_IBUS_Step == 100)
-        {
-            SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
-        }
+        SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
         break;
     case KEY3_SHORT:
         SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
@@ -229,6 +227,7 @@ void set_fastcharge(menu_u32 index)
 void set_presset_config(menu_u8 KeyValue)
 {
     extern presset_config_set_typeDef presset_config_set;
+    uint32_t out_power = get_sc8815_power() * 1000000;
     switch (KeyValue)
     {
     case LEFT:
@@ -279,6 +278,9 @@ void set_presset_config(menu_u8 KeyValue)
             break;
         case PRESSET_SET_IOUT:
             presset_config_set.set_ibus[presset_config_set.current_index] += presset_config_set.set_setp;
+            while (out_power <= presset_config_set.set_vbus[presset_config_set.current_index] * presset_config_set.set_ibus[presset_config_set.current_index]) {
+                presset_config_set.set_ibus[presset_config_set.current_index] -= 100;
+            }
             if (presset_config_set.set_ibus[presset_config_set.current_index] >= SC8815_IBUS_MAX)
             {
                 presset_config_set.set_ibus[presset_config_set.current_index] = SC8815_IBUS_MAX;
@@ -330,7 +332,7 @@ void set_presset_config(menu_u8 KeyValue)
         {
             if (presset_config_set.set_setp == 100)
                 presset_config_set.set_setp = 1000;
-            else if (presset_config_set.set_setp == 1000)
+            else if (presset_config_set.set_setp == 1000 && presset_config_set.set_flag != PRESSET_SET_IOUT)
                 presset_config_set.set_setp = 10000;
             break;
         }
@@ -373,18 +375,10 @@ void set_dc_limit(menu_u8 KeyValue)
         }
         break;
     case KEY1_SHORT:
-        if (SC8815_Config.SC8815_VBUS_IBUS_Step == 100) {
-            SC8815_Config.SC8815_VBUS_IBUS_Step = 10;
-        } else if (SC8815_Config.SC8815_VBUS_IBUS_Step == 1000) {
-            SC8815_Config.SC8815_VBUS_IBUS_Step = 100;
-        }
+        SC8815_Config.SC8815_VBUS_IBUS_Step = 100;
         break;
     case KEY2_SHORT:
-        if (SC8815_Config.SC8815_VBUS_IBUS_Step == 10) {
-            SC8815_Config.SC8815_VBUS_IBUS_Step = 100;
-        } else if (SC8815_Config.SC8815_VBUS_IBUS_Step == 100) {
-            SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
-        }
+        SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
         break;
     case KEY4_SHORT:
         SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;

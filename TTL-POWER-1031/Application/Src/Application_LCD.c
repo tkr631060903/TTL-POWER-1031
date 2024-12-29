@@ -28,14 +28,19 @@ void APP_LCD_main_init(void)
     // LCD_DrawLine(0, LCD_H - 1, LCD_W, LCD_H - 1, LIGHTBLUE);
     // LCD_DrawLine(LCD_W - 1, 0, LCD_W - 1, LCD_H - 1, LIGHTBLUE);
 
-    LCD_Fill_DMA(66, 0, 67, LCD_H, LIGHTBLUE);  // |
-    LCD_Fill_DMA(0, 0, 1, LCD_H, LIGHTBLUE);    // |
-    LCD_Fill_DMA(0, 0, LCD_W, 1, LIGHTBLUE);
-    LCD_Fill_DMA(0, 32, 66, 33, LIGHTBLUE);
-    LCD_Fill_DMA(0, 67, 66, 68, LIGHTBLUE);
-    LCD_Fill_DMA(0, 100, 66, 101, LIGHTBLUE);
-    LCD_Fill_DMA(0, LCD_H - 1, LCD_W, LCD_H, LIGHTBLUE); // __
-    LCD_Fill_DMA(LCD_W - 1, 0, LCD_W, LCD_H, LIGHTBLUE);    // |
+    // LCD_Fill_DMA(66, 0, 67, LCD_H, LIGHTBLUE);  // |
+    // LCD_Fill_DMA(0, 0, 1, LCD_H, LIGHTBLUE);    // |
+    // LCD_Fill_DMA(0, 0, LCD_W, 1, LIGHTBLUE);
+    // LCD_Fill_DMA(0, 32, 66, 33, LIGHTBLUE);
+    // LCD_Fill_DMA(0, 67, 66, 68, LIGHTBLUE);
+    // LCD_Fill_DMA(0, 100, 66, 101, LIGHTBLUE);
+    // LCD_Fill_DMA(0, LCD_H - 1, LCD_W, LCD_H, LIGHTBLUE); // __
+    // LCD_Fill_DMA(LCD_W - 1, 0, LCD_W, LCD_H, LIGHTBLUE);    // |
+
+    LCD_Fill_DMA(66, 0, 72  , LCD_H, LIGHTBLUE);
+    LCD_Fill_DMA(5, 32, 61, 33, LIGHTBLUE);
+    LCD_Fill_DMA(5, 67, 61, 68, LIGHTBLUE);
+    LCD_Fill_DMA(5, 100, 61, 101, LIGHTBLUE);
 
     LCD_ShowString(20, 1, "Vset", LIGHTBLUE, BLACK, 16, 0);
     // LCD_ShowString(15, 16, "5.00V", LIGHTBLUE, BLACK, 16, 0);
@@ -44,10 +49,10 @@ void APP_LCD_main_init(void)
     LCD_ShowString(23, 68, "Vin", LIGHTBLUE, BLACK, 16, 0);
     // LCD_ShowString(15, 84, "12.0V", LIGHTBLUE, BLACK, 16, 0);
     // LCD_ShowString(1, 102, " ON ", BLACK, GREEN, 32, 0);
-    // LCD_ShowString(80, 1, "05.10", MAGENTA, BLACK, 48, 0);
-    LCD_ShowString(200, 16, "V", MAGENTA, BLACK, 32, 0);
-    // LCD_ShowString(80, 44, "04.98", GREEN, BLACK, 48, 0);
-    LCD_ShowString(200, 56, "A", GREEN, BLACK, 32, 0);
+    // LCD_ShowString(80, 1, "05.10", GREEN, BLACK, 48, 0);
+    LCD_ShowString(200, 16, "V", GREEN, BLACK, 32, 0);
+    // LCD_ShowString(80, 44, "04.98", MAGENTA, BLACK, 48, 0);
+    LCD_ShowString(200, 56, "A", MAGENTA, BLACK, 32, 0);
     // LCD_ShowString(80, 86, "025.4", ORANGE, BLACK, 48, 0);
     LCD_ShowString(200, 100, "W", ORANGE, BLACK, 32, 0);
     // if (HAL_GPIO_ReadPin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin) == SET)
@@ -70,10 +75,10 @@ static void LCD_show_main_page_status(void)
     // vbus = 10;
     if (vbus >= 0 && vbus < 10) {
         sprintf(str, "0%.2f", vbus);
-        LCD_ShowString(80, 1, (const uint8_t*)str, MAGENTA, BLACK, 48, 0);
+        LCD_ShowString(80, 1, (const uint8_t*)str, GREEN, BLACK, 48, 0);
     } else if (vbus >= 10 && vbus < 40) {
         sprintf(str, "%.2f", vbus);
-        LCD_ShowString(80, 1, (const uint8_t*)str, MAGENTA, BLACK, 48, 0);
+        LCD_ShowString(80, 1, (const uint8_t*)str, GREEN, BLACK, 48, 0);
     } else {
         vbus = 0;
     }
@@ -82,11 +87,11 @@ static void LCD_show_main_page_status(void)
     float ibus = App_getIBUS_A();
     if (ibus >= 0 && ibus < 10) {
         sprintf(str, "%.3f", ibus);
-        LCD_ShowString(80, 44, (const uint8_t*)str, GREEN, BLACK, 48, 0);
+        LCD_ShowString(80, 44, (const uint8_t*)str, MAGENTA, BLACK, 48, 0);
     } else {
         ibus = 0;
         sprintf(str, "%.3f", ibus);
-        LCD_ShowString(80, 44, (const uint8_t*)str, GREEN, BLACK, 48, 0);
+        LCD_ShowString(80, 44, (const uint8_t*)str, MAGENTA, BLACK, 48, 0);
     }
 
     memset(str, 0, 10);
@@ -109,7 +114,7 @@ static void LCD_show_main_page_status(void)
         LCD_Fill_DMA(220, 2, 236, 18, BLACK);
     } else {
         LCD_ShowString(1, 102, " ON ", BLACK, GREEN, 32, 0);
-        if (fabs(vbus - SC8815_Config.SC8815_VBUS) > 0.2) {
+        if (SC8815_Config.SC8815_VBUS - vbus * 1000 >= 200 && HAL_GetTick() - SC8815_Config.VOUT_Open_Time > 200) {
             LCD_ShowString(220, 2, "CC", MAGENTA, BLACK, 16, 0);
         } else {
             LCD_ShowString(220, 2, "CV", GREEN, BLACK, 16, 0);
@@ -136,27 +141,25 @@ void APP_LCD_main_show(void)
     LCD_ShowString(7, 84, (const uint8_t*)str, LIGHTBLUE, BLACK, 16, 0);
 
     LCD_show_main_page_status();
-
-    if (SC8815_Config.SC8815_VBUS_Old != SC8815_Config.SC8815_VBUS) {
-        LCD_show_vset();
-        SC8815_Config.SC8815_VBUS_Old = SC8815_Config.SC8815_VBUS;
-    }
-    if (SC8815_Config.SC8815_IBUS_Limit_Old != SC8815_Config.SC8815_IBUS_Limit) {
-        LCD_show_iset();
-        SC8815_Config.SC8815_IBUS_Limit_Old = SC8815_Config.SC8815_IBUS_Limit;
-    }
+    LCD_show_vset();
+    LCD_show_iset();
 }
 
 void APP_LCD_presset_running_init(void)
 {
-    LCD_Fill_DMA(66, 0, 67, LCD_H, LIGHTBLUE);  // |
-    LCD_Fill_DMA(0, 0, 1, LCD_H, LIGHTBLUE);    // |
-    LCD_Fill_DMA(0, 0, LCD_W, 1, LIGHTBLUE);
-    LCD_Fill_DMA(0, 33, 66, 34, LIGHTBLUE);
-    LCD_Fill_DMA(0, 67, 66, 68, LIGHTBLUE);
-    LCD_Fill_DMA(0, 100, 66, 101, LIGHTBLUE);
-    LCD_Fill_DMA(0, LCD_H - 1, LCD_W, LCD_H, LIGHTBLUE); // __
-    LCD_Fill_DMA(LCD_W - 1, 0, LCD_W, LCD_H, LIGHTBLUE);    // |
+    LCD_Fill_DMA(66, 0, 72, LCD_H, LIGHTBLUE);  // |
+    LCD_Fill_DMA(5, 33, 61, 34, LIGHTBLUE);
+    LCD_Fill_DMA(5, 67, 61, 68, LIGHTBLUE);
+    LCD_Fill_DMA(5, 100, 61, 101, LIGHTBLUE);
+
+    // LCD_Fill_DMA(66, 0, 67, LCD_H, LIGHTBLUE);  // |
+    // LCD_Fill_DMA(0, 0, 1, LCD_H, LIGHTBLUE);    // |
+    // LCD_Fill_DMA(0, 0, LCD_W, 1, LIGHTBLUE);
+    // LCD_Fill_DMA(0, 33, 66, 34, LIGHTBLUE);
+    // LCD_Fill_DMA(0, 67, 66, 68, LIGHTBLUE);
+    // LCD_Fill_DMA(0, 100, 66, 101, LIGHTBLUE);
+    // LCD_Fill_DMA(0, LCD_H - 1, LCD_W, LCD_H, LIGHTBLUE); // __
+    // LCD_Fill_DMA(LCD_W - 1, 0, LCD_W, LCD_H, LIGHTBLUE);    // |
     LCD_ShowString(10, 1, "Runing", LIGHTBLUE, BLACK, 16, 0);
     // LCD_ShowString(15, 16, "5.00V", LIGHTBLUE, BLACK, 16, 0);
     LCD_ShowString(20, 34, "Loop", LIGHTBLUE, BLACK, 16, 0);
@@ -164,10 +167,10 @@ void APP_LCD_presset_running_init(void)
     LCD_ShowString(23, 68, "Key", LIGHTBLUE, BLACK, 16, 0);
     LCD_ShowString(20, 84, "Lock", LIGHTBLUE, BLACK, 16, 0);
     // LCD_ShowString(1, 102, " ON ", BLACK, GREEN, 32, 0);
-    // LCD_ShowString(80, 1, "05.10", MAGENTA, BLACK, 48, 0);
-    LCD_ShowString(200, 16, "V", MAGENTA, BLACK, 32, 0);
-    // LCD_ShowString(80, 44, "04.98", GREEN, BLACK, 48, 0);
-    LCD_ShowString(200, 56, "A", GREEN, BLACK, 32, 0);
+    // LCD_ShowString(80, 1, "05.10", GREEN, BLACK, 48, 0);
+    LCD_ShowString(200, 16, "V", GREEN, BLACK, 32, 0);
+    // LCD_ShowString(80, 44, "04.98", MAGENTA, BLACK, 48, 0);
+    LCD_ShowString(200, 56, "A", MAGENTA, BLACK, 32, 0);
     // LCD_ShowString(80, 86, "025.4", ORANGE, BLACK, 48, 0);
     LCD_ShowString(200, 100, "W", ORANGE, BLACK, 32, 0);
 }
@@ -191,11 +194,39 @@ void APP_LCD_presset_running_show(void)
 inline void presset_config_set_page_show(void)
 {
     char str[10];
+    // int number = 0, length = 0, digits[5] = {0};
     extern presset_config_set_typeDef presset_config_set;
     if (presset_config_set.set_flag == PRESSET_SET_VOUT)
     {
         sprintf(str, "vset:%.2fV ", presset_config_set.set_vbus[presset_config_set.current_index] / 1000);
         LCD_ShowString(0, 0, (uint8_t *)str, BLACK, LIGHTBLUE, 32, 0);
+        // if (presset_config_set.set_vbus[presset_config_set.current_index] >= 0 && presset_config_set.set_vbus[presset_config_set.current_index] < 10000) {
+        //     sprintf(str, " %.2fV", presset_config_set.set_vbus[presset_config_set.current_index] / 1000);
+        // } else if (presset_config_set.set_vbus[presset_config_set.current_index] >= 10000 && presset_config_set.set_vbus[presset_config_set.current_index] < 100000) {
+        //     sprintf(str, "%.2fV", presset_config_set.set_vbus[presset_config_set.current_index] / 1000);
+        // }
+        // LCD_ShowString(0, 0, "vset:", LIGHTBLUE, BLACK, 32, 0);
+        // LCD_ShowString(80, 0, (uint8_t*)str, LIGHTBLUE, BLACK, 32, 0);
+        // if (presset_config_set.set_vbus[presset_config_set.current_index] >= presset_config_set.set_setp) {
+        //     // Take the tens, thousands, and hundreds values and store them in variate digits
+        //     number = presset_config_set.set_vbus[presset_config_set.current_index];
+        //     while (number > 0) {
+        //         number /= 10;
+        //         length++;
+        //     }
+        //     number = presset_config_set.set_vbus[presset_config_set.current_index];
+        //     for (int i = length - 1; i >= 0; i--) {
+        //         digits[i] = number / (int)pow(10, i);
+        //         number %= (int)pow(10, i);
+        //     }
+        // }
+        // if (presset_config_set.set_setp == 100) {
+        //     LCD_ShowIntNum(80 + 16 * 3, 0, digits[2], 1, BLACK, LIGHTBLUE, 32);
+        // } else if (presset_config_set.set_setp == 1000) {
+        //     LCD_ShowIntNum(80 + 16 * 1, 0, digits[3], 1, BLACK, LIGHTBLUE, 32);
+        // } else if (presset_config_set.set_setp == 10000) {
+        //     LCD_ShowIntNum(80, 0, digits[4], 1, BLACK, LIGHTBLUE, 32);
+        // }
     }
     else {
         sprintf(str, "vset:%.2fV ", presset_config_set.set_vbus[presset_config_set.current_index] / 1000);
@@ -208,6 +239,25 @@ inline void presset_config_set_page_show(void)
     {
         sprintf(str, "iset:%.2fA", presset_config_set.set_ibus[presset_config_set.current_index] / 1000);
         LCD_ShowString(0, 33, (uint8_t *)str, BLACK, LIGHTBLUE, 32, 0);
+        // LCD_ShowString(0, 33, (uint8_t*)str, LIGHTBLUE, BLACK, 32, 0);
+        // if (presset_config_set.set_ibus[presset_config_set.current_index] >= presset_config_set.set_setp) {
+        //     // Take the tens, thousands, and hundreds values and store them in variate digits
+        //     number = presset_config_set.set_ibus[presset_config_set.current_index];
+        //     while (number > 0) {
+        //         number /= 10;
+        //         length++;
+        //     }
+        //     number = presset_config_set.set_ibus[presset_config_set.current_index];
+        //     for (int i = length - 1; i >= 0; i--) {
+        //         digits[i] = number / (int)pow(10, i);
+        //         number %= (int)pow(10, i);
+        //     }
+        // }
+        // if (presset_config_set.set_setp == 100) {
+        //     LCD_ShowIntNum(80 + 16 * 2, 33, digits[2], 1, BLACK, LIGHTBLUE, 32);
+        // } else if (presset_config_set.set_setp == 1000) {
+        //     LCD_ShowIntNum(80, 33, digits[3], 1, BLACK, LIGHTBLUE, 32);
+        // }
     }
     else {
         sprintf(str, "iset:%.2fA", presset_config_set.set_ibus[presset_config_set.current_index] / 1000);

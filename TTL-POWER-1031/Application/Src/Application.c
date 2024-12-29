@@ -44,7 +44,7 @@ void Application_main()
         key3_button_process();
         SET_LED1_Status();
 
-        if ((current_menu_index == MAIN_PAGE || current_menu_index == VOUT_PAGE || current_menu_index == IOUT_PAGE) && HAL_GetTick() - APP_LCD_main_show_time >= SC8815_IBUS_MIN)
+        if ((current_menu_index == MAIN_PAGE || current_menu_index == VOUT_PAGE || current_menu_index == IOUT_PAGE) && HAL_GetTick() - APP_LCD_main_show_time >= 100)
         {
             APP_LCD_main_show();
             APP_LCD_main_show_time = HAL_GetTick();
@@ -58,7 +58,7 @@ void Application_main()
             APP_config.lock_key = 0;
             SC8815_Config.sc8815_tim_work_lcd_flush = tim_work_lcd_none;
         }
-        else if ((SC8815_Config.sc8815_tim_work_lcd_flush == tim_work_lcd_running || current_menu_index == PRESSET_RUNNING_PAGE) && HAL_GetTick() - APP_LCD_main_show_time >= SC8815_IBUS_MIN)
+        else if ((SC8815_Config.sc8815_tim_work_lcd_flush == tim_work_lcd_running || current_menu_index == PRESSET_RUNNING_PAGE) && HAL_GetTick() - APP_LCD_main_show_time >= 100)
         {
             presset_running_page_process(0);
             APP_LCD_main_show_time = HAL_GetTick();
@@ -300,13 +300,16 @@ void app_config_load(void)
         {
             if (i == 0)
             {
+                uint32_t CpuID =  *(volatile uint32_t*)(0x1FFFF7E8);
                 app_config_save_config.SC8815_VBUS = 5000;
                 app_config_save_config.SC8815_IBUS_Limit = 1000;
 				app_config_save_config.DC_IBAT_Limit = 3000;
                 app_config_save_config.temperature = TEMPERATURE_50;
                 app_config_save_config.lock_buzzer = 0;
-                app_config_save_config.SW_FREQ = SCHWI_FREQ_150KHz;
+                app_config_save_config.SW_FREQ = SCHWI_FREQ_300KHz_1;
                 app_config_save_config.upgrade_flag = 0;
+                memcpy(app_config_save_config.device_name, "PDP-", 4);
+                snprintf(app_config_save_config.device_name + 4, 7, "%X", CpuID);
                 break;
             }
             else
@@ -330,6 +333,7 @@ void app_config_load(void)
     APP_config.temperature = app_config_save_config.temperature;
     APP_config.lock_buzzer = app_config_save_config.lock_buzzer;
     SC8815_HardwareInitStruct.SW_FREQ = app_config_save_config.SW_FREQ;
+    memcpy(APP_config.device_name, app_config_save_config.device_name, sizeof(APP_config.device_name));
 }
 
 void app_config_save(void)

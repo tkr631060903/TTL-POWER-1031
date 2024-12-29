@@ -42,7 +42,7 @@
 #define SC8815_IBUS_MAX 6000
 #define SC8815_IBUS_MIN 500
 #define SC8815_TIM_WORK_TIME_FAST 0xFFFFFFFF //判断当前开启是否为首次
-#define I2C_MUTEX_TIME_MS  3  //I2C互斥锁时间单位ms
+#define I2C_MUTEX_TIME_MS  5  //I2C互斥锁时间单位ms
 
 typedef enum
 {
@@ -112,6 +112,8 @@ void SC8815_Preset_Read(void);
 void SC8815_Preset_Save(void);
 uint8_t get_i2c_mutex(void);
 void set_i2c_mutex(uint8_t status);
+uint8_t get_sc8815_power(void);
+void set_sc8815_power(uint8_t power);
 void i2c_Start(void);
 void i2c_WaitAck(void);
 void i2c_SendByte(uint8_t dat);

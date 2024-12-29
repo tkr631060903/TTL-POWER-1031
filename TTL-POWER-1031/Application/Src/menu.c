@@ -296,9 +296,11 @@ void presset_config_set_page_process(menu_u8 KeyValue)
         break;
     case KEY1_SHORT:
         set_presset_config(KeyValue);
+        presset_config_set_page_ui_process(KeyValue);
         break;
     case KEY2_SHORT:
         set_presset_config(KeyValue);
+        presset_config_set_page_ui_process(KeyValue);
         break;
     case KEY2_LONG:
         main_page_init();
@@ -544,7 +546,7 @@ void fastch_page_process(menu_u8 KeyValue)
 }
 
 /**
- * @brief 设置开关频率页面处理
+ * @brief 校准输出电压页面处理
  * 
  * @param KeyValue 触发键值
  */
@@ -568,7 +570,7 @@ void VBUS_calibration_page_process(menu_u8 KeyValue)
             SC8815_output_calibration(1);
             main_page_init();
         } else {
-            main_menu_page_ui_process(sub_index.main_menu_current_index, KeyValue);
+            main_menu_page_ui_process(sub_index.main_menu_current_index, KEY3_SHORT);
         }
         break;
     case KEY2_LONG:
