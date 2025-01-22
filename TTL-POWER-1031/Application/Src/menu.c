@@ -420,7 +420,7 @@ void presset_running_page_process(menu_u8 KeyValue)
         Application_SC8815_Standby();
         SC8815_Config.sc8815_tim_work_lcd_flush = tim_work_lcd_main;
         App_SC8815_SetOutputVoltage(SC8815_Config.SC8815_VBUS);
-        SC8815_SetBusCurrentLimit(SC8815_Config.SC8815_IBUS_Limit);
+        App_SC8815_SetBusCurrentLimit(SC8815_Config.SC8815_IBUS_Limit);
         break;
     default:
         break;
@@ -468,7 +468,7 @@ void buzzer_page_process(menu_u8 KeyValue)
  */
 void temperature_page_process(menu_u8 KeyValue)
 {
-    float temperature[] = {TEMPERATURE_50, TEMPERATURE_60, TEMPERATURE_70};
+    float temperature[] = {TEMPERATURE_65, TEMPERATURE_75, TEMPERATURE_85};
     int i;
     switch (KeyValue)
     {

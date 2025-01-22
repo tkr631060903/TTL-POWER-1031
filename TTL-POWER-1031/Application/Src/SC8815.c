@@ -18,6 +18,7 @@
 SC8815_BatteryConfigTypeDef SC8815_BatteryConfigStruct = { 0 };
 SC8815_HardwareInitTypeDef SC8815_HardwareInitStruct = { 0 };
 SC8815_InterruptStatusTypeDef SC8815_InterruptMaskInitStruct = { 0 };
+extern float SCHW_VBUS_RSHUNT;
 
 /****************************************
 * @brief    初始化 SC8815
@@ -386,7 +387,8 @@ void SC8815_SetBatteryCurrLimit(uint16_t NewILIM)
 	uint16_t RATIO_Value;
 
 	RATIO_Value = ((I2C_ReadRegByte(SC8815_ADDR, SCREG_RATIO) & 0x10) == 16) ? 12 : 6; //取得 IBAT 的比率
-	tmp = (16 * (NewILIM) * (SCHW_VBUS_RSHUNT)) / (625 * RATIO_Value) - 1;             //计算 LIM 设置值
+	// tmp = (16 * (NewILIM) * (SCHW_VBUS_RSHUNT)) / (625 * RATIO_Value) - 1;             //计算 LIM 设置值
+	tmp = (16 * (NewILIM) * (SCHW_BATT_RSHUNT)) / (625 * RATIO_Value) - 1;             //计算 LIM 设置值
 	I2C_WriteRegByte(SC8815_ADDR, SCREG_IBAT_LIM_SET, tmp);                            //写入到 SC8815 寄存器
 
 	//printf("SC8815_SetBatteryCurrLimit = %d real=%d tmp=%02X.\n",NewILIM,SC8815_GetBatteryCurrLimit(),tmp);

@@ -49,9 +49,9 @@ float INA226_ReadVoltage(void)
 float INA226_ReadCurrent(void)
 {
     if (SC8815_Config.SC8815_VBUS >= APP_config.fastCharge_InVoltage * 1000 - 200) {
-        return (INA226_Read2Byte(Current_Reg) * 0.1682) - 5.5;  //boost
+        return (INA226_Read2Byte(Current_Reg) * 0.265) - 5.5;  //boost
     } else {
-        return INA226_Read2Byte(Current_Reg) * 0.1716;   //buck
+        return (INA226_Read2Byte(Current_Reg) * 0.265) - 5.5;   //buck
     }
 }
 
@@ -70,5 +70,6 @@ void INA226_Init(void)
     // INA226_Write2Byte(Config_Reg, 0x4527);
     INA226_Write2Byte(Config_Reg, 0x41FF);
     HAL_Delay(5);
-    INA226_Write2Byte(Calib_Reg, 0x17D7);
+    // INA226_Write2Byte(Calib_Reg, 0x17D7);
+    INA226_Write2Byte(Calib_Reg, 0x0F6C);
 }

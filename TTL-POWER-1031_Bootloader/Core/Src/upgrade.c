@@ -81,17 +81,17 @@ void upgrade_process(uint8_t* Buf, uint32_t *Len)
         memcpy(&app_data_buff[app_data_count], Buf, size);
 
         // memcpy(&app_data_buff[app_data_count], Buf, size);
-        app_data_count += size;
-    }
+            app_data_count += size;
+        }
     if (size < 0x40)
     {
         STMFLASH_Write(app_addr, (uint16_t*)app_data_buff, app_data_count >> 1);
 		for(int i;i<1000000;i++);
-        CDC_Transmit_FS("done", strlen("done"));
-        g_app_config_save_config.upgrade_flag = 2;
-        app_config_save();
-        __set_FAULTMASK(1); //关闭所有中断
-        NVIC_SystemReset(); //进行软件复位
+            CDC_Transmit_FS("done", strlen("done"));
+            g_app_config_save_config.upgrade_flag = 2;
+            app_config_save();
+            __set_FAULTMASK(1); //关闭所有中断
+            NVIC_SystemReset(); //进行软件复位
         return;
     }
 	if (app_data_count >= APP_DATA_BUFF_SIZE)
@@ -114,11 +114,22 @@ void upgrade_quit(void)
     NVIC_SystemReset(); //进行软件复位
 }
 
+static uint32_t timer = 0;
 void upgrade(void)
 {
 	aes_init(AES128key);
     g_app_config_save_config.upgrade_flag = 1;
     app_config_load();    //读取APP参数
+	timer = HAL_GetTick();
+    //bootloader增加同时长按key1，key2按键3s进入升级模式
+    while (HAL_GPIO_ReadPin(GPIOB, KEY1_Pin) == RESET && HAL_GPIO_ReadPin(GPIOB, KEY2_Pin) == RESET) {
+        if (HAL_GetTick() - timer > 3000) {
+            CDC_Transmit_FS("Upgrade mode!\r\n", strlen("Upgrade mode!\r\n"));
+            g_app_config_save_config.upgrade_flag = 1;
+            break;
+        }
+    }
+
     if (g_app_config_save_config.upgrade_flag == 0) {
         iap_load_app();	//跳转到APP的首地址
     }
@@ -131,6 +142,7 @@ void upgrade(void)
         else if (g_app_config_save_config.upgrade_flag == 3)
         {
             CDC_Transmit_FS("Upgrade failed!\r\n", strlen("Upgrade failed!\r\n"));
+            g_app_config_save_config.upgrade_flag = 1;
         }
     }
 }

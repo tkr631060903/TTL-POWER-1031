@@ -196,7 +196,11 @@ void husb238_init(void)
     if (PD_Power > 0) {
         //HUSB238_GetCapabilities(&PD_Voltage, &PD_Current);
         LCD_ShowChinese(20, 32, "快充输入能力", LIGHTBLUE, BLACK, 32, 0);
-        sprintf(str, "%dV %.1fA %.1fW", PDCapabilities[index].voltage, PDCapabilities[index].current, PD_Power);
+        if (PD_Power < 100) {
+            sprintf(str, "%dV %.1fA %.1fW", PDCapabilities[index].voltage, PDCapabilities[index].current, PD_Power);
+        } else {
+            sprintf(str, "%dV %.1fA %.0fW", PDCapabilities[index].voltage, PDCapabilities[index].current, PD_Power);
+        }
         LCD_ShowString(6, 80, (const uint8_t*)str, LIGHTBLUE, BLACK, 32, 0);
         APP_config.fastCharge_InVoltage = PDCapabilities[index].voltage;
         APP_config.fastCharge_InCurrent = PDCapabilities[index].current;

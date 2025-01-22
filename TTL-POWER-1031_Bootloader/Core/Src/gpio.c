@@ -46,7 +46,7 @@ void USB_reset(void)
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
   HAL_GPIO_WritePin(GPIOA, GPIO_PIN_12, GPIO_PIN_RESET);                                            
   HAL_Delay(65);
-  //先把PA12拉低再拉高，利用D+模拟USB的拔插动作   
+  //Pull the PA12 down and then up, and use D+ to simulate the USB plug and unplug action
   HAL_GPIO_WritePin(GPIOA, GPIO_PIN_12, GPIO_PIN_SET);
   HAL_Delay(65);
 }
@@ -62,15 +62,20 @@ void USB_reset(void)
 void MX_GPIO_Init(void)
 {
 
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
+
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOD_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
+
+  /*Configure GPIO pins : PBPin PBPin */
+  GPIO_InitStruct.Pin = KEY2_Pin|KEY1_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /* USER CODE BEGIN 2 */
   USB_reset();
   /* USER CODE END 2 */
 }
-
-/* USER CODE BEGIN 2 */
-
-/* USER CODE END 2 */

@@ -33,8 +33,6 @@ static Menu_NameTypeDef menu_name[] = {
 void Enter_Page(menu_i32 index, menu_u8 KeyValue)
 {
     sub_index.Current_Page = index;
-    int i;
-    uint8_t FSW_temp[] = {SCHWI_FREQ_150KHz, SCHWI_FREQ_300KHz_1, SCHWI_FREQ_300KHz_2, SCHWI_FREQ_450KHz};
     switch (sub_index.Current_Page)
     {
     case 0:
@@ -74,16 +72,9 @@ void Enter_Page(menu_i32 index, menu_u8 KeyValue)
         buzzer_page_ui_process(APP_config.lock_buzzer);
         break;
     case 5:
-        sub_index.VBUS_calibration_current_index = SCHWI_FREQ_150KHz;
-        for(i = 0; i < 4; i++)
-        {
-            if (FSW_temp[i] == app_config_save_config.SW_FREQ)
-            {
-                break;
-            }
-        }
+        sub_index.VBUS_calibration_current_index = 0;
         LCD_Clear();
-        VBUS_calibration_page_ui_process(FSW_temp[i]);
+        VBUS_calibration_page_ui_process(sub_index.VBUS_calibration_current_index);
         break;
     case 6:
         about_page_ui_process();
@@ -376,7 +367,7 @@ void temperature_page_ui_process(float index)
 {
     current_menu_index = TEMPERATURE_PAGE;
     sub_index.temperature_current_index = index;
-    if (index == TEMPERATURE_50)
+    if (index == TEMPERATURE_65)
     {
         LCD_ShowChinese(0, 0, "过温保护", BLACK, LIGHTBLUE, 32, 0);
         LCD_ShowString(128, 0, ":50", BLACK, LIGHTBLUE, 32, 0);
@@ -385,7 +376,7 @@ void temperature_page_ui_process(float index)
         LCD_ShowChinese(0, 66, "过温保护", LIGHTBLUE, BLACK, 32, 0);
         LCD_ShowString(128, 66, ":70", LIGHTBLUE, BLACK, 32, 0);
     }
-    else if (index == TEMPERATURE_60)
+    else if (index == TEMPERATURE_75)
     {
         LCD_ShowChinese(0, 0, "过温保护", LIGHTBLUE, BLACK, 32, 0);
         LCD_ShowString(128, 0, ":50", LIGHTBLUE, BLACK, 32, 0);
@@ -394,7 +385,7 @@ void temperature_page_ui_process(float index)
         LCD_ShowChinese(0, 66, "过温保护", LIGHTBLUE, BLACK, 32, 0);
         LCD_ShowString(128, 66, ":70", LIGHTBLUE, BLACK, 32, 0);
     }
-    else if (index == TEMPERATURE_70)
+    else if (index == TEMPERATURE_85)
     {
         LCD_ShowChinese(0, 0, "过温保护", LIGHTBLUE, BLACK, 32, 0);
         LCD_ShowString(128, 0, ":50", LIGHTBLUE, BLACK, 32, 0);

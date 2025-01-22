@@ -18,7 +18,7 @@ uint32_t cmd_Index = 0;  //串口1命令计数指针
 typedef char *CmdStr[CMD_STR_CNT];
 typedef int ascii_handler_fn(CmdStr param, short param_cnt, uint8_t cmd_source);
 static ascii_handler_fn
-    setVBUS_handler, setIBUS_handler, setIBAT_handler, setIRCOMP_handler, setVBAT_SEL_handler, setCSEL_handler,
+    setIBAT_handler, setIRCOMP_handler, setVBAT_SEL_handler, setCSEL_handler, calibration_ibus_handler,
     setVCELL_handler, setSW_FREQ_handler, setDeadTime_handler, setFB_Mode_handler, setDITHER_handler,
     setSLEW_SET_handler, setILIM_BW_handler, get_msg_handler, lock_key_handler, start_preset_handler,
     set_switch_handler, set_current_handler, set_current_port_handler, set_current_step_handler,
@@ -31,7 +31,7 @@ typedef struct lookup_table
     ascii_handler_fn *handler;
 } lookup_table_t;
 static const lookup_table_t handler_map_static[] = {
-    {"setvbus", setVBUS_handler}, {"setibus", setIBUS_handler}, {"setibat", setIBAT_handler}, {"setircomp", setIRCOMP_handler},
+    {"setibat", setIBAT_handler}, {"setircomp", setIRCOMP_handler}, {"calibus", calibration_ibus_handler},
     {"setvbatsel", setVBAT_SEL_handler}, {"setcsel", setCSEL_handler}, {"setvcell", setVCELL_handler}, {"setswfreq", setSW_FREQ_handler}, 
     {"setdeadtime", setDeadTime_handler}, {"setfbmode", setFB_Mode_handler}, {"setdither", setDITHER_handler},
     {"setslewset", setSLEW_SET_handler}, {"setilimbw", setILIM_BW_handler}, {"getmsg", get_msg_handler}, {"lockkey", lock_key_handler}, {"startPreset", start_preset_handler},
@@ -42,63 +42,6 @@ static const lookup_table_t handler_map_static[] = {
     {"setpower", set_power_limit_handler}, {"setname", set_name_handler}
 };
 const lookup_table_t* handler_map = handler_map_static;
-
-
-/**
- * @brief 设置 SC8815 在 OTG 反向输出时的输出电压
- * 
- * @param param 命令参数
- * @param param_cnt 命令参数个数
- * @return 1-命令执行成功，0-命令执行失败 
- */
-int setVBUS_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
-{
-    if (param_cnt == 1)
-    {
-        return 0;
-    }
-    float value;
-    sscanf(param[1], "%f", &value);
-    if (value > 36)
-    {
-        return 0;
-    } else if (value < 2.7) {
-        return 0;
-    }
-    value = value * 1000;
-    SC8815_Config.SC8815_VBUS = value;
-    SC8815_Config.SC8815_VBUS_Old = value;
-    App_SC8815_SetOutputVoltage(value);
-    return 1;
-}
-
-/**
- * @brief 设置 SC8815 VBUS 路径上的限流值,双向通用
- * 
- * @param param 命令参数
- * @param param_cnt 命令参数个数
- * @return 1-命令执行成功，0-命令执行失败 
- */
-int setIBUS_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
-{
-    if (param_cnt == 1)
-    {
-        return 0;
-    }
-    float value;
-    sscanf(param[1], "%f", &value);
-    if (value > 6)
-    {
-        return 0;
-    } else if (value < 0.3) {
-        return 0;
-    }
-    value = value * 1000;
-    SC8815_Config.SC8815_IBUS_Limit = value;
-    SC8815_Config.SC8815_IBUS_Limit_Old = value;
-    SC8815_SetBusCurrentLimit(value);
-    return 1;
-}
 
 /**
  * @brief 设置 SC8815 电池路径上的限流值,双向通用
@@ -400,6 +343,13 @@ int set_switch_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
     return 1;
 }
 
+/**
+ * @brief 设置 SC8815 VBUS 路径上的限流值,双向通用
+ * 
+ * @param param 命令参数
+ * @param param_cnt 命令参数个数
+ * @return 1-命令执行成功，0-命令执行失败 
+ */
 int set_current_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
 {
     if (param_cnt == 1)
@@ -414,7 +364,7 @@ int set_current_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
         }
         SC8815_Config.SC8815_IBUS_Limit += SC8815_Config.SC8815_IBUS_CMD_Step;
         SC8815_Config.SC8815_IBUS_Limit_Old = SC8815_Config.SC8815_IBUS_Limit;
-        SC8815_SetBusCurrentLimit(SC8815_Config.SC8815_IBUS_Limit);
+        App_SC8815_SetBusCurrentLimit(SC8815_Config.SC8815_IBUS_Limit);
     }
     else
     {
@@ -430,8 +380,7 @@ int set_current_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
         }
         value = value * 1000;
         SC8815_Config.SC8815_IBUS_Limit = value;
-        SC8815_Config.SC8815_IBUS_Limit_Old = value;
-        SC8815_SetBusCurrentLimit(value);
+        App_SC8815_SetBusCurrentLimit(value);
     }
     return 1;
 }
@@ -447,7 +396,7 @@ int set_current_port_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
     // value = value * 1000; 
     // SC8815_Config.SC8815_IBUS_Limit = value;
     // SC8815_Config.SC8815_IBUS_Limit_Old = value;
-    // SC8815_SetBusCurrentLimit(value);
+    // App_SC8815_SetBusCurrentLimit(value);
     return 1;
 }
 
@@ -464,6 +413,13 @@ int set_current_step_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
     return 1;
 }
 
+/**
+ * @brief 设置 SC8815 在 OTG 反向输出时的输出电压
+ * 
+ * @param param 命令参数
+ * @param param_cnt 命令参数个数
+ * @return 1-命令执行成功，0-命令执行失败 
+ */
 int set_voltage_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
 {
     if (param_cnt == 1)
@@ -492,7 +448,6 @@ int set_voltage_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
         }
         value = value * 1000;
         SC8815_Config.SC8815_VBUS = value;
-        SC8815_Config.SC8815_VBUS_Old = value;
         App_SC8815_SetOutputVoltage(value);
     }
     return 1;
@@ -544,11 +499,11 @@ int get_fetch_current_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
     // }
     if (cmd_source)
     {
-        usb_printf("%f", App_getIBUS_A());
+        usb_printf("%d", (unsigned int)App_getIBUS_mA());
     }
     else
     {
-        printf("%f", App_getIBUS_A());
+        printf("%d", (unsigned int)App_getIBUS_mA());
     }
     return 1;
 }
@@ -568,11 +523,11 @@ int get_fetch_voltage_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
     // }
     if (cmd_source)
     {
-        usb_printf("%f", App_getVBUS_V());
+        usb_printf("%d", (unsigned int)App_getVBUS_mV());
     }
     else
     {
-        printf("%f", App_getVBUS_V());
+        printf("%d", (unsigned int)App_getVBUS_mV());
     }
     return 1;
 }
@@ -592,11 +547,11 @@ int get_fetch_power_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
     // }
     if (cmd_source)
     {
-        usb_printf("%f", App_getVBUS_V() * App_getIBUS_A());
+        usb_printf("%d", (unsigned int)(App_getVBUS_V() * App_getIBUS_A()));
     }
     else
     {
-        printf("%f", App_getVBUS_V() * App_getIBUS_A());
+        printf("%d", (unsigned int)(App_getVBUS_V() * App_getIBUS_A()));
     }
     return 1;
 }
@@ -728,6 +683,17 @@ int set_name_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
     }
     memcpy(APP_config.device_name, param[1], strlen(param[1]));
     app_config_save();
+    return 1;
+}
+
+int calibration_ibus_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
+{
+    if (param_cnt == 1) {
+        return 0;
+    }
+    int value;
+    sscanf(param[1], "%d", &value);
+    SC8815_Config.sc8815_calibration_ibus_flag = value;
     return 1;
 }
 

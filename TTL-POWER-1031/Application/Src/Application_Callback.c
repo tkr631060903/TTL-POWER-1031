@@ -109,6 +109,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
         }
         sc8815_tim_work();
         get_msg();
+        reflesh_VBUS_IBUS();
         //SC8815_Soft_Protect();
 
         if (HAL_GPIO_ReadPin(Rotar_L_GPIO_Port, Rotar_L_Pin) != previous)
@@ -138,8 +139,8 @@ static void get_msg(void)
     {
         extern Application_Config APP_config;
         uint32_t temp[6];
-        temp[0] = App_get_msg_getVBUS_mV();
-        temp[1] = App_get_msg_getIBUS_mA();
+        temp[0] = App_getVBUS_mV();
+        temp[1] = App_getIBUS_mA();
         temp[2] = (temp[0] / 1000) * (temp[1] / 1000);
         if (HAL_GPIO_ReadPin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin) == GPIO_PIN_SET)
         {
@@ -175,13 +176,13 @@ static void sc8815_tim_work(void)
             if (presset_config_set.set_vbus[SC8815_Config.sc8815_tim_work_step] > 0 && presset_config_set.set_ibus[SC8815_Config.sc8815_tim_work_step] >= SC8815_IBUS_MIN)
             {
                 App_SC8815_SetOutputVoltage(presset_config_set.set_vbus[SC8815_Config.sc8815_tim_work_step]);
-                SC8815_SetBusCurrentLimit(presset_config_set.set_ibus[SC8815_Config.sc8815_tim_work_step]);
+                App_SC8815_SetBusCurrentLimit(presset_config_set.set_ibus[SC8815_Config.sc8815_tim_work_step]);
                 if (HAL_GPIO_ReadPin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin) == SET) {
                     Application_SC8815_Run();
                     SC8815_SFB_Disable();
                     // SoftwareDelay(10);
                     // SC8815_SFB_Enable();
-                    SC8815_Config.sc8815_sfb_delay_ms = 50;	//最小值为1
+                    SC8815_Config.sc8815_sfb_delay_ms = 20;	//最小值为1
                 }
             }
             else
@@ -217,13 +218,13 @@ static void sc8815_tim_work(void)
                     if (presset_config_set.set_vbus[SC8815_Config.sc8815_tim_work_step] > 0 && presset_config_set.set_ibus[SC8815_Config.sc8815_tim_work_step] >= SC8815_IBUS_MIN)
                     {
                         App_SC8815_SetOutputVoltage(presset_config_set.set_vbus[SC8815_Config.sc8815_tim_work_step]);
-                        SC8815_SetBusCurrentLimit(presset_config_set.set_ibus[SC8815_Config.sc8815_tim_work_step]);
+                        App_SC8815_SetBusCurrentLimit(presset_config_set.set_ibus[SC8815_Config.sc8815_tim_work_step]);
                         if (HAL_GPIO_ReadPin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin) == SET) {
                             Application_SC8815_Run();
                             SC8815_SFB_Disable();
                             // SoftwareDelay(10);
                             // SC8815_SFB_Enable();
-                            SC8815_Config.sc8815_sfb_delay_ms = 50;	//最小值为1
+                            SC8815_Config.sc8815_sfb_delay_ms = 20;	//最小值为1
                         }
                     }
                     else

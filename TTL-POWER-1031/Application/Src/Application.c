@@ -97,6 +97,11 @@ void Application_main()
             APP_config.app_config_save_flag = 0;
         }
 
+        if (SC8815_Config.sc8815_calibration_ibus_flag) {
+            SC8815_IBUS_calibration();
+            SC8815_Config.sc8815_calibration_ibus_flag = 0;
+        }
+
         // printf("temperature:%f\n", App_getTemp_V());
         // CDC_Transmit_FS((uint8_t*)&starttick, sizeof(uint32_t)); //CDC_Receive_FS中断接收
         // printf("tick: %d\n", HAL_GetTick() - starttick);
@@ -304,7 +309,7 @@ void app_config_load(void)
                 app_config_save_config.SC8815_VBUS = 5000;
                 app_config_save_config.SC8815_IBUS_Limit = 1000;
 				app_config_save_config.DC_IBAT_Limit = 3000;
-                app_config_save_config.temperature = TEMPERATURE_50;
+                app_config_save_config.temperature = TEMPERATURE_65;
                 app_config_save_config.lock_buzzer = 0;
                 app_config_save_config.SW_FREQ = SCHWI_FREQ_300KHz_1;
                 app_config_save_config.upgrade_flag = 0;

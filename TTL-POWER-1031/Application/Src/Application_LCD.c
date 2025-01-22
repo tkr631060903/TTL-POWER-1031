@@ -70,41 +70,56 @@ void APP_LCD_main_init(void)
 
 static void LCD_show_main_page_status(void)
 {
-    char str[10] = {0};
+    char str[16] = {0};
     float vbus = App_getVBUS_V();
+    extern presset_config_set_typeDef presset_config_set;
     // vbus = 10;
-    if (vbus >= 0 && vbus < 10) {
+    if (vbus >= 0 && vbus < 9.990) {
         sprintf(str, "0%.2f", vbus);
-        LCD_ShowString(80, 1, (const uint8_t*)str, GREEN, BLACK, 48, 0);
-    } else if (vbus >= 10 && vbus < 40) {
+        if (strlen((char*)str) == 5 && (char*)str[5] == '\0') {
+            LCD_ShowString(80, 1, (const uint8_t*)str, GREEN, BLACK, 48, 0);
+        }
+    } else if (vbus >= 9.990 && vbus < 40) {
         sprintf(str, "%.2f", vbus);
-        LCD_ShowString(80, 1, (const uint8_t*)str, GREEN, BLACK, 48, 0);
+        if (strlen((char*)str) == 5 && (char*)str[5] == '\0') {
+            LCD_ShowString(80, 1, (const uint8_t*)str, GREEN, BLACK, 48, 0);
+        }
     } else {
         vbus = 0;
     }
 
-    memset(str, 0, 10);
+    memset(str, 0, sizeof(str));
     float ibus = App_getIBUS_A();
-    if (ibus >= 0 && ibus < 10) {
+    if (ibus >= 0 && ibus < 9.990) {
         sprintf(str, "%.3f", ibus);
-        LCD_ShowString(80, 44, (const uint8_t*)str, MAGENTA, BLACK, 48, 0);
+        if (strlen((char*)str) == 5 && (char*)str[5] == '\0') {
+            LCD_ShowString(80, 44, (const uint8_t*)str, MAGENTA, BLACK, 48, 0);
+        }
     } else {
         ibus = 0;
         sprintf(str, "%.3f", ibus);
-        LCD_ShowString(80, 44, (const uint8_t*)str, MAGENTA, BLACK, 48, 0);
+        if (strlen((char*)str) == 5 && (char*)str[5] == '\0') {
+            LCD_ShowString(80, 44, (const uint8_t*)str, MAGENTA, BLACK, 48, 0);
+        }
     }
 
-    memset(str, 0, 10);
+    memset(str, 0, sizeof(str));
     float powr = vbus * ibus;
-    if (powr >= 0 && powr < 10) {
+    if (powr >= 0 && powr < 9.990) {
         sprintf(str, "0%.2f", powr);
-        LCD_ShowString(80, 86, (const uint8_t*)str, ORANGE, BLACK, 48, 0);
-    } else if (powr >= 10 && powr < 100) {
+        if (strlen((char*)str) == 5 && (char*)str[5] == '\0') {
+            LCD_ShowString(80, 86, (const uint8_t*)str, ORANGE, BLACK, 48, 0);
+        }
+    } else if (powr >= 9.990 && powr < 99.90) {
         sprintf(str, "%.2f", powr);
-        LCD_ShowString(80, 86, (const uint8_t*)str, ORANGE, BLACK, 48, 0);
-    } else if (powr >= 100 && powr < 105) {
+        if (strlen((char*)str) == 5 && (char*)str[5] == '\0') {
+            LCD_ShowString(80, 86, (const uint8_t*)str, ORANGE, BLACK, 48, 0);
+        }
+    } else if (powr >= 99.90 && powr < 105) {
         sprintf(str, "%.1f", powr);
-        LCD_ShowString(80, 86, (const uint8_t*)str, ORANGE, BLACK, 48, 0);
+        if (strlen((char*)str) == 5 && (char*)str[5] == '\0') {
+            LCD_ShowString(80, 86, (const uint8_t*)str, ORANGE, BLACK, 48, 0);
+        }
     }
 
     if (HAL_GPIO_ReadPin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin) == SET) {
@@ -114,7 +129,12 @@ static void LCD_show_main_page_status(void)
         LCD_Fill_DMA(220, 2, 236, 18, BLACK);
     } else {
         LCD_ShowString(1, 102, " ON ", BLACK, GREEN, 32, 0);
-        if (SC8815_Config.SC8815_VBUS - vbus * 1000 >= 200 && HAL_GetTick() - SC8815_Config.VOUT_Open_Time > 200) {
+        if (SC8815_Config.SC8815_Status == SC8815_TIM_WORK) {
+            vbus = presset_config_set.set_vbus[SC8815_Config.sc8815_tim_work_step] - vbus * 1000;
+        } else {
+            vbus = SC8815_Config.SC8815_VBUS - vbus * 1000;
+        }
+        if (vbus >= 200 && HAL_GetTick() - SC8815_Config.VOUT_Open_Time > 500) {
             LCD_ShowString(220, 2, "CC", MAGENTA, BLACK, 16, 0);
         } else {
             LCD_ShowString(220, 2, "CV", GREEN, BLACK, 16, 0);
@@ -141,8 +161,14 @@ void APP_LCD_main_show(void)
     LCD_ShowString(7, 84, (const uint8_t*)str, LIGHTBLUE, BLACK, 16, 0);
 
     LCD_show_main_page_status();
-    LCD_show_vset();
-    LCD_show_iset();
+    if (SC8815_Config.SC8815_VBUS != SC8815_Config.SC8815_VBUS_Old) {
+        LCD_show_vset();
+        SC8815_Config.SC8815_VBUS_Old = SC8815_Config.SC8815_VBUS;
+    }
+    if (SC8815_Config.SC8815_IBUS_Limit != SC8815_Config.SC8815_IBUS_Limit_Old) {
+        LCD_show_iset();
+        SC8815_Config.SC8815_IBUS_Limit_Old = SC8815_Config.SC8815_IBUS_Limit;
+    }
 }
 
 void APP_LCD_presset_running_init(void)

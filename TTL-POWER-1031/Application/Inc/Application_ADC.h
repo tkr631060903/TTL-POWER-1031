@@ -17,6 +17,7 @@
 
 extern uint16_t ADC_Value[4];
 
+void reflesh_VBUS_IBUS(void);
 float App_getVBUS_mV(void);
 float App_getVBUS_V(void);
 float App_getTemp_mV(void);
@@ -31,7 +32,5 @@ float App_getIBUS_average_mA(void);
 float App_getIBUS_average_A(void);
 float App_getVBAT_average_mV(void);
 float App_getVBAT_average_V(void);
-float App_get_msg_getVBUS_mV(void);
-float App_get_msg_getIBUS_mA(void);
 
 #endif

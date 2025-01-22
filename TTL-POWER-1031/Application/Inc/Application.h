@@ -18,9 +18,9 @@
 #define SC8815_TIM_WORK_SIZE 10 //预设保存数量
 #define SC8815_TIM_WORK_STEP 30 //每个预设设定步骤
 
-#define TEMPERATURE_50 (float)1.343
-#define TEMPERATURE_60 (float)1.085
-#define TEMPERATURE_70 (float)0.825
+#define TEMPERATURE_65 (float)0.93
+#define TEMPERATURE_75 (float)0.788
+#define TEMPERATURE_85 (float)0.585
 
 #define APP_CONFIG_SAVE_TIME  30000
 

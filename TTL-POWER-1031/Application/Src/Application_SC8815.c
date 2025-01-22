@@ -17,17 +17,20 @@
 #include "menu_ui.h"
 #include <math.h>
 #include "Application_LCD.h"
+#include "usbd_cdc_if.h"
 
 #define SC8815_TIM_WORK_FLASH_SAVE_ADDR     STM32_FLASH_BASE+STM_SECTOR_SIZE*124
 #define SC8815_OUTPUT_CALIBRATION_TABLE_ADDR    	STM32_FLASH_BASE+STM_SECTOR_SIZE*121
 #define ALPHA_PARAMETER 0.1
 #define CALIBRATION_TABLE_VALUE(calibration_table, voltage) calibration_table[((int)voltage - SC8815_VBUS_MIN) / 100]	//获取校准表值,-2700表示=>输出电压最小值为2.7V
-
+#define CALIBRATION_IBUS_TABLE_VALUE(calibration_table, current) calibration_table[((int)current - SC8815_IBUS_MIN) / 100]	//获取校准表值,-500表示=>输出电流最小值为0.5A
+#define SCHW_VBUS_RSHUNT_DEFAULT 5
 
 SC8815_ConfigTypeDef SC8815_Config;
 SC8815_TIM_WorkTypeDef SC8815_TIM_Work[SC8815_TIM_WORK_SIZE] = { 0 };
 static uint8_t i2c_mutex = 0;	//I2C总线互斥信号,0表示总线空闲，1表示总线忙
-uint8_t sc8815_power = 100; //SC8815输出功率值
+static uint8_t sc8815_power = 105; //SC8815输出功率值
+float SCHW_VBUS_RSHUNT = SCHW_VBUS_RSHUNT_DEFAULT;
 
 uint8_t get_i2c_mutex(void)
 {
@@ -64,6 +67,7 @@ void IIC_delay(void)
 {
 	uint8_t i;
 	for (i = 0; i < 10; i++);
+	// for (i = 0; i < 250; i++);
 	// i2c_delay(5);
 	// i2c_delay(1);
 }
@@ -321,7 +325,7 @@ void Application_SC8815_Init(void)
 	SC8815_Config.SC8815_IBUS_Limit_Old = SC8815_Config.SC8815_IBUS_Limit;
 	SC8815_Config.SC8815_VBUS_Old = SC8815_Config.SC8815_VBUS;
 	SC8815_SetBatteryCurrLimit(SC8815_Config.SC8815_IBAT_Limit);
-	SC8815_SetBusCurrentLimit(SC8815_Config.SC8815_IBUS_Limit);
+	App_SC8815_SetBusCurrentLimit(SC8815_Config.SC8815_IBUS_Limit);
 	App_SC8815_SetOutputVoltage(SC8815_Config.SC8815_VBUS);
 	SC8815_OTG_Enable();
 
@@ -359,13 +363,19 @@ void Application_SC8815_Init(void)
  */
 void SC8815_Soft_Protect(void)
 {
-	if (HAL_GPIO_ReadPin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin) == GPIO_PIN_SET)
-	{
+	if (HAL_GPIO_ReadPin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin) == GPIO_PIN_SET) {
 		return;
 	}
-	if (App_getVBUS_V() < 1) {
-		HAL_Delay(500);
-		if (App_getVBUS_V() < 1) {
+	float output_voltage = 0;
+    extern presset_config_set_typeDef presset_config_set;
+	if (SC8815_Config.SC8815_Status == SC8815_TIM_WORK) {
+		output_voltage = presset_config_set.set_vbus[SC8815_Config.sc8815_tim_work_step];
+	} else {
+		output_voltage = SC8815_Config.SC8815_VBUS;
+	}
+	if (HAL_GetTick() - SC8815_Config.VOUT_Open_Time >= 300 && App_getVBUS_mV() < output_voltage / 2) {
+		HAL_Delay(300);
+		if (App_getVBUS_mV() < output_voltage / 2) {
 			if (SC8815_Config.SC8815_Status == SC8815_TIM_WORK) {
 				SC8815_Preset_Mode_Quit();
 			} else {
@@ -466,17 +476,27 @@ void SC8815_Preset_Mode_Quit(void)
 	Application_SC8815_Standby();
 	SC8815_Config.sc8815_tim_work_lcd_flush = tim_work_lcd_main;
 	App_SC8815_SetOutputVoltage(SC8815_Config.SC8815_VBUS);
-	SC8815_SetBusCurrentLimit(SC8815_Config.SC8815_IBUS_Limit);
+	App_SC8815_SetBusCurrentLimit(SC8815_Config.SC8815_IBUS_Limit);
 }
 
 void App_SC8815_SetOutputVoltage(float voltage)
 {
 	float* calibration_table = (float*)((uint32_t)SC8815_OUTPUT_CALIBRATION_TABLE_ADDR);
-	float voltage_temp = SC8815_Config.SC8815_VBUS_Old;
-	float voltage_target = voltage;
+	extern presset_config_set_typeDef presset_config_set;
+	float voltage_target = voltage, vbus_old = 0;
+	if (SC8815_Config.SC8815_Status == SC8815_TIM_WORK) {
+		if (SC8815_Config.sc8815_tim_work_step == 0) {
+			vbus_old = SC8815_Config.SC8815_VBUS_Old;
+		} else {
+			vbus_old = presset_config_set.set_vbus[SC8815_Config.sc8815_tim_work_step - 1];
+		}
+	} else {
+		vbus_old = SC8815_Config.SC8815_VBUS_Old;
+	}
+	float voltage_temp = vbus_old;
 	voltage = voltage + (float)CALIBRATION_TABLE_VALUE(calibration_table, voltage);
 	if (SC8815_Config.SC8815_Status == SC8815_LoadStart) {
-		if (voltage_target - SC8815_Config.SC8815_VBUS_Old >= 9000) {
+		if (voltage_target - vbus_old >= 9000) {
 			SC8815_PFM_Enable();
 			for (int i = 0; i < 40; i++) {
 				voltage_temp = ALPHA_PARAMETER * voltage + (1 - ALPHA_PARAMETER) * voltage_temp;
@@ -484,12 +504,12 @@ void App_SC8815_SetOutputVoltage(float voltage)
 			}
 			SC8815_SetOutputVoltage(voltage);
 			SC8815_PFM_Disable();
-		} else if (SC8815_Config.SC8815_VBUS_Old - voltage_target >= 900 || App_getVBAT_V() <= 9.5) {
+		} else if (vbus_old - voltage_target >= 9000 || (vbus_old - voltage_target >= 900 && App_getVBAT_V() <= 9.5) || App_getVBAT_V() <= 9.5) {
 			SC8815_PFM_Enable();
 			SC8815_SetOutputVoltage(voltage);
 			SC8815_Config.sc8815_pfm_delay_ms = 250;	//最小值为1
 			// HAL_GPIO_WritePin(POWER_RELEASE_GPIO_Port, POWER_RELEASE_Pin, GPIO_PIN_SET);	//放电
-			// if (SC8815_Config.SC8815_VBUS_Old - voltage_target >= 9000) {
+			// if (vbus_old - voltage_target >= 9000) {
 			// 	SC8815_Config.sc8815_pfm_delay_ms = 250;
 			// }
 			// SC8815_PFM_Disable();
@@ -499,7 +519,17 @@ void App_SC8815_SetOutputVoltage(float voltage)
 	} else {
 		SC8815_SetOutputVoltage(voltage);
 	}
-	
+	SC8815_Config.VOUT_Open_Time = HAL_GetTick();
+}
+
+void App_SC8815_SetBusCurrentLimit(float current)
+{
+	float* calibration_table = (float*)((uint32_t)SC8815_OUTPUT_CALIBRATION_TABLE_ADDR + sizeof(float) * 334);
+	SCHW_VBUS_RSHUNT = (float)CALIBRATION_IBUS_TABLE_VALUE(calibration_table, current);
+	if (SCHW_VBUS_RSHUNT > 8 || SCHW_VBUS_RSHUNT < 4) {
+		SCHW_VBUS_RSHUNT = SCHW_VBUS_RSHUNT_DEFAULT;
+	}
+	SC8815_SetBusCurrentLimit(current);
 }
 
 /**
@@ -509,7 +539,6 @@ void App_SC8815_SetOutputVoltage(float voltage)
  */
 void SC8815_output_calibration(uint8_t calibration)
 {
-	// float calibration_table_temp[334] = {0};
 	float* calibration_table_temp = (float*)SC8815_TIM_Work;
 	float voltage = SC8815_VBUS_MIN;
 	uint16_t* calibration_table = (uint16_t*)((uint32_t)SC8815_OUTPUT_CALIBRATION_TABLE_ADDR);
@@ -542,12 +571,62 @@ void SC8815_output_calibration(uint8_t calibration)
 				LCD_Fill_DMA(0, LCD_H - 10, LCD_W, LCD_H, LIGHTBLUE);
 			}
 		}
-		SC8815_Config.SC8815_Status = SC8815_Standby;
-    	Application_SC8815_Standby();
-		SC8815_SetOutputVoltage(SC8815_Config.SC8815_VBUS);
 		STMFLASH_Write(SC8815_OUTPUT_CALIBRATION_TABLE_ADDR, (uint16_t*)calibration_table_temp, sizeof(float) * 334 >> 1);
 		SC8815_Preset_Read();
+		SC8815_Config.SC8815_Status = SC8815_Standby;
+    Application_SC8815_Standby();
+		App_SC8815_SetOutputVoltage(SC8815_Config.SC8815_VBUS);
 	}
+}
+
+/**
+ *@brief 校准SC8815输出电流从0.5A到5.5A以0.1A的间隔校准，总共校准51个电流点
+ * 
+ */
+void SC8815_IBUS_calibration(void)
+{
+	uint16_t ibus_calibration = SC8815_IBUS_MIN;
+	float* calibration_table_temp = (float*)SC8815_TIM_Work;
+	float calibration_error = 0.03;
+	SCHW_VBUS_RSHUNT = 8;
+	App_SC8815_SetOutputVoltage(12000);
+	SC8815_SetBusCurrentLimit(ibus_calibration);
+	SC8815_Config.SC8815_Status = SC8815_LoadStart;
+	Application_SC8815_loadStart();
+	HAL_Delay(1000);
+	memset(SC8815_TIM_Work, 0, sizeof(SC8815_TIM_WorkTypeDef) * SC8815_TIM_WORK_SIZE);
+	for (int i = 0; i < (SC8815_IBUS_MAX - SC8815_IBUS_MIN) / 100 + 1; i++) {
+		usb_printf("ibus_calibration:%d\n", ibus_calibration);
+		while (1) {
+			if (App_getIBUS_mA() >= ibus_calibration - ibus_calibration * calibration_error && App_getIBUS_mA() <= ibus_calibration + ibus_calibration * calibration_error) {
+				calibration_table_temp[i] = SCHW_VBUS_RSHUNT;
+				break;
+			}
+			if (SCHW_VBUS_RSHUNT <= 4) {
+				calibration_table_temp[i] = SCHW_VBUS_RSHUNT_DEFAULT;
+				break;
+			}
+			SCHW_VBUS_RSHUNT -= 0.1;
+			SC8815_SetBusCurrentLimit(ibus_calibration);
+			HAL_Delay(500);
+		}
+		ibus_calibration += 100;
+		if (ibus_calibration <= 700) {
+			SCHW_VBUS_RSHUNT = 8;
+			calibration_error = 0.03;
+		} else {
+			SCHW_VBUS_RSHUNT = 6.5;
+			calibration_error = 0.02;
+		}
+		SC8815_SetBusCurrentLimit(ibus_calibration);
+		HAL_Delay(500);
+	}
+	STMFLASH_Write(SC8815_OUTPUT_CALIBRATION_TABLE_ADDR + sizeof(float) * 334, (uint16_t*)calibration_table_temp, (sizeof(float) * ((SC8815_IBUS_MAX - SC8815_IBUS_MIN) / 100 + 1) >> 1));
+	SC8815_Config.SC8815_Status = SC8815_Standby;
+	Application_SC8815_Standby();
+	SC8815_Preset_Read();
+	App_SC8815_SetOutputVoltage(SC8815_Config.SC8815_VBUS);
+	App_SC8815_SetBusCurrentLimit(SC8815_Config.SC8815_IBUS_Limit);
 }
 
 void SC8815_auto_output(void)
