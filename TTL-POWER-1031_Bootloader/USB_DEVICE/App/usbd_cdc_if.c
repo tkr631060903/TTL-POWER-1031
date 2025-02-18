@@ -259,13 +259,17 @@ static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length)
 static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
 {
   /* USER CODE BEGIN 6 */
+  extern uint16_t g_upgrade_flag;
   USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);
 
   if (strstr((const char*)Buf, "upgrade quit"))
   {
     upgrade_quit();
-  }
-  else if (g_app_config_save_config.upgrade_flag == 1) {
+  } else if (strstr((const char*)Buf, "PDPsearch")) {
+    extern Application_SaveConfig g_app_config_save_config;
+    CDC_Transmit_FS("infoPDP_save_device", strlen("infoPDP_save_device"));
+  } else if (strstr((const char*)Buf, "upgrade")) {
+	} else if (g_upgrade_flag == 1) {
     upgrade_process(Buf, Len);
   }
 

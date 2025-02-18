@@ -24,6 +24,8 @@
 
 #define APP_CONFIG_SAVE_TIME  30000
 
+#define APP_SET_KEY_ADDR 0x801FFFA
+
 typedef enum
 {
     APP_OK = 0x00U,
@@ -58,7 +60,6 @@ typedef struct
 {
     uint8_t lock_buzzer;     //蜂鸣器锁定 1锁 0不锁
     uint8_t SW_FREQ;        //开关频率
-    uint8_t upgrade_flag;   //升级标志位，0不进入升级 1进入升级 2升级成功 3升级失败
     float temperature;     //温度监控值
     float SC8815_IBUS_Limit;
     float SC8815_VBUS;
@@ -82,5 +83,7 @@ void rotary_knob_process(void);
 uint32_t htonl(uint32_t hostlong);
 void app_config_load(void);
 void app_config_save(void);
+void set_app_upgrade_flag(uint16_t flag);
+uint32_t GetCPU_ID(void);
 
 #endif

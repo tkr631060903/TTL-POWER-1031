@@ -31,6 +31,7 @@ static OP_MENU_PAGE g_opStruct[] =
     {PROTECT_PAGE, protect_page_process},
     {ABOUT_PAGE, about_page_process},
     {DC_LIMIT_PAGE, DC_limit_page_process},
+    {LANGUAGE_CHANGE_PAGE, language_change_page_process},
 };
 
 /**
@@ -84,14 +85,10 @@ void main_page_process(menu_u8 KeyValue)
         {
             SC8815_Config.SC8815_Status = SC8815_Standby;
             Application_SC8815_Standby();
-            // LCD_ShowString(10, 102, "OFF", BLACK, GRAY, 32, 0);
-            // LCD_Fill_DMA(1, 102, 10, LCD_H - 1, GRAY);
-            // LCD_Fill_DMA(56, 102, 66, LCD_H - 1, GRAY);
         }
         else {
             SC8815_Config.SC8815_Status = SC8815_LoadStart;
             Application_SC8815_loadStart();
-            // LCD_ShowString(1, 102, " ON ", BLACK, GREEN, 32, 0);
         }
         break;
     default:
@@ -225,6 +222,9 @@ void presset_page_process(menu_u8 KeyValue)
     case KEY4_SHORT:
         sub_index.presset_config_current_index = 0;
         LCD_Clear();
+        LCD_Fill_DMA(0, 32, LCD_W, 34, GRAY2);
+        LCD_Fill_DMA(0, 66, LCD_W, 68, GRAY2);
+        LCD_Fill_DMA(0, 100, LCD_W, 102, GRAY2);
         presset_config_page_ui_process(0);
         break;
     default:
@@ -261,6 +261,7 @@ void presset_config_page_process(menu_u8 KeyValue)
         memset(&presset_config_set, 0, sizeof(presset_config_set_typeDef));
         presset_config_set.set_flag = PRESSET_SET_VOUT;
         presset_config_set.set_setp = 1000;
+        // 取出SC8815_TIM_Work数据放入预设数组中
         // extern SC8815_TIM_WorkTypeDef SC8815_TIM_Work[SC8815_TIM_WORK_SIZE];
         // for (size_t i = 0; i < SC8815_TIM_WORK_SIZE; i++)
         // {
@@ -270,6 +271,9 @@ void presset_config_page_process(menu_u8 KeyValue)
         // }
         // presset_config_set.set_circular = SC8815_TIM_Work[sub_index.presset_current_index].circular;
         LCD_Clear();
+        LCD_Fill_DMA(0, 32, LCD_W, 34, GRAY2);
+        LCD_Fill_DMA(0, 66, LCD_W, 68, GRAY2);
+        LCD_Fill_DMA(0, 100, LCD_W, 102, GRAY2);
         presset_config_set_page_ui_process(KeyValue);
         break;
     default:
@@ -362,18 +366,18 @@ void presset_start_page_process(menu_u8 KeyValue)
     {
     case LEFT:
         (sub_index.presset_current_index > 0) ? (sub_index.presset_current_index--) : (sub_index.presset_current_index = 0);
-        presset_page_ui_process(sub_index.presset_current_index, KeyValue);
+        presset_start_page_ui_process(sub_index.presset_current_index, KeyValue);
         break;
     case RIGHT:
         (sub_index.presset_current_index < SC8815_TIM_WORK_SIZE - 1) ? (sub_index.presset_current_index++) : (sub_index.presset_current_index = SC8815_TIM_WORK_SIZE - 1);
-        presset_page_ui_process(sub_index.presset_current_index, KeyValue);
+        presset_start_page_ui_process(sub_index.presset_current_index, KeyValue);
         break;
     case KEY2_LONG:
         main_page_init();
         break;
     case KEY3_SHORT:
         //返回上一级
-        main_menu_Init();
+        main_menu_page_ui_process(sub_index.main_menu_current_index, KeyValue);
         break;
     case KEY4_SHORT:
         if (APP_config.fastCharge_InVoltage < 8.8) { //低于8.8V不允许启动预设
@@ -468,46 +472,42 @@ void buzzer_page_process(menu_u8 KeyValue)
  */
 void temperature_page_process(menu_u8 KeyValue)
 {
-    float temperature[] = {TEMPERATURE_65, TEMPERATURE_75, TEMPERATURE_85};
-    int i;
     switch (KeyValue)
     {
     case LEFT:
-        for(i = 0; i <= 3; i++)
-        {
-            if (temperature[i] == sub_index.temperature_current_index)
-            {
-                break;
-            }
+        APP_config.temperature = APP_config.temperature - SC8815_Config.SC8815_VBUS_IBUS_Step;
+        if (APP_config.temperature < 30) {
+            APP_config.temperature = 30;
         }
-        if (i - 1 >= 0)
-        {
-            temperature_page_ui_process(temperature[i - 1]);
-        }
+        temperature_page_ui_process(APP_config.temperature);
         break;
     case RIGHT:
-        for(i = 0; i <= 3; i++)
-        {
-            if (temperature[i] == sub_index.temperature_current_index)
-            {
-                break;
-            }
+        APP_config.temperature = APP_config.temperature + SC8815_Config.SC8815_VBUS_IBUS_Step;
+        if (APP_config.temperature > 90) {
+            APP_config.temperature = 90;
         }
-        if (i + 1 <= 2)
-        {
-            temperature_page_ui_process(temperature[i + 1]);
-        }
+        temperature_page_ui_process(APP_config.temperature);
+        break;
+    case KEY1_SHORT:
+        SC8815_Config.SC8815_VBUS_IBUS_Step = 1;
+        temperature_page_ui_process(APP_config.temperature);
+        break;
+    case KEY2_SHORT:
+        SC8815_Config.SC8815_VBUS_IBUS_Step = 10;
+        temperature_page_ui_process(APP_config.temperature);
         break;
     case KEY3_SHORT:
+        SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
         main_menu_page_ui_process(sub_index.main_menu_current_index, KeyValue);
         break;
     case KEY4_SHORT:
-        APP_config.temperature = sub_index.temperature_current_index;
+        SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
         app_config_save_config.temperature = APP_config.temperature;
         app_config_save();
         main_page_init();
         break;
     case KEY2_LONG:
+        SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
         main_page_init();
         break;
     default:
@@ -633,6 +633,37 @@ void DC_limit_page_process(menu_u8 KeyValue)
         LCD_Clear();
         APP_LCD_main_init();
     }
+    default:
+        break;
+    }
+}
+
+void language_change_page_process(menu_u8 KeyValue)
+{
+    switch (KeyValue)
+    {
+    case LEFT:
+        (sub_index.VBUS_calibration_current_index > 0) ? (sub_index.VBUS_calibration_current_index--) : (sub_index.VBUS_calibration_current_index = 0);
+        VBUS_calibration_page_ui_process(sub_index.VBUS_calibration_current_index);
+        break;
+    case RIGHT:
+        (sub_index.VBUS_calibration_current_index < 1) ? (sub_index.VBUS_calibration_current_index++) : (sub_index.VBUS_calibration_current_index = 1);
+        VBUS_calibration_page_ui_process(sub_index.VBUS_calibration_current_index);
+        break;
+    case KEY3_SHORT:
+        main_menu_page_ui_process(sub_index.main_menu_current_index, KeyValue);
+        break;
+    case KEY4_SHORT:
+        if (sub_index.VBUS_calibration_current_index == 0) {
+            SC8815_output_calibration(1);
+            main_page_init();
+        } else {
+            main_menu_page_ui_process(sub_index.main_menu_current_index, KEY3_SHORT);
+        }
+        break;
+    case KEY2_LONG:
+        main_page_init();
+        break;
     default:
         break;
     }

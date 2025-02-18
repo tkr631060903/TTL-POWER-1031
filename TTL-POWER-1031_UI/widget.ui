@@ -6,176 +6,138 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>442</width>
-    <height>303</height>
+    <width>288</width>
+    <height>268</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>TTL-POWER升级工具</string>
   </property>
-  <widget class="QGroupBox" name="groupBoxMenu">
+  <widget class="QWidget" name="gridLayoutWidget_2">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>10</y>
-     <width>121</width>
-     <height>281</height>
+     <x>0</x>
+     <y>0</y>
+     <width>281</width>
+     <height>261</height>
     </rect>
    </property>
-   <property name="title">
-    <string>功能</string>
-   </property>
-   <widget class="QWidget" name="layoutWidget">
-    <property name="geometry">
-     <rect>
-      <x>12</x>
-      <y>20</y>
-      <width>103</width>
-      <height>199</height>
-     </rect>
-    </property>
-    <layout class="QVBoxLayout" name="verticalLayoutMenu">
-     <item>
-      <layout class="QHBoxLayout" name="horizontalLayoutUART">
-       <item>
-        <widget class="QLabel" name="labelUART">
-         <property name="text">
-          <string>串口</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QComboBox" name="comboBoxUART"/>
-       </item>
-      </layout>
-     </item>
-     <item>
-      <widget class="QPushButton" name="refreshCOM">
-       <property name="styleSheet">
-        <string notr="true">color: rgb(0, 85, 255);</string>
+   <layout class="QGridLayout" name="gridLayout_2">
+    <item row="2" column="0">
+     <widget class="QGroupBox" name="groupBoxMenu">
+      <property name="title">
+       <string>功能</string>
+      </property>
+      <widget class="QWidget" name="layoutWidget">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>10</y>
+         <width>71</width>
+         <height>191</height>
+        </rect>
        </property>
-       <property name="text">
-        <string>刷新串口</string>
+       <layout class="QVBoxLayout" name="verticalLayoutMenu">
+        <item>
+         <widget class="QPushButton" name="refreshCOM">
+          <property name="styleSheet">
+           <string notr="true">color: rgb(0, 85, 255);</string>
+          </property>
+          <property name="text">
+           <string>刷新串口</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="loadFile">
+          <property name="styleSheet">
+           <string notr="true">color: rgb(0, 85, 255);</string>
+          </property>
+          <property name="text">
+           <string>加载文件</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="startUpgrade">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">color: rgb(0, 85, 255);</string>
+          </property>
+          <property name="text">
+           <string>开始升级</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="clearMessage">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">color: rgb(0, 85, 255);</string>
+          </property>
+          <property name="text">
+           <string>清除消息</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <widget class="QLabel" name="labelUART">
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="text">
+       <string>      设备列表：</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="1" colspan="2">
+     <widget class="QComboBox" name="comboBoxUART">
+      <property name="minimumSize">
+       <size>
+        <width>120</width>
+        <height>0</height>
+       </size>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="1" colspan="2">
+     <widget class="QGroupBox" name="groupBoxRev">
+      <property name="title">
+       <string>消息</string>
+      </property>
+      <widget class="QTextEdit" name="textEditRev">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>20</y>
+         <width>171</width>
+         <height>211</height>
+        </rect>
        </property>
       </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="enterUpgrade">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">color: rgb(0, 85, 255);
-border-color: rgb(0, 85, 255);</string>
-       </property>
-       <property name="text">
-        <string>进入升级模式</string>
-       </property>
-       <property name="autoDefault">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="quitUpgrade">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">color: rgb(0, 85, 255);
-border-color: rgb(0, 85, 255);</string>
-       </property>
-       <property name="text">
-        <string>退出升级模式</string>
-       </property>
-       <property name="autoDefault">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="loadFile">
-       <property name="styleSheet">
-        <string notr="true">color: rgb(0, 85, 255);</string>
-       </property>
-       <property name="text">
-        <string>加载文件</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="startUpgrade">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>101</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">color: rgb(0, 85, 255);</string>
-       </property>
-       <property name="text">
-        <string>开始升级</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="clearMessage">
-       <property name="minimumSize">
-        <size>
-         <width>101</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">color: rgb(0, 85, 255);</string>
-       </property>
-       <property name="text">
-        <string>清除消息</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </widget>
-   <widget class="QPushButton" name="pushButtonUART">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>220</y>
-      <width>101</width>
-      <height>51</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>打开串口</string>
-    </property>
-   </widget>
-  </widget>
-  <widget class="QGroupBox" name="groupBoxRev">
-   <property name="geometry">
-    <rect>
-     <x>140</x>
-     <y>10</y>
-     <width>291</width>
-     <height>281</height>
-    </rect>
-   </property>
-   <property name="title">
-    <string>消息</string>
-   </property>
-   <widget class="QTextEdit" name="textEditRev">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>20</y>
-      <width>271</width>
-      <height>251</height>
-     </rect>
-    </property>
-   </widget>
+     </widget>
+    </item>
+   </layout>
   </widget>
  </widget>
  <resources/>

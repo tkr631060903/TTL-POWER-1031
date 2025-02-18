@@ -411,9 +411,19 @@ void SC8815_VINREG_SetVoltage(uint16_t NewVolt)
 *****************************************/
 void SC8815_SetVBUSFBMode(uint8_t mode)
 {
-	SC8815_HardwareInitStruct.FB_Mode &= ~0x10;
-	SC8815_HardwareInitStruct.FB_Mode |= mode;
-	SC8815_HardwareInit(&SC8815_HardwareInitStruct);
+	uint8_t tmp;
+	// SC8815_HardwareInitStruct.FB_Mode &= ~0x10;
+	// SC8815_HardwareInitStruct.FB_Mode |= mode;
+	SC8815_HardwareInitStruct.FB_Mode = mode;
+	tmp = I2C_ReadRegByte(SC8815_ADDR, SCREG_CTRL1_SET) & 0x03;
+	tmp |= SC8815_HardwareInitStruct.ICHAR;
+	tmp |= SC8815_HardwareInitStruct.TRICKLE;
+	tmp |= SC8815_HardwareInitStruct.TERM;
+	tmp |= SC8815_HardwareInitStruct.FB_Mode;
+	tmp |= SC8815_HardwareInitStruct.TRICKLE_SET;
+	tmp |= SC8815_HardwareInitStruct.OVP;
+	I2C_WriteRegByte(SC8815_ADDR, SCREG_CTRL1_SET, tmp);
+	SoftwareDelay(5);
 }
 
 uint8_t SC8815_GetVBUSFBMode(void)

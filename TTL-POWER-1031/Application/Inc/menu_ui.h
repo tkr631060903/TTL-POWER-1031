@@ -11,6 +11,7 @@ void main_menu_page_ui_process(menu_u8 index, menu_u8 KeyValue);
 void vout_page_ui_process(menu_u8 KeyValue);
 void iout_page_ui_process(menu_u8 KeyValue);
 void presset_page_ui_process(menu_u8 index, menu_u8 KeyValue);
+void presset_start_page_ui_process(menu_u8 index, menu_u8 KeyValue);
 void presset_config_page_ui_process(menu_u8 index);
 void presset_config_set_page_ui_process(menu_u8 KeyValue);
 void buzzer_page_ui_process(menu_u8 KeyValue);

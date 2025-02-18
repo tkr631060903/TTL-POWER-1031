@@ -182,7 +182,9 @@ static void sc8815_tim_work(void)
                     SC8815_SFB_Disable();
                     // SoftwareDelay(10);
                     // SC8815_SFB_Enable();
-                    SC8815_Config.sc8815_sfb_delay_ms = 20;	//最小值为1
+                    if (presset_config_set.set_vbus[SC8815_Config.sc8815_tim_work_step] >= 2700) {
+                        SC8815_Config.sc8815_sfb_delay_ms = 30;	//最小值为1
+                    }
                 }
             }
             else
@@ -224,7 +226,9 @@ static void sc8815_tim_work(void)
                             SC8815_SFB_Disable();
                             // SoftwareDelay(10);
                             // SC8815_SFB_Enable();
-                            SC8815_Config.sc8815_sfb_delay_ms = 20;	//最小值为1
+                            if (presset_config_set.set_vbus[SC8815_Config.sc8815_tim_work_step] >= 2700) {
+                                SC8815_Config.sc8815_sfb_delay_ms = 30;	//最小值为1
+                            }
                         }
                     }
                     else

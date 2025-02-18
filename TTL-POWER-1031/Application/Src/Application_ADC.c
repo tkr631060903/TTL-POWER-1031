@@ -61,7 +61,7 @@ float App_getVBUS_V(void)
     // if (ina226_voltage < 0) {
     //     ina226_voltage = 0;
     // }
-    return ina226_voltage / 1000;
+    return App_getVBUS_mV() / 1000;
 }
 
 /**
@@ -71,7 +71,7 @@ float App_getVBUS_V(void)
  */
 float App_getTemp_mV(void)
 {
-    return 1.02 * ((float)ADC_Value[1] * SAMPLING_RATE) * 1000;
+    return App_getTemp_V() * 1000;
 }
 
 /**
@@ -82,6 +82,21 @@ float App_getTemp_mV(void)
 float App_getTemp_V(void)
 {
     return 1.02 * ((float)ADC_Value[1] * SAMPLING_RATE);
+}
+
+/**
+ * @brief 获取温度分两段获取-20℃~34℃和34~95℃
+ *
+ * @return float 
+ */
+float App_getTemp(void)
+{
+    if (App_getTemp_V() >= 1.893) {
+        // 小于等于34℃
+        return -21.058 * (ADC_Value[1] * SAMPLING_RATE * ADC_Value[1] * SAMPLING_RATE * ADC_Value[1] * SAMPLING_RATE) + 141.66 * ADC_Value[1] * SAMPLING_RATE * ADC_Value[1] * SAMPLING_RATE - 347.4 * ADC_Value[1] * SAMPLING_RATE + 327.04;
+    } else {
+        return -13.187 * (ADC_Value[1] * SAMPLING_RATE * ADC_Value[1] * SAMPLING_RATE * ADC_Value[1] * SAMPLING_RATE) + 61.641 * ADC_Value[1] * SAMPLING_RATE * ADC_Value[1] * SAMPLING_RATE - 125.76 * ADC_Value[1] * SAMPLING_RATE + 140.18;
+    }
 }
 
 /**
@@ -113,7 +128,7 @@ float App_getIBUS_A(void)
     // if (ina226_current < 0) {
     //     ina226_current = 0;
     // }
-    return ina226_current / 1000;
+    return App_getIBUS_mA() / 1000;
 }
 
 /**
@@ -123,7 +138,7 @@ float App_getIBUS_A(void)
  */
 float App_getVBAT_mV(void)
 {
-    return (11.59 * ((float)ADC_Value[3] * SAMPLING_RATE)) * 1000;
+    return App_getVBAT_V() * 1000;
 }
 
 /**
@@ -133,7 +148,8 @@ float App_getVBAT_mV(void)
  */
 float App_getVBAT_V(void)
 {
-    return 11.59 * ((float)ADC_Value[3] * SAMPLING_RATE);
+    // return 11.59 * ((float)ADC_Value[3] * SAMPLING_RATE);
+    return 11.799 * ((float)ADC_Value[3] * SAMPLING_RATE) - 0.1701;
 }
 
 /**

@@ -5,7 +5,7 @@
 #include "Hardware_setting.h"
 #include "Application.h"
 
-#define MENU_PAGE_NUM 7
+#define MENU_PAGE_NUM 6
 
 typedef struct Menu_Key_Index
 {
@@ -14,7 +14,6 @@ typedef struct Menu_Key_Index
     menu_u8 presset_config_current_index;
     menu_u8 presset_config_set_current_index;
     menu_u8 buzzer_current_index;
-    float temperature_current_index;
     menu_u8 fastch_current_index;
     menu_u8 VBUS_calibration_current_index;
     menu_u8 Current_Page;
@@ -46,6 +45,7 @@ typedef enum
     PROTECT_PAGE,   //保护状态页面
     ABOUT_PAGE,   //保护状态页面
     DC_LIMIT_PAGE,  //DC电流限制页面
+    LANGUAGE_CHANGE_PAGE,  //语言变更页面
 } OP_PAGE;
 
 typedef enum
@@ -86,5 +86,6 @@ void VBUS_calibration_page_process(menu_u8 KeyValue);
 void protect_page_process(menu_u8 KeyValue);
 void about_page_process(menu_u8 KeyValue);
 void DC_limit_page_process(menu_u8 KeyValue);
+void language_change_page_process(menu_u8 KeyValue);
 
 #endif //__MENU_H

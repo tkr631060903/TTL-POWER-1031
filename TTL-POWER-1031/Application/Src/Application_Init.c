@@ -20,6 +20,7 @@
 #include "Application_Callback.h"
 #include "husb238.h"
 #include "ina226.h"
+#include "stmflash.h"
 
 /**
  * @brief 应用初始化
@@ -30,9 +31,15 @@ void Application_Init(void)
     extern ADC_HandleTypeDef hadc1;
     extern char uart1_Cmd[Cmd_Length];   //串口1接收缓冲区
     extern menu_i32 current_menu_index;
+    uint32_t set_key_id;
     HAL_GPIO_WritePin(POWER_RELEASE_GPIO_Port, POWER_RELEASE_Pin, GPIO_PIN_SET);	//放电
     HAL_Delay(500);
     LCD_Init();
+    STMFLASH_ReadBytes(APP_SET_KEY_ADDR, (uint8_t*)&set_key_id, sizeof(uint32_t));
+    if (set_key_id != GetCPU_ID()) {
+        LCD_Fill(ORANGE);
+        while (1);
+    }
     LCD_Clear();
     // 初始化串口中断输入
     HAL_UART_Receive_IT(&huart1, (uint8_t*)uart1_Cmd, Cmd_Length);

@@ -293,18 +293,18 @@ void TIM2_Delay1us(uint16_t cnt)
   // Prescalar
   // TIM2 Internal Clock is 60,000,000Hz, So, if delay 1us, Prescalar must set 60-1=59
   // HAL_RCC_GetPCLK1Freq()<<1/1000/1000;
-  __HAL_TIM_SET_PRESCALER(&htim2, 71);            // 设置预分频，这个决定定时器数�?次需要多长时间�??
+  __HAL_TIM_SET_PRESCALER(&htim2, 71);            // 设置预分频，这个决定定时器数�?次需要多长时间�??
   // Count
   __HAL_TIM_SET_AUTORELOAD(&htim2, cnt);     // 设置数数，这个决定数多少个数
-  SET_BIT(htim2.Instance->EGR, TIM_EGR_UG);        // 产生�?个UEV(Update Event)，用来更新定时器�?
-  __HAL_TIM_ENABLE(&htim2);                                // �?启定时器�?
-  // 看一下数�?0了没有�??
+  SET_BIT(htim2.Instance->EGR, TIM_EGR_UG);        // 产生�?个UEV(Update Event)，用来更新定时器�?
+  __HAL_TIM_ENABLE(&htim2);                                // �?启定时器�?
+  // 看一下数�?0了没有�??
   while (1)
   {
     if (!__HAL_TIM_GET_COUNTER(&htim2))
       break;
   }
-  // 关掉定时器，没必要再数了�?
+  // 关掉定时器，没必要再数了�?
   __HAL_TIM_DISABLE(&htim2);
 }
 /* USER CODE END 1 */

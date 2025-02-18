@@ -4,26 +4,30 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QFileDialog>
-#include <QThread>
+#include <QTimer>
 
 #define APP_DATA_BUFF_SIZE 9 * 1024
+
+struct dev_info
+{
+    QString dev_name;
+    QSerialPort serialPort;
+};
+
 int app_data_count = 0;
-char *app_data = NULL;
+char* app_data = NULL;
+QList<QSerialPort*> serialPorts; // 存储已连接的串口对象
+QList<dev_info*> devices;
 
 Widget::Widget(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::WidgetUpgrade)
 {
     ui->setupUi(this);
-    serialStatus = false;
+    this->setLayout(ui->gridLayout_2);
     QByteArray flieData;
-    setialPort = new QSerialPort(this);
-    connect(setialPort, &QSerialPort::readyRead, this, &Widget::on_serialData_readyToRead);
-    QList<QSerialPortInfo> serialList = QSerialPortInfo::availablePorts();
-    for(QSerialPortInfo serialInfo : serialList){
-        qDebug() << serialInfo.portName();
-        ui->comboBoxUART->addItem(serialInfo.portName());
-    }
+    serialPort = new QSerialPort(this);
+    on_refreshCOM_clicked();
     //ui->textEditRev->setEnabled(false);
 }
 
@@ -32,76 +36,62 @@ Widget::~Widget()
     delete ui;
 }
 
-void Widget::on_pushButtonUART_clicked()
+void close_all_serial(void)
 {
-    if(!serialStatus){
-        setialPort->setPortName(ui->comboBoxUART->currentText());
-        setialPort->setBaudRate(QSerialPort::Baud115200);
-        setialPort->setDataBits(QSerialPort::DataBits(QSerialPort::Data8));
-        setialPort->setStopBits(QSerialPort::StopBits(QSerialPort::OneStop));
-        setialPort->setFlowControl(QSerialPort::NoFlowControl);
-        setialPort->setParity(QSerialPort::NoParity);
-        if(setialPort->open(QIODevice::ReadWrite)){
-            qDebug() << "serial open";
-            serialStatus = true;
-            ui->comboBoxUART->setEnabled(false);
-            ui->enterUpgrade->setEnabled(true);
-            ui->refreshCOM->setEnabled(false);
-            ui->quitUpgrade->setEnabled(true);
-            ui->pushButtonUART->setText("关闭串口");
-        }else{
-            qDebug() << "serial error";
-            QMessageBox msgBox;
-            msgBox.setWindowTitle("打开串口错误");
-            msgBox.setText("打开失败，串口可能被占用！");
-            msgBox.exec();
+    for (QSerialPort *serial : serialPorts) {
+        if(serial->isOpen()){
+            serial->close();
+            serialPorts.removeOne(serial);
         }
-    }else{
-        setialPort->close();
-        ui->comboBoxUART->setEnabled(true);
-        ui->enterUpgrade->setEnabled(false);
-        ui->startUpgrade->setEnabled(false);
-        ui->refreshCOM->setEnabled(true);
-        ui->quitUpgrade->setEnabled(false);
-        serialStatus = false;
-        ui->pushButtonUART->setText("打开串口");
     }
 }
 
-
-void Widget::on_enterUpgrade_clicked()
+void Widget::send_file_app()
 {
-    setialPort->close();
-    setialPort->setPortName(ui->comboBoxUART->currentText());
-    setialPort->setBaudRate(QSerialPort::Baud115200);
-    setialPort->setDataBits(QSerialPort::DataBits(QSerialPort::Data8));
-    setialPort->setStopBits(QSerialPort::StopBits(QSerialPort::OneStop));
-    setialPort->setFlowControl(QSerialPort::NoFlowControl);
-    setialPort->setParity(QSerialPort::NoParity);
-    if(setialPort->open(QIODevice::ReadWrite)){
-        setialPort->write("upgrade app");
+    serialPort->open(QIODevice::ReadWrite);
+    app_data_count = 0;
+    if(flieData.size() - app_data_count >= APP_DATA_BUFF_SIZE){
+        serialPort->write(&app_data[app_data_count], APP_DATA_BUFF_SIZE);
+        app_data_count += APP_DATA_BUFF_SIZE;
     }else{
-        setialPort->write("upgrade app");
+        serialPort->write(&app_data[app_data_count], flieData.size() - app_data_count);
+        app_data_count += (flieData.size() - app_data_count);
     }
 }
 
 void Widget::on_serialData_readyToRead()
 {
-    QString revMessagee = setialPort->readAll();
+    QString revMessagee;
+    for (QSerialPort *serial : serialPorts) {
+        qDebug() << "portName:" << serial->portName();
+        revMessagee = serial->readAll();
+        if (strstr(revMessagee.toStdString().c_str(), (char*)"info") != NULL){
+            revMessagee = revMessagee.mid(4, revMessagee.size() - 4);
+            ui->comboBoxUART->addItem(revMessagee);
+            dev_info* dev = new dev_info();
+            dev->dev_name = revMessagee;
+            memcpy((void*)&dev->serialPort, (void*)serial, sizeof(QSerialPort));
+            devices.append(dev);
+            serial->close();
+            serialPorts.removeOne(serial);
+            return;
+        }
+    }
+    revMessagee = serialPort->readAll();
+    if(revMessagee.isEmpty()) {
+        return;
+    }
     qDebug() << "msg:" << revMessagee;
     //ui->textEditRev->append(revMessagee);
     if (revMessagee == "ok"){
         ui->textEditRev->append("已入升级模式.");
         ui->startUpgrade->setEnabled(true);
-        ui->enterUpgrade->setEnabled(false);
-        setialPort->close();
+        serialPort->close();
     }else if(revMessagee == "write"){
         ui->textEditRev->append("ACK.");
     }else if(revMessagee == "done"){
         app_data_count = 0;
-        ui->enterUpgrade->setEnabled(true);
         ui->startUpgrade->setEnabled(true);
-        ui->pushButtonUART->setEnabled(true);
         ui->loadFile->setEnabled(true);
         ui->startUpgrade->setEnabled(false);
         ui->textEditRev->append("升级成功.");
@@ -110,10 +100,10 @@ void Widget::on_serialData_readyToRead()
     }else if(revMessagee == "read"){
         ui->textEditRev->append("ACK.");
         if(flieData.size() - app_data_count >= APP_DATA_BUFF_SIZE){
-            setialPort->write(&app_data[app_data_count], APP_DATA_BUFF_SIZE);
+            serialPort->write(&app_data[app_data_count], APP_DATA_BUFF_SIZE);
             app_data_count += APP_DATA_BUFF_SIZE;
         }else{
-            setialPort->write(&app_data[app_data_count], flieData.size() - app_data_count);
+            serialPort->write(&app_data[app_data_count], flieData.size() - app_data_count);
             app_data_count += (flieData.size() - app_data_count);
         }
     }
@@ -128,41 +118,31 @@ void Widget::on_clearMessage_clicked()
 
 void Widget::on_startUpgrade_clicked()
 {
-    // app_data_count = 0;
-    // if(flieData.size() - app_data_count >= APP_DATA_BUFF_SIZE){
-    //     setialPort->write(&app_data[app_data_count], APP_DATA_BUFF_SIZE);
-    //     app_data_count += APP_DATA_BUFF_SIZE;
-    // }else{
-    //     setialPort->write(&app_data[app_data_count], flieData.size() - app_data_count);
-    //     app_data_count += (flieData.size() - app_data_count);
-    // }
     if(app_data == NULL)
     {
         ui->textEditRev->append("请先加载固件！！！");
         return;
     }
-    setialPort->setPortName(ui->comboBoxUART->currentText());
-    setialPort->setBaudRate(QSerialPort::Baud115200);
-    setialPort->setDataBits(QSerialPort::DataBits(QSerialPort::Data8));
-    setialPort->setStopBits(QSerialPort::StopBits(QSerialPort::OneStop));
-    setialPort->setFlowControl(QSerialPort::NoFlowControl);
-    setialPort->setParity(QSerialPort::NoParity);
-    if(setialPort->open(QIODevice::ReadWrite)){
-        qDebug() << "serial open";
-        ui->startUpgrade->setEnabled(false);
-        ui->pushButtonUART->setEnabled(false);
-        ui->loadFile->setEnabled(false);
-        ui->textEditRev->append("开始升级...");
-        app_data_count = 0;
-        if(flieData.size() - app_data_count >= APP_DATA_BUFF_SIZE){
-            setialPort->write(&app_data[app_data_count], APP_DATA_BUFF_SIZE);
-            app_data_count += APP_DATA_BUFF_SIZE;
-        }else{
-            setialPort->write(&app_data[app_data_count], flieData.size() - app_data_count);
-            app_data_count += (flieData.size() - app_data_count);
+    for (dev_info *dev : devices) {
+        if (dev->dev_name == ui->comboBoxUART->currentText()) {
+            serialPort = &dev->serialPort;
+            serialPort->setPortName(dev->serialPort.portName());
+            serialPort->setBaudRate(QSerialPort::Baud115200);
+            serialPort->setDataBits(QSerialPort::DataBits(QSerialPort::Data8));
+            serialPort->setStopBits(QSerialPort::StopBits(QSerialPort::OneStop));
+            serialPort->setFlowControl(QSerialPort::NoFlowControl);
+            serialPort->setParity(QSerialPort::NoParity);
+            if(serialPort->open(QIODevice::ReadWrite)){
+                qDebug() << "serial open";
+                ui->startUpgrade->setEnabled(false);
+                ui->loadFile->setEnabled(false);
+                ui->textEditRev->append("开始升级...");
+                serialPort->write("upgrade app");
+                QTimer::singleShot(1000, this, send_file_app);
+            }else{
+                qDebug() << "serial error";
+            }
         }
-    }else{
-        qDebug() << "serial error";
     }
 }
 
@@ -172,7 +152,7 @@ void Widget::on_loadFile_clicked()
     QString file_name = QFileDialog::getOpenFileName(NULL,"",".","*.bin");
     qDebug() << file_name;
     QFile file(file_name);
-    ui->textEditRev->setText(file_name);
+    // ui->textEditRev->setText(file_name);
     if (file.open(QFile::ReadOnly  | QFile::Truncate))
     {
         flieData = file.readAll();
@@ -187,29 +167,36 @@ void Widget::on_loadFile_clicked()
 void Widget::on_refreshCOM_clicked()
 {
     ui->comboBoxUART->clear();
-    QList<QSerialPortInfo> serialList = QSerialPortInfo::availablePorts();
-    for(QSerialPortInfo serialInfo : serialList){
+    QList<QSerialPortInfo> portList = QSerialPortInfo::availablePorts();
+    if (portList.isEmpty()) {
+        qDebug() << "No serial ports found!";
+        return;
+    }
+    for(dev_info* dev : devices){
+        devices.removeOne(dev);
+    }
+    for(QSerialPortInfo serialInfo : portList){
         qDebug() << serialInfo.portName();
-        ui->comboBoxUART->addItem(serialInfo.portName());
+        QSerialPort *serial = new QSerialPort(this);
+
+        serial->setPortName(serialInfo.portName());
+        serial->setBaudRate(QSerialPort::Baud115200);
+        serial->setDataBits(QSerialPort::DataBits(QSerialPort::Data8));
+        serial->setStopBits(QSerialPort::StopBits(QSerialPort::OneStop));
+        serial->setFlowControl(QSerialPort::NoFlowControl);
+        serial->setParity(QSerialPort::NoParity);
+        // 尝试打开串口
+        if (serial->open(QIODevice::ReadWrite)) {
+            qDebug() << "Connected to:" << serialInfo.portName();
+            serialPorts.append(serial);
+            connect(serial, &QSerialPort::readyRead, this, &Widget::on_serialData_readyToRead);
+            serial->write("PDPsearch 1");
+        } else {
+            qDebug() << "Failed to open" << serialInfo.portName()
+            << "Error:" << serial->errorString();
+            delete serial;
+        }
     }
+    QTimer::singleShot(1000, this, close_all_serial);
+    ui->textEditRev->append("刷新设备成功.");
 }
-
-
-void Widget::on_quitUpgrade_clicked()
-{
-    ui->enterUpgrade->setEnabled(true);
-    setialPort->close();
-    setialPort->setPortName(ui->comboBoxUART->currentText());
-    setialPort->setBaudRate(QSerialPort::Baud115200);
-    setialPort->setDataBits(QSerialPort::DataBits(QSerialPort::Data8));
-    setialPort->setStopBits(QSerialPort::StopBits(QSerialPort::OneStop));
-    setialPort->setFlowControl(QSerialPort::NoFlowControl);
-    setialPort->setParity(QSerialPort::NoParity);
-    if(setialPort->open(QIODevice::ReadWrite)){
-        setialPort->write("upgrade quit");
-    }else{
-        setialPort->write("upgrade quit");
-    }
-    ui->textEditRev->append("已发送退出升级模式指令.");
-}
-

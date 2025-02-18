@@ -19,9 +19,6 @@ public:
     ~Widget();
 
 private slots:
-    void on_pushButtonUART_clicked();
-
-    void on_enterUpgrade_clicked();
 
     void on_serialData_readyToRead();
 
@@ -33,12 +30,12 @@ private slots:
 
     void on_refreshCOM_clicked();
 
-    void on_quitUpgrade_clicked();
-
 private:
     Ui::WidgetUpgrade *ui;
-    QSerialPort *setialPort;
+    QSerialPort *serialPort;
     bool serialStatus;
     QByteArray flieData;
+
+    void send_file_app();
 };
 #endif // WIDGET_H

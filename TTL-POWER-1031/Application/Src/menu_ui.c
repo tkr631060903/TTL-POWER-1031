@@ -17,11 +17,12 @@ typedef struct
 extern menu_i32 current_menu_index;
 static menu_u8 cursor_main_menu = 0; //主菜单光标位置
 static menu_u8 cursor_secondary_menu = 0; //二级菜单光标位置
-// static uint8_t presset_show_vlaue[] = {0, 1, 2, 3};   //当前显示的预设值
 static uint8_t secondary_menu_index = 0; //二级菜单第一行显示索引
 static uint8_t main_menu_index = 0; //主菜单第一行显示索引
 static Menu_NameTypeDef menu_name[] = {
-    {0, gImage_presset, "预设配置"}, {1, gImage_start_presset, "开启预设"}, {2, gImage_temp, "过温保护"}, {3, gImage_PDinput, "快充输入"}, {4, gImage_buzzer, "蜂鸣器"}, {5, gImage_calibration, "校准电压"}, {6, gImage_about, "关于"}
+    // {0, gImage_presset, "预设配置"}, {1, gImage_start_presset, "开启预设"}, {2, gImage_temp, "过温保护"}, {3, gImage_PDinput, "快充输入"}, {4, gImage_buzzer, "蜂鸣器配置"}, {5, gImage_calibration, "校准电压"}, {6, gImage_about, "关于"}
+    {0, gImage_presset, "预设配置"}, {1, gImage_start_presset, "开启预设"}, {2, gImage_temp, "过温保护"}, {3, gImage_PDinput, "快充输入"}, {4, gImage_buzzer, "蜂鸣器配置"}, {5, gImage_about, "关于"}
+    // {0, gImage_presset, "SetPreset"}, {1, gImage_start_presset, "OpenPreset"}, {2, gImage_temp, "OTP"}, {3, gImage_PDinput, "FastCharge"}, {4, gImage_buzzer, "Buzzer"}, {5, gImage_calibration, "Language"}, {6, gImage_about, "About"}
 };
 
 /**
@@ -39,10 +40,6 @@ void Enter_Page(menu_i32 index, menu_u8 KeyValue)
         sub_index.presset_current_index = 0;
         cursor_secondary_menu = 0;
         secondary_menu_index = 0;
-        // presset_show_vlaue[0] = 0;
-        // presset_show_vlaue[1] = 1;
-        // presset_show_vlaue[2] = 2;
-        // presset_show_vlaue[3] = 3;
         current_menu_index = PRESSET_PAGE;
         presset_page_ui_process(0, KeyValue);
         break;
@@ -50,15 +47,12 @@ void Enter_Page(menu_i32 index, menu_u8 KeyValue)
         sub_index.presset_current_index = 0;
         cursor_secondary_menu = 0;
         secondary_menu_index = 0;
-        // presset_show_vlaue[0] = 0;
-        // presset_show_vlaue[1] = 1;
-        // presset_show_vlaue[2] = 2;
-        // presset_show_vlaue[3] = 3;
         current_menu_index = PRESSET_START_PAGE;
-        presset_page_ui_process(0, KeyValue);
+        presset_start_page_ui_process(0, KeyValue);
         break;
     case 2:
         LCD_Clear();
+        SC8815_Config.SC8815_VBUS_IBUS_Step = 1;
         temperature_page_ui_process(APP_config.temperature);
         break;
     case 3:
@@ -71,12 +65,12 @@ void Enter_Page(menu_i32 index, menu_u8 KeyValue)
         LCD_Clear();
         buzzer_page_ui_process(APP_config.lock_buzzer);
         break;
+    // case 5:
+    //     sub_index.VBUS_calibration_current_index = 0;
+    //     LCD_Clear();
+    //     VBUS_calibration_page_ui_process(sub_index.VBUS_calibration_current_index);
+    //     break;
     case 5:
-        sub_index.VBUS_calibration_current_index = 0;
-        LCD_Clear();
-        VBUS_calibration_page_ui_process(sub_index.VBUS_calibration_current_index);
-        break;
-    case 6:
         about_page_ui_process();
         break;
     default:
@@ -109,14 +103,10 @@ void main_menu_Init(void)
     main_menu_index = 0;
     //.....刷新回主页面的UI和状态
     LCD_Clear();
-    LCD_ShowChinese(40, 0, "预设配置", BLACK, LIGHTBLUE, 32, 0);
-    LCD_ShowPicture(0, 0, 32, 32, gImage_presset);
-    LCD_ShowChinese(40, 33, "开启预设", LIGHTBLUE, BLACK, 32, 0);
-    LCD_ShowPicture(0, 33, 32, 32, gImage_start_presset);
-    LCD_ShowChinese(40, 66, "过温保护", LIGHTBLUE, BLACK, 32, 0);
-    LCD_ShowPicture(0, 66, 32, 32, gImage_temp);
-    LCD_ShowChinese(40, 99, "快充输入", LIGHTBLUE, BLACK, 32, 0);
-    LCD_ShowPicture(0, 99, 32, 32, gImage_PDinput);
+    LCD_on_menu_line(0, (uint8_t*)gImage_presset, (uint8_t*)menu_name[0].menu_name);
+    LCD_off_menu_line(1, (uint8_t*)gImage_start_presset, (uint8_t*)menu_name[1].menu_name);
+    LCD_off_menu_line(2, (uint8_t*)gImage_temp, (uint8_t*)menu_name[2].menu_name);
+    LCD_off_menu_line(3, (uint8_t*)gImage_PDinput, (uint8_t*)menu_name[3].menu_name);
 }
 
 // 主菜单页面UI处理
@@ -149,19 +139,15 @@ void main_menu_page_ui_process(menu_u8 index, menu_u8 KeyValue)
     }
     if (index_move_flag || KeyValue == KEY3_SHORT) {
         for (size_t i = 0; i < 4; i++) {
-            LCD_RowClear(i, 32, BLACK);
-            LCD_ShowPicture(0, i * 33, 32, 32, (uint8_t*)menu_name[main_menu_index + i].icon);
             if (i == cursor_main_menu) {
-                LCD_ShowChinese(40, i * 33, (uint8_t*)menu_name[main_menu_index + i].menu_name, BLACK, LIGHTBLUE, 32, 0);
+                LCD_on_menu_line(i, (uint8_t*)menu_name[main_menu_index + i].icon, (uint8_t*)menu_name[main_menu_index + i].menu_name);
             } else {
-                LCD_ShowChinese(40, i * 33, (uint8_t*)menu_name[main_menu_index + i].menu_name, LIGHTBLUE, BLACK, 32, 0);
+                LCD_off_menu_line(i, (uint8_t*)menu_name[main_menu_index + i].icon, (uint8_t*)menu_name[main_menu_index + i].menu_name);
             }
         }
     } else {
-	    LCD_Fill_DMA(32, cursor_temp * 32, LCD_W, (cursor_temp + 1) * 32, BLACK);
-        LCD_ShowChinese(40, cursor_temp * 33, (uint8_t*)menu_name[main_menu_index + cursor_temp].menu_name, LIGHTBLUE, BLACK, 32, 0);
-	    LCD_Fill_DMA(32, cursor_main_menu * 32, LCD_W, (cursor_main_menu + 1) * 32, BLACK);
-        LCD_ShowChinese(40, cursor_main_menu * 33, (uint8_t*)menu_name[main_menu_index + cursor_main_menu].menu_name, BLACK, LIGHTBLUE, 32, 0);
+        LCD_off_menu_line(cursor_temp, (uint8_t*)menu_name[main_menu_index + cursor_temp].icon, (uint8_t*)menu_name[main_menu_index + cursor_temp].menu_name);
+        LCD_on_menu_line(cursor_main_menu, (uint8_t*)menu_name[main_menu_index + cursor_main_menu].icon, (uint8_t*)menu_name[main_menu_index + cursor_main_menu].menu_name);
     }
 }
 
@@ -190,11 +176,11 @@ void vout_page_ui_process(menu_u8 KeyValue)
             }
         }
         if (SC8815_Config.SC8815_VBUS_IBUS_Step == 100) {
-            LCD_ShowIntNum(16 * 2, 16, digits[2], 1, BLACK, LIGHTBLUE, 16);
+            LCD_ShowIntNum(36, 16, digits[2], 1, BLACK, LIGHTBLUE, 16);
         } else if (SC8815_Config.SC8815_VBUS_IBUS_Step == 1000) {
-            LCD_ShowIntNum(16, 16, digits[3], 1, BLACK, LIGHTBLUE, 16);
+            LCD_ShowIntNum(20, 16, digits[3], 1, BLACK, LIGHTBLUE, 16);
         } else if (SC8815_Config.SC8815_VBUS_IBUS_Step == 10000) {
-            LCD_ShowIntNum(7, 16, digits[4], 1, BLACK, LIGHTBLUE, 16);
+            LCD_ShowIntNum(12, 16, digits[4], 1, BLACK, LIGHTBLUE, 16);
         }
         break;
     default:
@@ -227,11 +213,11 @@ void iout_page_ui_process(menu_u8 KeyValue)
             }
         }
         if (SC8815_Config.SC8815_VBUS_IBUS_Step == 100) {
-            LCD_ShowIntNum(15 * 2, 51, digits[2], 1, BLACK, LIGHTBLUE, 16);
+            LCD_ShowIntNum(36, 50, digits[2], 1, BLACK, LIGHTBLUE, 16);
         } else if (SC8815_Config.SC8815_VBUS_IBUS_Step == 1000) {
-            LCD_ShowIntNum(15, 51, digits[3], 1, BLACK, LIGHTBLUE, 16);
+            LCD_ShowIntNum(20, 50, digits[3], 1, BLACK, LIGHTBLUE, 16);
         } else if (SC8815_Config.SC8815_VBUS_IBUS_Step == 10000) {
-            LCD_ShowIntNum(7, 51, digits[4], 1, BLACK, LIGHTBLUE, 16);
+            LCD_ShowIntNum(12, 50, digits[4], 1, BLACK, LIGHTBLUE, 16);
         }
         break;
     default:
@@ -268,22 +254,62 @@ void presset_page_ui_process(menu_u8 index, menu_u8 KeyValue)
     }
     if (index_move_flag || KeyValue == KEY3_SHORT || KeyValue == KEY4_SHORT) {
         for (size_t i = 0; i < 4; i++) {
-            sprintf(presset_str, ":%d", secondary_menu_index + i);
+            sprintf(presset_str, "预设:%d", secondary_menu_index + i);
             if (i == cursor_secondary_menu) {
-                LCD_ShowChinese(0, i * 33, "预设", BLACK, LIGHTBLUE, 32, 0);
-                LCD_ShowString(64, i * 33, (uint8_t *)presset_str, BLACK, LIGHTBLUE, 32, 0);
+                LCD_on_menu_line(i, (uint8_t*)gImage_presset, (uint8_t*)presset_str);
             } else {
-                LCD_ShowChinese(0, i * 33, "预设", LIGHTBLUE, BLACK, 32, 0);
-                LCD_ShowString(64, i * 33, (uint8_t *)presset_str, LIGHTBLUE, BLACK, 32, 0);
+                LCD_off_menu_line(i, (uint8_t*)gImage_presset, (uint8_t*)presset_str);
             }
         }
     } else {
-        sprintf(presset_str, ":%d", secondary_menu_index + cursor_temp);
-        LCD_ShowChinese(0, cursor_temp * 33, "预设", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowString(64, cursor_temp * 33, (uint8_t*)presset_str, LIGHTBLUE, BLACK, 32, 0);
-        sprintf(presset_str, ":%d", secondary_menu_index + cursor_secondary_menu);
-        LCD_ShowChinese(0, cursor_secondary_menu * 33, "预设", BLACK, LIGHTBLUE, 32, 0);
-        LCD_ShowString(64, cursor_secondary_menu * 33, (uint8_t *)presset_str, BLACK, LIGHTBLUE, 32, 0);
+        sprintf(presset_str, "预设:%d", secondary_menu_index + cursor_temp);
+        LCD_off_menu_line(cursor_temp, (uint8_t*)gImage_presset, (uint8_t*)presset_str);
+        sprintf(presset_str, "预设:%d", secondary_menu_index + cursor_secondary_menu);
+        LCD_on_menu_line(cursor_secondary_menu, (uint8_t*)gImage_presset, (uint8_t*)presset_str);
+    }
+}
+
+void presset_start_page_ui_process(menu_u8 index, menu_u8 KeyValue)
+{
+    char presset_str[10] = {0};
+    uint8_t index_move_flag = 0;
+    menu_u8 cursor_temp = cursor_secondary_menu;
+    if (cursor_secondary_menu == 3 && KeyValue == RIGHT && secondary_menu_index != (SC8815_TIM_WORK_SIZE - 4))
+    {
+        secondary_menu_index++;
+        index_move_flag = 1;
+    }
+    else if (cursor_secondary_menu == 0 && KeyValue == LEFT && secondary_menu_index != 0)
+    {
+        secondary_menu_index--;
+        index_move_flag = 1;
+    }
+    if(cursor_secondary_menu != 3 && KeyValue == RIGHT)
+    {
+        cursor_secondary_menu++;
+    }
+    else if (cursor_secondary_menu != 0 && KeyValue == LEFT)
+    {
+        cursor_secondary_menu--;
+    }
+    
+    if (index_move_flag == 0 && (KeyValue == KEY3_SHORT || KeyValue == KEY4_SHORT)) {
+        LCD_Clear();
+    }
+    if (index_move_flag || KeyValue == KEY3_SHORT || KeyValue == KEY4_SHORT) {
+        for (size_t i = 0; i < 4; i++) {
+            sprintf(presset_str, "预设:%d", secondary_menu_index + i);
+            if (i == cursor_secondary_menu) {
+                LCD_on_menu_line(i, (uint8_t*)gImage_start_presset, (uint8_t*)presset_str);
+            } else {
+                LCD_off_menu_line(i, (uint8_t*)gImage_start_presset, (uint8_t*)presset_str);
+            }
+        }
+    } else {
+        sprintf(presset_str, "预设:%d", secondary_menu_index + cursor_temp);
+        LCD_off_menu_line(cursor_temp, (uint8_t*)gImage_start_presset, (uint8_t*)presset_str);
+        sprintf(presset_str, "预设:%d", secondary_menu_index + cursor_secondary_menu);
+        LCD_on_menu_line(cursor_secondary_menu, (uint8_t*)gImage_start_presset, (uint8_t*)presset_str);
     }
 }
 
@@ -292,24 +318,28 @@ void presset_config_page_ui_process(menu_u8 index)
     current_menu_index = PRESSET_CONFIG_PAGE;
     extern SC8815_TIM_WorkTypeDef SC8815_TIM_Work[SC8815_TIM_WORK_SIZE];
     char str[10];
-    sprintf(str, "vset:%.2fv", SC8815_TIM_Work[sub_index.presset_current_index].SC8815_VBUS[index] / 1000);
-	LCD_Fill_DMA(80, 0 * 32, LCD_W, (0 + 1) * 32, BLACK);
-    LCD_ShowString(0, 0, (uint8_t*)str, LIGHTBLUE, BLACK, 32, 0);
+    if (SC8815_TIM_Work[sub_index.presset_current_index].SC8815_VBUS[index] >= 0 && SC8815_TIM_Work[sub_index.presset_current_index].SC8815_VBUS[index] < 10000) {
+        sprintf(str, "Vset:0%.2fV ", SC8815_TIM_Work[sub_index.presset_current_index].SC8815_VBUS[index] / 1000);
+    } else {
+        sprintf(str, "Vset:%.2fV ", SC8815_TIM_Work[sub_index.presset_current_index].SC8815_VBUS[index] / 1000);
+    }
+    LCD_Fill_DMA(80, 0, LCD_W, 32, RED);
+    LCD_ShowString(0, 0, (uint8_t*)str, WHITE, RED, 32, 0);
     memset(str, 0, 10);
-    sprintf(str, "iset:%.2fA", SC8815_TIM_Work[sub_index.presset_current_index].SC8815_IBUS_Limit[index] / 1000);
-	LCD_Fill_DMA(80, 1 * 32, LCD_W, (1 + 1) * 32, BLACK);
-    LCD_ShowString(0, 33, (uint8_t *)str, LIGHTBLUE, BLACK, 32, 0);
+    sprintf(str, "Iset:%.2fA", SC8815_TIM_Work[sub_index.presset_current_index].SC8815_IBUS_Limit[index] / 1000);
+    LCD_Fill_DMA(80, 34, LCD_W, 66, RED);
+    LCD_ShowString(0, 34, (uint8_t*)str, WHITE, RED, 32, 0);
     memset(str, 0, 10);
-    sprintf(str, "time:%ds", SC8815_TIM_Work[sub_index.presset_current_index].SC8815_TIM_Work_second[index]);
-	LCD_Fill_DMA(80, 2 * 32, LCD_W, (2 + 1) * 32, BLACK);
-    LCD_ShowString(0, 66, (uint8_t *)str, LIGHTBLUE, BLACK, 32, 0);
+    sprintf(str, "Time:%ds", SC8815_TIM_Work[sub_index.presset_current_index].SC8815_TIM_Work_second[index]);
+    LCD_Fill_DMA(80, 68, LCD_W, 100, RED);
+    LCD_ShowString(0, 68, (uint8_t*)str, WHITE, RED, 32, 0);
     memset(str, 0, 10);
-    sprintf(str, "loop:%d", SC8815_TIM_Work[sub_index.presset_current_index].circular);
-	LCD_Fill_DMA(32, 3 * 32, 100, (3 + 1) * 32, BLACK);
-    LCD_ShowString(0, 99, (uint8_t *)str, LIGHTBLUE, BLACK, 16, 0);
+    sprintf(str, "Loop:%d", SC8815_TIM_Work[sub_index.presset_current_index].circular);
+    LCD_Fill_DMA(80, 102, LCD_W, 135, RED);
+    LCD_ShowString(0, 102, (uint8_t*)str, WHITE, RED, 32, 0);
     memset(str, 0, 10);
-    sprintf(str, "step:%d/29", index);
-    LCD_ShowString(100, 99, (uint8_t *)str, LIGHTBLUE, BLACK, 16, 0);
+    sprintf(str, "Step:%d/29", index);
+    LCD_ShowString(160, 118, (uint8_t*)str, WHITE, RED, 16, 0);
 }
 
 void presset_config_set_page_ui_process(menu_u8 KeyValue)
@@ -351,12 +381,12 @@ void buzzer_page_ui_process(menu_u8 index)
     switch (index)
     {
     case 0:
-        LCD_ShowChinese(0, 0, "开启蜂鸣器", BLACK, LIGHTBLUE, 32, 0);
-        LCD_ShowChinese(0, 33, "关闭蜂鸣器", LIGHTBLUE, BLACK, 32, 0);
+        LCD_on_menu_line(0, (uint8_t*)gImage_buzzer, "开启蜂鸣器");
+        LCD_off_menu_line(1, (uint8_t*)gImage_buzzer, "关闭蜂鸣器");
         break;
     case 1:
-        LCD_ShowChinese(0, 0, "开启蜂鸣器", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowChinese(0, 33, "关闭蜂鸣器", BLACK, LIGHTBLUE, 32, 0);
+        LCD_off_menu_line(0, (uint8_t*)gImage_buzzer, "开启蜂鸣器");
+        LCD_on_menu_line(1, (uint8_t*)gImage_buzzer, "关闭蜂鸣器");
         break;
     default:
         break;
@@ -365,34 +395,28 @@ void buzzer_page_ui_process(menu_u8 index)
 
 void temperature_page_ui_process(float index)
 {
+    char str[10] = {0};
+    int number = 0, length = 0, digits[2] = {0};
     current_menu_index = TEMPERATURE_PAGE;
-    sub_index.temperature_current_index = index;
-    if (index == TEMPERATURE_65)
-    {
-        LCD_ShowChinese(0, 0, "过温保护", BLACK, LIGHTBLUE, 32, 0);
-        LCD_ShowString(128, 0, ":50", BLACK, LIGHTBLUE, 32, 0);
-        LCD_ShowChinese(0, 33, "过温保护", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowString(128, 33, ":60", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowChinese(0, 66, "过温保护", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowString(128, 66, ":70", LIGHTBLUE, BLACK, 32, 0);
+    sprintf(str, "温度:%.0fC", index);
+    LCD_on_menu_line(0, (uint8_t*)gImage_temp, (uint8_t*)str);
+    if (index >= SC8815_Config.SC8815_VBUS_IBUS_Step) {
+        // Take the tens, thousands, and hundreds values and store them in variate digits
+        number = index;
+        while (number > 0) {
+            number /= 10;
+            length++;
+        }
+        number = index;
+        for (int i = length - 1; i >= 0; i--) {
+            digits[i] = number / (int)pow(10, i);
+            number %= (int)pow(10, i);
+        }
     }
-    else if (index == TEMPERATURE_75)
-    {
-        LCD_ShowChinese(0, 0, "过温保护", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowString(128, 0, ":50", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowChinese(0, 33, "过温保护", BLACK, LIGHTBLUE, 32, 0);
-        LCD_ShowString(128, 33, ":60", BLACK, LIGHTBLUE, 32, 0);
-        LCD_ShowChinese(0, 66, "过温保护", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowString(128, 66, ":70", LIGHTBLUE, BLACK, 32, 0);
-    }
-    else if (index == TEMPERATURE_85)
-    {
-        LCD_ShowChinese(0, 0, "过温保护", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowString(128, 0, ":50", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowChinese(0, 33, "过温保护", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowString(128, 33, ":60", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowChinese(0, 66, "过温保护", BLACK, LIGHTBLUE, 32, 0);
-        LCD_ShowString(128, 66, ":70", BLACK, LIGHTBLUE, 32, 0);
+    if (SC8815_Config.SC8815_VBUS_IBUS_Step == 1) {
+        LCD_ShowIntNum(144 + 16 * 2, 0, digits[0], 1, RED, WHITE, 32);
+    } else if (SC8815_Config.SC8815_VBUS_IBUS_Step == 10) {
+        LCD_ShowIntNum(144 + 16, 0, digits[1], 1, RED, WHITE, 32);
     }
 }
 
@@ -460,25 +484,19 @@ void fastch_page_ui_process(menu_u8 KeyValue, uint16_t fastCharge_InVoltage)
     }
     if (index_move_flag ||  KeyValue == KEY4_SHORT) {
         for (size_t i = 0; i < count; i++) {
-            sprintf(str, ":%dV %.1fA", PDCapabilities[secondary_menu_index + i].voltage, PDCapabilities[secondary_menu_index + i].current);
+            sprintf(str, "%dV %.1fA", PDCapabilities[secondary_menu_index + i].voltage, PDCapabilities[secondary_menu_index + i].current);
             LCD_RowClear(i, 32, BLACK);
             if (i == cursor_secondary_menu) {
-                LCD_ShowChinese(0, i * 33, "快充", BLACK, LIGHTBLUE, 32, 0);
-                LCD_ShowString(64, i * 33, (uint8_t*)str, BLACK, LIGHTBLUE, 32, 0);
+                LCD_on_menu_line(i, (uint8_t*)gImage_PDinput, (uint8_t*)str);
             } else {
-                LCD_ShowChinese(0, i * 33, "快充", LIGHTBLUE, BLACK, 32, 0);
-                LCD_ShowString(64, i * 33, (uint8_t*)str, LIGHTBLUE, BLACK, 32, 0);
+                LCD_off_menu_line(i, (uint8_t*)gImage_PDinput, (uint8_t*)str);
             }
         }
     } else {
-        sprintf(str, ":%dV %.1fA", PDCapabilities[secondary_menu_index + cursor_temp].voltage, PDCapabilities[secondary_menu_index + cursor_temp].current);
-        LCD_RowClear(cursor_temp, 32, BLACK);
-        LCD_ShowChinese(0, cursor_temp * 33, "快充", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowString(64, cursor_temp * 33, (uint8_t*)str, LIGHTBLUE, BLACK, 32, 0);
-        sprintf(str, ":%dV %.1fA", PDCapabilities[secondary_menu_index + cursor_secondary_menu].voltage, PDCapabilities[secondary_menu_index + cursor_secondary_menu].current);
-        LCD_RowClear(cursor_secondary_menu, 32, BLACK);
-        LCD_ShowChinese(0, cursor_secondary_menu * 33, "快充", BLACK, LIGHTBLUE, 32, 0);
-        LCD_ShowString(64, cursor_secondary_menu * 33, (uint8_t*)str, BLACK, LIGHTBLUE, 32, 0);
+        sprintf(str, "%dV %.1fA", PDCapabilities[secondary_menu_index + cursor_temp].voltage, PDCapabilities[secondary_menu_index + cursor_temp].current);
+        LCD_off_menu_line(cursor_temp, (uint8_t*)gImage_PDinput, (uint8_t*)str);
+        sprintf(str, "%dV %.1fA", PDCapabilities[secondary_menu_index + cursor_secondary_menu].voltage, PDCapabilities[secondary_menu_index + cursor_secondary_menu].current);
+        LCD_on_menu_line(cursor_secondary_menu, (uint8_t*)gImage_PDinput, (uint8_t*)str);
     }
 }
 
@@ -504,20 +522,24 @@ void VBUS_calibration_page_ui_process(menu_u8 index)
 void protect_page_ui_process(menu_u8 index)
 {
     current_menu_index = PROTECT_PAGE;
-    LCD_Clear();
+    LCD_Fill_DMA(0, 102, LCD_W, 135, WARNING_YELLOW);
+    LCD_show_on_off(0, 102, 16, 16, gImage_left1, WARNING_YELLOW);
+    LCD_show_on_off(LCD_W - 16, 102, 16, 16, gImage_right1, WARNING_YELLOW);
     switch (index)
     {
     case VBUS_PROTECT:
-        LCD_ShowString(100, 50, "SCP", RED, BLACK, 32, 0);
+        LCD_ShowChinese(60, 102, "过流保护", BLACK, WARNING_YELLOW, 32, 0);
         break;
     case TEMP_PROTECT:
-        LCD_ShowChinese(50, 50, "过温保护", RED, BLACK, 32, 0);
+        LCD_ShowChinese(60, 102, "过温保护", BLACK, WARNING_YELLOW, 32, 0);
         break;
     case VBAT_PROTECT:
-        LCD_ShowString(50, 50, "VBATPORT!", RED, BLACK, 32, 0);
+        LCD_ShowChinese(20, 102, "输入电压", BLACK, WARNING_YELLOW, 32, 0);
+        LCD_ShowString(148, 102, ">25.5V", BLACK, WARNING_YELLOW, 32, 0);
         break;
     case PRESSET_PROTECT:
-        LCD_ShowString(10, 50, "NeedInput>=9V", RED, BLACK, 32, 0);
+        LCD_ShowChinese(20, 102, "输入电压", BLACK, WARNING_YELLOW, 32, 0);
+        LCD_ShowString(148, 102, "<=9V", BLACK, WARNING_YELLOW, 32, 0);
         break;
     default:
         break;
@@ -530,13 +552,15 @@ void about_page_ui_process(void)
     char name[sizeof(APP_config.device_name) + 1] = ":";
     LCD_Clear();
     LCD_ShowChinese(0, 0, "名称", LIGHTBLUE, BLACK, 32, 0);
+    // LCD_ShowString(0, 0, "Name", LIGHTBLUE, BLACK, 32, 0);
     strcat(name, APP_config.device_name);
     LCD_ShowString(64, 0, (uint8_t*)name, LIGHTBLUE, BLACK, 32, 0);
     LCD_ShowChinese(0, 33, "型号", LIGHTBLUE, BLACK, 32, 0);
-    LCD_ShowString(64, 33, ":PD  POCKET", LIGHTBLUE, BLACK, 32, 0);
+    LCD_ShowString(64, 33, ":PD POCKET", LIGHTBLUE, BLACK, 32, 0);
+    // LCD_ShowString(0, 33, "Type:PD POCKET", LIGHTBLUE, BLACK, 32, 0);
     LCD_ShowChinese(0, 66, "版本", LIGHTBLUE, BLACK, 32, 0);
     LCD_ShowString(64, 66, ":1.1.0", LIGHTBLUE, BLACK, 32, 0);
-    // LCD_ShowString(0, 0, "PD Pocket", LIGHTBLUE, BLACK, 32, 0);
+    // LCD_ShowString(0, 66, "Version:1.1.0", LIGHTBLUE, BLACK, 32, 0);
 }
 
 void DC_limit_page_ui_process(menu_u8 KeyValue)

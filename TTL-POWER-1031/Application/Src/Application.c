@@ -17,12 +17,14 @@
 #include "stmflash.h"
 #include "string.h"
 
-#define APP_CONFIG_FLASH_ADDR     STM32_FLASH_BASE+STM_SECTOR_SIZE*123
+#define APP_CONFIG_FLASH_ADDR     (STM32_FLASH_BASE+STM_SECTOR_SIZE*123)
+#define APP_UPGRADE_FLAG_ADDR 0x801FFFE
 
 Application_Config APP_config;
 Application_SaveConfig app_config_save_config;
 
 uint32_t APP_LCD_main_show_time = 0;
+static uint32_t temperature_protect_time = 0;
 extern menu_i32 current_menu_index;
 
 /**
@@ -48,6 +50,7 @@ void Application_main()
         {
             APP_LCD_main_show();
             APP_LCD_main_show_time = HAL_GetTick();
+            APP_config.fastCharge_InVoltage = App_getVBAT_V();  //刷新DC输出电压值
         }
 
         if (SC8815_Config.sc8815_tim_work_lcd_flush == tim_work_lcd_main)
@@ -70,19 +73,22 @@ void Application_main()
             SC8815_Config.SC8815_Status = SC8815_TIM_WORK;
         }
 
-        if ( APP_config.temperature > App_getTemp_V() && HAL_GPIO_ReadPin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin) == GPIO_PIN_RESET)
-        {
-            HAL_Delay(500);
-            if (APP_config.temperature > App_getTemp_V())
+        if (HAL_GetTick() - temperature_protect_time >= 5000) {
+            if ( APP_config.temperature < App_getTemp() && HAL_GPIO_ReadPin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin) == GPIO_PIN_RESET)
             {
-                if (SC8815_Config.SC8815_Status == SC8815_TIM_WORK) {
-                    SC8815_Preset_Mode_Quit();
-                } else {
-                    SC8815_Config.SC8815_Status = SC8815_Standby;
-                    Application_SC8815_Standby();
+                HAL_Delay(500);
+                if (APP_config.temperature < App_getTemp())
+                {
+                    if (SC8815_Config.SC8815_Status == SC8815_TIM_WORK) {
+                        SC8815_Preset_Mode_Quit();
+                    } else {
+                        SC8815_Config.SC8815_Status = SC8815_Standby;
+                        Application_SC8815_Standby();
+                    }
+                    protect_page_ui_process(TEMP_PROTECT);
                 }
-                protect_page_ui_process(TEMP_PROTECT);
             }
+            temperature_protect_time = HAL_GetTick();
         }
         SC8815_Soft_Protect();
 
@@ -97,9 +103,13 @@ void Application_main()
             APP_config.app_config_save_flag = 0;
         }
 
-        if (SC8815_Config.sc8815_calibration_ibus_flag) {
+        if (SC8815_Config.sc8815_calibration_flag == 1) {
             SC8815_IBUS_calibration();
-            SC8815_Config.sc8815_calibration_ibus_flag = 0;
+            SC8815_Config.sc8815_calibration_flag = 0;
+        } else if (SC8815_Config.sc8815_calibration_flag == 2) {
+            SC8815_output_calibration(1);
+            SC8815_Config.sc8815_calibration_flag = 0;
+            main_page_init();
         }
 
         // printf("temperature:%f\n", App_getTemp_V());
@@ -309,12 +319,12 @@ void app_config_load(void)
                 app_config_save_config.SC8815_VBUS = 5000;
                 app_config_save_config.SC8815_IBUS_Limit = 1000;
 				app_config_save_config.DC_IBAT_Limit = 3000;
-                app_config_save_config.temperature = TEMPERATURE_65;
+                app_config_save_config.temperature = 75;
                 app_config_save_config.lock_buzzer = 0;
-                app_config_save_config.SW_FREQ = SCHWI_FREQ_300KHz_1;
-                app_config_save_config.upgrade_flag = 0;
+                app_config_save_config.SW_FREQ = SCHWI_FREQ_150KHz;
                 memcpy(app_config_save_config.device_name, "PDP-", 4);
                 snprintf(app_config_save_config.device_name + 4, 7, "%X", CpuID);
+                app_config_save();
                 break;
             }
             else
@@ -330,6 +340,12 @@ void app_config_load(void)
     {
         i -= sizeof(Application_SaveConfig);
         STMFLASH_ReadBytes(APP_CONFIG_FLASH_ADDR + i, (uint8_t*)&app_config_save_config, sizeof(Application_SaveConfig));
+    }
+    // 校验是否为新添加数据
+    if (app_config_save_config.device_name[0] == 0xff) {
+        uint32_t CpuID =  *(volatile uint32_t*)(0x1FFFF7E8);
+        memcpy(app_config_save_config.device_name, "PDP-", 4);
+        snprintf(app_config_save_config.device_name + 4, 7, "%X", CpuID);
     }
     SC8815_Config.SC8815_IBUS_Limit = app_config_save_config.SC8815_IBUS_Limit;
     SC8815_Config.SC8815_IBUS_Limit_Old = app_config_save_config.SC8815_IBUS_Limit;
@@ -365,4 +381,19 @@ void app_config_save(void)
         }
         STMFLASH_Write(APP_CONFIG_FLASH_ADDR, (uint16_t*)&app_config_save_config, sizeof(Application_SaveConfig) >> 1);
     }
+}
+
+//升级标志位，0不进入升级 1进入升级 2升级成功 3升级失败
+void set_app_upgrade_flag(uint16_t flag)
+{
+    STMFLASH_Write(APP_UPGRADE_FLAG_ADDR, &flag, 1);
+}
+
+uint32_t GetCPU_ID(void)
+{
+    uint32_t CpuID[3];							//小端模式
+    CpuID[0] = *(uint32_t*)(0x1ffff7e8); //高32位地址
+    CpuID[1] = *(uint32_t*)(0x1ffff7ec); //中32位地址
+    CpuID[2] = *(uint32_t*)(0x1ffff7f0); //低32位地址
+    return CpuID[0] ^ CpuID[1] ^ CpuID[2];
 }

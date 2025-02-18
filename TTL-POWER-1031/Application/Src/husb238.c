@@ -196,6 +196,8 @@ void husb238_init(void)
     if (PD_Power > 0) {
         //HUSB238_GetCapabilities(&PD_Voltage, &PD_Current);
         LCD_ShowChinese(20, 32, "快充输入能力", LIGHTBLUE, BLACK, 32, 0);
+        // LCD_ShowString(20, 32, "Fast charging", LIGHTBLUE, BLACK, 32, 0);
+        // LCD_ShowString(20, 32, "input capability", LIGHTBLUE, BLACK, 32, 0);
         if (PD_Power < 100) {
             sprintf(str, "%dV %.1fA %.1fW", PDCapabilities[index].voltage, PDCapabilities[index].current, PD_Power);
         } else {
@@ -210,6 +212,7 @@ void husb238_init(void)
     } else {
         SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
         LCD_ShowChinese(20, 32, "设置输入电流", LIGHTBLUE, BLACK, 32, 0);
+        // LCD_ShowString(20, 32, "Set input current", LIGHTBLUE, BLACK, 32, 0);
         DC_limit_page_ui_process(KEY2_SHORT);
     }
 }
