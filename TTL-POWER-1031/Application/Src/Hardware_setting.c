@@ -37,6 +37,8 @@ void set_vout(menu_u8 KeyValue)
             SC8815_Config.SC8815_VBUS -= SC8815_Config.SC8815_VBUS_IBUS_Step;
             break;
         }
+        if (SC8815_Config.SC8815_VBUS > SC8815_Config.SC8815_VBUS_protect)
+            SC8815_Config.SC8815_VBUS = SC8815_Config.SC8815_VBUS_protect;
         in_power = (APP_config.fastCharge_InVoltage * APP_config.fastCharge_InCurrent) * 1000000;
         if (in_power > get_sc8815_power() * 1000000) {
             in_power = get_sc8815_power() * 1000000;

@@ -31,7 +31,7 @@ static OP_MENU_PAGE g_opStruct[] =
     {PROTECT_PAGE, protect_page_process},
     {ABOUT_PAGE, about_page_process},
     {DC_LIMIT_PAGE, DC_limit_page_process},
-    {LANGUAGE_CHANGE_PAGE, language_change_page_process},
+    {VBUS_PROTECT_PAGE, vbus_protect_page_process},
 };
 
 /**
@@ -145,6 +145,7 @@ void vout_page_process(menu_u8 KeyValue)
         vout_page_ui_process(KeyValue);
         break;
     case KEY3_SHORT:
+    case KEY4_SHORT:
     {
         //返回上一级
         set_vout(KeyValue);
@@ -178,6 +179,7 @@ void iout_page_process(menu_u8 KeyValue)
         iout_page_ui_process(KeyValue);
         break;
     case KEY3_SHORT:
+    case KEY4_SHORT:
     {
         //返回上一级
         set_iout(KeyValue);
@@ -498,6 +500,7 @@ void temperature_page_process(menu_u8 KeyValue)
         break;
     case KEY3_SHORT:
         SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
+        app_config_load();
         main_menu_page_ui_process(sub_index.main_menu_current_index, KeyValue);
         break;
     case KEY4_SHORT:
@@ -508,6 +511,7 @@ void temperature_page_process(menu_u8 KeyValue)
         break;
     case KEY2_LONG:
         SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
+        app_config_load();
         main_page_init();
         break;
     default:
@@ -638,30 +642,54 @@ void DC_limit_page_process(menu_u8 KeyValue)
     }
 }
 
-void language_change_page_process(menu_u8 KeyValue)
+void vbus_protect_page_process(menu_u8 KeyValue)
 {
     switch (KeyValue)
     {
     case LEFT:
-        (sub_index.VBUS_calibration_current_index > 0) ? (sub_index.VBUS_calibration_current_index--) : (sub_index.VBUS_calibration_current_index = 0);
-        VBUS_calibration_page_ui_process(sub_index.VBUS_calibration_current_index);
+        SC8815_Config.SC8815_VBUS_protect -= SC8815_Config.SC8815_VBUS_IBUS_Step;
+        if (SC8815_Config.SC8815_VBUS_protect < SC8815_VBUS_MIN)
+            SC8815_Config.SC8815_VBUS_protect = SC8815_VBUS_MIN;
+        vbus_protect_page_ui_process(KeyValue);
         break;
     case RIGHT:
-        (sub_index.VBUS_calibration_current_index < 1) ? (sub_index.VBUS_calibration_current_index++) : (sub_index.VBUS_calibration_current_index = 1);
-        VBUS_calibration_page_ui_process(sub_index.VBUS_calibration_current_index);
+        SC8815_Config.SC8815_VBUS_protect += SC8815_Config.SC8815_VBUS_IBUS_Step;
+        if (SC8815_Config.SC8815_VBUS_protect > SC8815_VBUS_MAX)
+            SC8815_Config.SC8815_VBUS_protect = SC8815_VBUS_MAX;
+        vbus_protect_page_ui_process(KeyValue);
+        break;
+    case KEY1_SHORT:
+        if (SC8815_Config.SC8815_VBUS_IBUS_Step == 1000)
+            SC8815_Config.SC8815_VBUS_IBUS_Step = 100;
+        else if (SC8815_Config.SC8815_VBUS_IBUS_Step == 10000)
+            SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
+            vbus_protect_page_ui_process(KeyValue);
+        break;
+    case KEY2_SHORT:
+        if (SC8815_Config.SC8815_VBUS_IBUS_Step == 100)
+            SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
+        else if (SC8815_Config.SC8815_VBUS_IBUS_Step == 1000)
+            SC8815_Config.SC8815_VBUS_IBUS_Step = 10000;
+        vbus_protect_page_ui_process(KeyValue);
         break;
     case KEY3_SHORT:
+        SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
+        app_config_load();
         main_menu_page_ui_process(sub_index.main_menu_current_index, KeyValue);
         break;
     case KEY4_SHORT:
-        if (sub_index.VBUS_calibration_current_index == 0) {
-            SC8815_output_calibration(1);
-            main_page_init();
-        } else {
-            main_menu_page_ui_process(sub_index.main_menu_current_index, KEY3_SHORT);
+        SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
+        if (SC8815_Config.SC8815_VBUS_protect < SC8815_Config.SC8815_VBUS) {
+            SC8815_Config.SC8815_VBUS = SC8815_Config.SC8815_VBUS_protect;
+            SC8815_Config.SC8815_VBUS_Old = SC8815_Config.SC8815_VBUS_protect;
         }
+        App_SC8815_SetOutputVoltage(SC8815_Config.SC8815_VBUS);
+        app_config_save();
+        main_page_init();
         break;
     case KEY2_LONG:
+        SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
+        app_config_load();
         main_page_init();
         break;
     default:

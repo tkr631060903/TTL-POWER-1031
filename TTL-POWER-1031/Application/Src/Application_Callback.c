@@ -182,6 +182,11 @@ static void sc8815_tim_work(void)
                     SC8815_SFB_Disable();
                     // SoftwareDelay(10);
                     // SC8815_SFB_Enable();
+                    if (presset_config_set.set_vbus[SC8815_Config.sc8815_tim_work_step] < 7500 && SC8815_HardwareInitStruct.FB_Mode) {
+                        SC8815_SetVBUSFBMode(0);
+                    } else if (presset_config_set.set_vbus[SC8815_Config.sc8815_tim_work_step] >= 7500 && SC8815_HardwareInitStruct.FB_Mode == SCHWI_FB_Internal) {
+                        SC8815_SetVBUSFBMode(1);
+                    }
                     if (presset_config_set.set_vbus[SC8815_Config.sc8815_tim_work_step] >= 2700) {
                         SC8815_Config.sc8815_sfb_delay_ms = 30;	//最小值为1
                     }
@@ -226,6 +231,11 @@ static void sc8815_tim_work(void)
                             SC8815_SFB_Disable();
                             // SoftwareDelay(10);
                             // SC8815_SFB_Enable();
+                            if (presset_config_set.set_vbus[SC8815_Config.sc8815_tim_work_step] < 7500 && SC8815_HardwareInitStruct.FB_Mode) {
+                                SC8815_SetVBUSFBMode(0);
+                            } else if (presset_config_set.set_vbus[SC8815_Config.sc8815_tim_work_step] >= 7500 && SC8815_HardwareInitStruct.FB_Mode == SCHWI_FB_Internal) {
+                                SC8815_SetVBUSFBMode(1);
+                            }
                             if (presset_config_set.set_vbus[SC8815_Config.sc8815_tim_work_step] >= 2700) {
                                 SC8815_Config.sc8815_sfb_delay_ms = 30;	//最小值为1
                             }

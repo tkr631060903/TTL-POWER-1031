@@ -73,6 +73,7 @@ typedef struct
     float SC8815_VBUS_IBUS_Step;        // 8815 VBUS输出电压/电流步进值
     float SC8815_VBUS_CMD_Step;        // 8815 VBUS输出电压命令步进值
     float SC8815_IBUS_CMD_Step;        // 8815 VBUS输出电流命令步进值
+    float SC8815_VBUS_protect;          // 8815 VBUS过压保护mv
     uint32_t VOUT_Open_Time;            // 8815 输出开启时间
     uint32_t sc8815_tim_work_time;      // 8815 定时工作时间定时器增加值
     uint8_t sc8815_tim_work_step;       // 8815 定时工作当前循环第n个步骤

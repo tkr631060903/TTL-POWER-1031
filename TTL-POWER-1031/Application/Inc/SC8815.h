@@ -382,6 +382,7 @@ void SC8815_SetLoop(uint8_t NewLoop);								//设置环路响应模式 	数值函义为 1=正
 uint8_t SC8815_GetLoop(void);												//获取环路响应模式 	返回值 1=正常环路响应 2=改善环路响应
 void SC8815_SetOTGFBMode(uint8_t NewVal);						//设置VBUS采样模式		
 uint8_t SC8815_GetVBUSShort(void);
+void SC8815_SetIBUSRatio(uint8_t ratio);
 
 extern SC8815_HardwareInitTypeDef SC8815_HardwareInitStruct;
 

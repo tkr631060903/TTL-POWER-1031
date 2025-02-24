@@ -14,6 +14,7 @@
 //包含头文件
 #include "SC8815.h"
 #include "Application.h"
+#include "Application_SC8815.h"
 
 SC8815_BatteryConfigTypeDef SC8815_BatteryConfigStruct = { 0 };
 SC8815_HardwareInitTypeDef SC8815_HardwareInitStruct = { 0 };
@@ -411,19 +412,16 @@ void SC8815_VINREG_SetVoltage(uint16_t NewVolt)
 *****************************************/
 void SC8815_SetVBUSFBMode(uint8_t mode)
 {
-	uint8_t tmp;
-	// SC8815_HardwareInitStruct.FB_Mode &= ~0x10;
-	// SC8815_HardwareInitStruct.FB_Mode |= mode;
-	SC8815_HardwareInitStruct.FB_Mode = mode;
-	tmp = I2C_ReadRegByte(SC8815_ADDR, SCREG_CTRL1_SET) & 0x03;
-	tmp |= SC8815_HardwareInitStruct.ICHAR;
-	tmp |= SC8815_HardwareInitStruct.TRICKLE;
-	tmp |= SC8815_HardwareInitStruct.TERM;
-	tmp |= SC8815_HardwareInitStruct.FB_Mode;
-	tmp |= SC8815_HardwareInitStruct.TRICKLE_SET;
-	tmp |= SC8815_HardwareInitStruct.OVP;
+	extern SC8815_ConfigTypeDef SC8815_Config;
+	if (mode) {
+		SC8815_HardwareInitStruct.FB_Mode = SCHWI_FB_External;
+	} else {
+		SC8815_HardwareInitStruct.FB_Mode = mode;
+	}
+	uint8_t tmp = I2C_ReadRegByte(SC8815_ADDR, SCREG_CTRL1_SET);
+	tmp = mode ? (tmp|(1 << 4)):(tmp & ~(1 << 4));// 清零
 	I2C_WriteRegByte(SC8815_ADDR, SCREG_CTRL1_SET, tmp);
-	SoftwareDelay(5);
+	// App_SC8815_SetOutputVoltage(SC8815_Config.SC8815_VBUS);
 }
 
 uint8_t SC8815_GetVBUSFBMode(void)
@@ -976,6 +974,19 @@ uint8_t SC8815_GetVBUSShort(void)
 {
 	uint8_t temp = I2C_ReadRegByte(SC8815_ADDR, SCREG_STATUS) & 0x08;
 	return (temp == 0x08) ? 1 : 0;
+}
+
+void SC8815_SetIBUSRatio(uint8_t ratio)
+{
+	uint8_t tmp;
+	SC8815_HardwareInitStruct.IBUS_RATIO = ratio;
+	//比例配置
+	tmp = I2C_ReadRegByte(SC8815_ADDR, SCREG_RATIO) & 0xE0; //读取寄存器中的保留位(这些保留位不能动)
+	tmp |= SC8815_HardwareInitStruct.IBAT_RATIO;           //装填配置参数
+	tmp |= SC8815_HardwareInitStruct.IBUS_RATIO;
+	tmp |= SC8815_HardwareInitStruct.VBAT_RATIO;
+	tmp |= SC8815_HardwareInitStruct.VBUS_RATIO;
+	I2C_WriteRegByte(SC8815_ADDR, SCREG_RATIO, tmp);    //写回寄存器
 }
 
 /*****END OF FILE****/

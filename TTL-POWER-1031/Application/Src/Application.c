@@ -307,11 +307,15 @@ uint32_t htonl(uint32_t hostlong)
 
 void app_config_load(void)
 {
-    int i;
+    int i, if_config_default = 0;
     for (i = 0; i < STM_SECTOR_SIZE;)
     {
         STMFLASH_ReadBytes(APP_CONFIG_FLASH_ADDR + i, (uint8_t*)&app_config_save_config, sizeof(Application_SaveConfig));
-        if (app_config_save_config.lock_buzzer != 0 && app_config_save_config.lock_buzzer != 1)
+        // 校验是否为新添加数据
+        if (app_config_save_config.SC8815_VBUS_protect > SC8815_VBUS_MAX || app_config_save_config.SC8815_VBUS_protect < SC8815_VBUS_MIN) {
+            if_config_default = 1;
+        }
+        if ((app_config_save_config.lock_buzzer != 0 && app_config_save_config.lock_buzzer != 1) || if_config_default)
         {
             if (i == 0)
             {
@@ -322,6 +326,7 @@ void app_config_load(void)
                 app_config_save_config.temperature = 75;
                 app_config_save_config.lock_buzzer = 0;
                 app_config_save_config.SW_FREQ = SCHWI_FREQ_150KHz;
+                app_config_save_config.SC8815_VBUS_protect = SC8815_VBUS_MAX;
                 memcpy(app_config_save_config.device_name, "PDP-", 4);
                 snprintf(app_config_save_config.device_name + 4, 7, "%X", CpuID);
                 app_config_save();
@@ -341,16 +346,11 @@ void app_config_load(void)
         i -= sizeof(Application_SaveConfig);
         STMFLASH_ReadBytes(APP_CONFIG_FLASH_ADDR + i, (uint8_t*)&app_config_save_config, sizeof(Application_SaveConfig));
     }
-    // 校验是否为新添加数据
-    if (app_config_save_config.device_name[0] == 0xff) {
-        uint32_t CpuID =  *(volatile uint32_t*)(0x1FFFF7E8);
-        memcpy(app_config_save_config.device_name, "PDP-", 4);
-        snprintf(app_config_save_config.device_name + 4, 7, "%X", CpuID);
-    }
     SC8815_Config.SC8815_IBUS_Limit = app_config_save_config.SC8815_IBUS_Limit;
     SC8815_Config.SC8815_IBUS_Limit_Old = app_config_save_config.SC8815_IBUS_Limit;
     SC8815_Config.SC8815_VBUS = app_config_save_config.SC8815_VBUS;
     SC8815_Config.SC8815_VBUS_Old = app_config_save_config.SC8815_VBUS;
+    SC8815_Config.SC8815_VBUS_protect = app_config_save_config.SC8815_VBUS_protect;
     APP_config.temperature = app_config_save_config.temperature;
     APP_config.lock_buzzer = app_config_save_config.lock_buzzer;
     SC8815_HardwareInitStruct.SW_FREQ = app_config_save_config.SW_FREQ;

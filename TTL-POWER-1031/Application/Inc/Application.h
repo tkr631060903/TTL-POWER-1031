@@ -65,6 +65,7 @@ typedef struct
     float SC8815_VBUS;
     float DC_IBAT_Limit;
     char device_name[11];
+    float SC8815_VBUS_protect;
 } Application_SaveConfig;
 
 extern Application_Config APP_config;

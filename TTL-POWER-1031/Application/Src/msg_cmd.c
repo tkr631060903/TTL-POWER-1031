@@ -226,8 +226,6 @@ int setFB_Mode_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
     {
         return 0;
     }
-    SC8815_Config.SC8815_Status = SC8815_Standby;
-    Application_SC8815_Standby();
     int value;
     sscanf(param[1], "%d", &value);
     SC8815_SetVBUSFBMode(value);
@@ -706,7 +704,8 @@ int set_name_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
     if (strlen(param[1]) > 10) {
         return 0;
     }
-    memcpy(APP_config.device_name, param[1], strlen(param[1]));
+    memset(APP_config.device_name, 0, sizeof(APP_config.device_name));
+    memcpy(APP_config.device_name, param[1], sizeof(param[1]));
     app_config_save();
     return 1;
 }
@@ -717,8 +716,8 @@ int PDP_search_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
         return 0;
     }
     char str[24];
-    sprintf(str, "info%s", app_config_save_config.device_name);
-    //memcpy(str + 4 + sizeof(app_config_save_config.device_name), "1.1.0", sizeof("1.1.0"));
+    sprintf(str, "info%s", APP_config.device_name);
+    //memcpy(str + 4 + sizeof(APP_config.device_name), "1.1.0", sizeof("1.1.0"));
     if (cmd_source) {
         usb_printf("%s", str);
     } 

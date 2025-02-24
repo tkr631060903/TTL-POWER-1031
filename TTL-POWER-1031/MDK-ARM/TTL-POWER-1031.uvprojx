@@ -1094,11 +1094,6 @@
               <FilePath>..\Application\Src\SC8815.c</FilePath>
             </File>
             <File>
-              <FileName>Application_SC8815.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Application\Src\Application_SC8815.c</FilePath>
-            </File>
-            <File>
               <FileName>Application_BUZZER.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Application\Src\Application_BUZZER.c</FilePath>
@@ -1117,6 +1112,11 @@
               <FileName>lcd_init.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Application\Src\lcd_init.c</FilePath>
+            </File>
+            <File>
+              <FileName>Application_SC8815.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Application\Src\Application_SC8815.c</FilePath>
             </File>
             <File>
               <FileName>Application_LCD.c</FileName>

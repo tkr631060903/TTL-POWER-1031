@@ -20,8 +20,7 @@ static menu_u8 cursor_secondary_menu = 0; //二级菜单光标位置
 static uint8_t secondary_menu_index = 0; //二级菜单第一行显示索引
 static uint8_t main_menu_index = 0; //主菜单第一行显示索引
 static Menu_NameTypeDef menu_name[] = {
-    // {0, gImage_presset, "预设配置"}, {1, gImage_start_presset, "开启预设"}, {2, gImage_temp, "过温保护"}, {3, gImage_PDinput, "快充输入"}, {4, gImage_buzzer, "蜂鸣器配置"}, {5, gImage_calibration, "校准电压"}, {6, gImage_about, "关于"}
-    {0, gImage_presset, "预设配置"}, {1, gImage_start_presset, "开启预设"}, {2, gImage_temp, "过温保护"}, {3, gImage_PDinput, "快充输入"}, {4, gImage_buzzer, "蜂鸣器配置"}, {5, gImage_about, "关于"}
+    {0, gImage_presset, "预设配置"}, {1, gImage_start_presset, "开启预设"}, {2, gImage_temp, "过温保护"}, {3, gImage_PDinput, "快充输入"}, {4, gImage_buzzer, "蜂鸣器配置"}, {5, gImage_vbus_protect, "过压保护"}, {6, gImage_about, "关于"}
     // {0, gImage_presset, "SetPreset"}, {1, gImage_start_presset, "OpenPreset"}, {2, gImage_temp, "OTP"}, {3, gImage_PDinput, "FastCharge"}, {4, gImage_buzzer, "Buzzer"}, {5, gImage_calibration, "Language"}, {6, gImage_about, "About"}
 };
 
@@ -65,12 +64,12 @@ void Enter_Page(menu_i32 index, menu_u8 KeyValue)
         LCD_Clear();
         buzzer_page_ui_process(APP_config.lock_buzzer);
         break;
-    // case 5:
-    //     sub_index.VBUS_calibration_current_index = 0;
-    //     LCD_Clear();
-    //     VBUS_calibration_page_ui_process(sub_index.VBUS_calibration_current_index);
-    //     break;
     case 5:
+        LCD_Clear();
+        SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
+        vbus_protect_page_ui_process(sub_index.VBUS_calibration_current_index);
+        break;
+    case 6:
         about_page_ui_process();
         break;
     default:
@@ -605,5 +604,37 @@ void DC_limit_page_ui_process(menu_u8 KeyValue)
         break;
     default:
         break;
+    }
+}
+
+void vbus_protect_page_ui_process(float index)
+{
+    char str[10] = {0};
+    int number = 0, length = 0, digits[5] = {0};
+    current_menu_index = VBUS_PROTECT_PAGE;
+    if (SC8815_Config.SC8815_VBUS_protect < 10000)
+        sprintf(str, "电压:0%.1fV", SC8815_Config.SC8815_VBUS_protect / 1000);
+    else
+        sprintf(str, "电压:%.1fV", SC8815_Config.SC8815_VBUS_protect / 1000);
+    LCD_on_menu_line(0, (uint8_t*)gImage_temp, (uint8_t*)str);
+    if (SC8815_Config.SC8815_VBUS_protect >= SC8815_Config.SC8815_VBUS_IBUS_Step) {
+        // Take the tens, thousands, and hundreds values and store them in variate digits
+        number = SC8815_Config.SC8815_VBUS_protect;
+        while (number > 0) {
+            number /= 10;
+            length++;
+        }
+        number = SC8815_Config.SC8815_VBUS_protect;
+        for (int i = length - 1; i >= 0; i--) {
+            digits[i] = number / (int)pow(10, i);
+            number %= (int)pow(10, i);
+        }
+    }
+    if (SC8815_Config.SC8815_VBUS_IBUS_Step == 100) {
+        LCD_ShowIntNum(144 + 16 * 4, 0, digits[2], 1, RED, WHITE, 32);
+    } else if (SC8815_Config.SC8815_VBUS_IBUS_Step == 1000) {
+        LCD_ShowIntNum(144 + 16 * 2, 0, digits[3], 1, RED, WHITE, 32);
+    } else if (SC8815_Config.SC8815_VBUS_IBUS_Step == 10000) {
+        LCD_ShowIntNum(144 + 16, 0, digits[4], 1, RED, WHITE, 32);
     }
 }

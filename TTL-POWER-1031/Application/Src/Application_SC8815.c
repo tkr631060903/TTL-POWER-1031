@@ -237,6 +237,11 @@ void Application_SC8815_loadStart(void)
 		// HAL_Delay(10);
 		// Application_SoftwareDelay(10);
 		// SC8815_SFB_Enable();
+		if (SC8815_Config.SC8815_VBUS < 7500 && SC8815_HardwareInitStruct.FB_Mode) {
+			SC8815_SetVBUSFBMode(0);
+		} else if (SC8815_Config.SC8815_VBUS >= 7500 && SC8815_HardwareInitStruct.FB_Mode == SCHWI_FB_Internal) {
+			SC8815_SetVBUSFBMode(1);
+		}
 		if (SC8815_Config.SC8815_VBUS >= 2700) {
 			SC8815_Config.sc8815_sfb_delay_ms = 30;	//最小值为1
 		}
@@ -267,8 +272,8 @@ void Application_SC8815_Init(void)
 	SC8815_HardwareInitStruct.IBAT_RATIO = SCHWI_IBAT_RATIO_12x;
 	SC8815_HardwareInitStruct.IBUS_RATIO = SCHWI_IBUS_RATIO_6x;
 	SC8815_HardwareInitStruct.VBAT_RATIO = SCHWI_VBAT_RATIO_12_5x;
-	SC8815_HardwareInitStruct.VBUS_RATIO = SCHWI_VBUS_RATIO_12_5x;
-	SC8815_HardwareInitStruct.VINREG_Ratio = SCHWI_VINREG_RATIO_100x;
+	SC8815_HardwareInitStruct.VBUS_RATIO = SCHWI_VBUS_RATIO_5x;
+	SC8815_HardwareInitStruct.VINREG_Ratio = SCHWI_VINREG_RATIO_40x;
 	SC8815_HardwareInitStruct.SW_FREQ = app_config_save_config.SW_FREQ;
 	SC8815_HardwareInitStruct.DeadTime = SCHWI_DT_40ns;
 	SC8815_HardwareInitStruct.ICHAR = SCHWI_ICHAR_IBAT;
@@ -516,6 +521,11 @@ void App_SC8815_SetOutputVoltage(float voltage)
 	} else if (vbus_old < 2700 && voltage_target >= 2700) {
 		SC8815_SFB_Enable();
 	}
+	if (voltage_target < 7500 && SC8815_HardwareInitStruct.FB_Mode) {
+		SC8815_SetVBUSFBMode(0);
+	} else if (voltage_target >= 7500 && SC8815_HardwareInitStruct.FB_Mode == SCHWI_FB_Internal) {
+		SC8815_SetVBUSFBMode(1);
+	}
 
 	if (SC8815_Config.SC8815_Status == SC8815_LoadStart) {
 		if (voltage_target - vbus_old >= 9000) {
@@ -583,6 +593,11 @@ void SC8815_output_calibration(uint8_t calibration)
 		Application_SC8815_loadStart();
 		HAL_Delay(1000);
 		for (int i = 0; i < (SC8815_VBUS_MAX - SC8815_VBUS_MIN) / 100 + 1; i++) {
+			if (voltage < 7500 && SC8815_HardwareInitStruct.FB_Mode) {
+				SC8815_SetVBUSFBMode(0);
+			} else if (voltage >= 7500 && SC8815_HardwareInitStruct.FB_Mode == SCHWI_FB_Internal) {
+				SC8815_SetVBUSFBMode(1);
+			}
 			SC8815_SetOutputVoltage(voltage);
 			HAL_Delay(500);
 			calibration_table_temp[i] = voltage - App_getVBUS_mV();
@@ -614,7 +629,8 @@ void SC8815_IBUS_calibration(void)
 	float* calibration_table_temp = (float*)SC8815_TIM_Work;
 	float calibration_error = 0.03;	//校准误差
 	SCHW_VBUS_RSHUNT = SCHW_VBUS_RSHUNT_MAX;
-	App_SC8815_SetOutputVoltage(12000);
+	// App_SC8815_SetOutputVoltage(12000);
+	SC8815_SetOutputVoltage(12000);
 	SC8815_SetBusCurrentLimit(ibus_calibration);
 	SC8815_Config.SC8815_Status = SC8815_LoadStart;
 	Application_SC8815_loadStart();
@@ -622,6 +638,10 @@ void SC8815_IBUS_calibration(void)
 	memset(SC8815_TIM_Work, 0, sizeof(SC8815_TIM_WorkTypeDef) * SC8815_TIM_WORK_SIZE);
 	for (int i = 0; i < (SC8815_IBUS_MAX - SC8815_IBUS_MIN) / 100 + 1; i++) {
 		usb_printf("ibus_calibration:%d\n", ibus_calibration);
+		if (ibus_calibration >= 4000 && SC8815_HardwareInitStruct.IBUS_RATIO != SCHWI_IBUS_RATIO_6x)
+			SC8815_SetIBUSRatio(SCHWI_IBUS_RATIO_6x);
+		else if (ibus_calibration < 4000 && SC8815_HardwareInitStruct.IBUS_RATIO != SCHWI_IBUS_RATIO_3x)
+			SC8815_SetIBUSRatio(SCHWI_IBUS_RATIO_3x);
 		while (1) {
 			if (App_getIBUS_mA() >= ibus_calibration - ibus_calibration * calibration_error && App_getIBUS_mA() <= ibus_calibration + ibus_calibration * calibration_error) {
 				calibration_table_temp[i] = SCHW_VBUS_RSHUNT;
@@ -634,11 +654,15 @@ void SC8815_IBUS_calibration(void)
 				LCD_ShowString(30, 50, "calibration err", LIGHTBLUE, BLACK, 32, 0);
 				sprintf(str, "%dmA", ibus_calibration);
 				LCD_ShowString(30, 66, (uint8_t*)str, LIGHTBLUE, BLACK, 32, 0);
-				return;
+				SC8815_Config.SC8815_Status = SC8815_Standby;
+    			Application_SC8815_Standby();
+				while (1) {
+					HAL_Delay(100);
+				}
 			}
 			SCHW_VBUS_RSHUNT -= 0.05;
 			SC8815_SetBusCurrentLimit(ibus_calibration);
-			HAL_Delay(500);
+			HAL_Delay(300);
 		}
 		ibus_calibration += 100;
 		if (ibus_calibration <= 700) {
@@ -649,13 +673,14 @@ void SC8815_IBUS_calibration(void)
 			calibration_error = 0.02;
 		}
 		SC8815_SetBusCurrentLimit(ibus_calibration);
-		HAL_Delay(500);
+		HAL_Delay(50);
 	}
 	STMFLASH_Write(SC8815_OUTPUT_CALIBRATION_TABLE_ADDR + sizeof(float) * ((SC8815_VBUS_MAX - SC8815_VBUS_MIN) / 100 + 1), (uint16_t*)calibration_table_temp, (sizeof(float) * ((SC8815_IBUS_MAX - SC8815_IBUS_MIN) / 100 + 1) >> 1));
 	SC8815_Config.SC8815_Status = SC8815_Standby;
 	Application_SC8815_Standby();
 	SC8815_Preset_Read();
-	App_SC8815_SetOutputVoltage(SC8815_Config.SC8815_VBUS);
+	// App_SC8815_SetOutputVoltage(SC8815_Config.SC8815_VBUS);
+	SC8815_SetOutputVoltage(SC8815_Config.SC8815_VBUS);
 	App_SC8815_SetBusCurrentLimit(SC8815_Config.SC8815_IBUS_Limit);
 }
 
