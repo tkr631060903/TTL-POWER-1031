@@ -323,7 +323,7 @@ void app_config_load(void)
                 app_config_save_config.SC8815_VBUS = 5000;
                 app_config_save_config.SC8815_IBUS_Limit = 1000;
 				app_config_save_config.DC_IBAT_Limit = 3000;
-                app_config_save_config.temperature = 75;
+                app_config_save_config.temperature = 65;
                 app_config_save_config.lock_buzzer = 0;
                 app_config_save_config.SW_FREQ = SCHWI_FREQ_150KHz;
                 app_config_save_config.SC8815_VBUS_protect = SC8815_VBUS_MAX;

@@ -43,16 +43,23 @@ static uint8_t INA226_Write2Byte(uint8_t reg_addr, uint16_t reg_data)
 
 float INA226_ReadVoltage(void)
 {
-    return INA226_Read2Byte(Bus_V_Reg) * 1.25;
+    float temp = INA226_Read2Byte(Bus_V_Reg) * 1.25;
+    if (temp < 0)
+        temp = 0;
+    return temp;
 }
 
 float INA226_ReadCurrent(void)
 {
+    float temp;
     if (SC8815_Config.SC8815_VBUS >= APP_config.fastCharge_InVoltage * 1000 - 200) {
-        return (INA226_Read2Byte(Current_Reg) * 0.263) - 9;  //boost
+        temp = (INA226_Read2Byte(Current_Reg) * 0.263) - 9;  //boost
     } else {
-        return (INA226_Read2Byte(Current_Reg) * 0.264) - 1;   //buck
+        temp = (INA226_Read2Byte(Current_Reg) * 0.264) - 1;   //buck
     }
+    if (temp < 0)
+        temp = 0;
+    return temp;
 }
 
 float INA226_ReadPower(void)

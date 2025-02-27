@@ -382,12 +382,9 @@ int set_current_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
     }
     if (strstr(param[1], "UP") != NULL)
     {
-        if ((SC8815_Config.SC8815_IBUS_Limit + SC8815_Config.SC8815_IBUS_CMD_Step) > SC8815_IBUS_MAX)
-        {
-            return 0;
-        }
         SC8815_Config.SC8815_IBUS_Limit += SC8815_Config.SC8815_IBUS_CMD_Step;
-        SC8815_Config.SC8815_IBUS_Limit_Old = SC8815_Config.SC8815_IBUS_Limit;
+        if (SC8815_Config.SC8815_IBUS_Limit > SC8815_IBUS_MAX)
+            SC8815_Config.SC8815_IBUS_Limit = SC8815_IBUS_MAX;
         App_SC8815_SetBusCurrentLimit(SC8815_Config.SC8815_IBUS_Limit);
     }
     else
@@ -399,7 +396,7 @@ int set_current_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
         if (value > SC8815_IBUS_MAX / 1000)
         {
             return 0;
-        } else if (value < SC8815_IBUS_MAX / 1000) {
+        } else if (value < SC8815_IBUS_MIN / 1000) {
             return 0;
         }
         value = value * 1000;
@@ -432,7 +429,9 @@ int set_current_step_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
     }
     float value;
     sscanf(param[1], "%f", &value);
-    value = value * 1000; 
+    if (value < 0)
+        return 0;
+    value = value * 1000;
     SC8815_Config.SC8815_IBUS_CMD_Step = value;
     return 1;
 }
@@ -452,12 +451,9 @@ int set_voltage_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
     }
     if (strstr(param[1], "UP") != NULL)
     {
-        if ((SC8815_Config.SC8815_VBUS + SC8815_Config.SC8815_VBUS_CMD_Step) > SC8815_VBUS_MAX)
-        {
-            return 0;
-        }
         SC8815_Config.SC8815_VBUS += SC8815_Config.SC8815_VBUS_CMD_Step;
-        SC8815_Config.SC8815_VBUS_Old = SC8815_Config.SC8815_VBUS;
+        if (SC8815_Config.SC8815_VBUS > SC8815_VBUS_MAX)
+            SC8815_Config.SC8815_VBUS = SC8815_VBUS_MAX;
         App_SC8815_SetOutputVoltage(SC8815_Config.SC8815_VBUS);
     }
     else
@@ -467,7 +463,7 @@ int set_voltage_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
         if (value > SC8815_VBUS_MAX / 1000)
         {
             return 0;
-        } else if (value < SC8815_VBUS_MAX / 1000) {
+        } else if (value < SC8815_VBUS_MIN / 1000) {
             return 0;
         }
         value = value * 1000;
@@ -620,14 +616,18 @@ int set_preset_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
     {
         int value2;
         sscanf(param[3], "%d", &value2);
-        SC8815_TIM_Work[value].circular = value1;
+        SC8815_TIM_Work[value].circular = value2;
     }
-    else if(param_cnt == 6){
+    else if (param_cnt == 6) {
+        if (value > 9 || value1 > 29)
+            return 0;
         float value2, value3, value4;
         sscanf(param[3], "%f", &value2);
         value2 *= 1000;
         sscanf(param[4], "%f", &value3);
         value3 *= 1000;
+        if (value2 > SC8815_VBUS_MAX || value2 < SC8815_VBUS_MIN || value3 > SC8815_IBUS_MAX || value3 < SC8815_IBUS_MIN)
+            return 0;
         sscanf(param[5], "%f", &value4);
         SC8815_TIM_Work[value].SC8815_VBUS[value1] = value2;
         SC8815_TIM_Work[value].SC8815_IBUS_Limit[value1] = value3;
@@ -685,6 +685,9 @@ int start_preset_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
     sscanf(param[1], "%d", &value);
     extern presset_config_set_typeDef presset_config_set;
     extern SC8815_TIM_WorkTypeDef SC8815_TIM_Work[SC8815_TIM_WORK_SIZE];
+    if (value > SC8815_TIM_WORK_SIZE - 1) {
+        return 0;
+    }
     SC8815_Config.sc8815_tim_work_time = SC8815_TIM_WORK_TIME_FAST;
     SC8815_Config.sc8815_tim_work_step = 0;
     memcpy(&presset_config_set.set_circular, &SC8815_TIM_Work[value].circular, sizeof(uint16_t));
@@ -705,7 +708,7 @@ int set_name_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
         return 0;
     }
     memset(APP_config.device_name, 0, sizeof(APP_config.device_name));
-    memcpy(APP_config.device_name, param[1], sizeof(param[1]));
+    memcpy(APP_config.device_name, param[1], sizeof(APP_config.device_name));
     app_config_save();
     return 1;
 }

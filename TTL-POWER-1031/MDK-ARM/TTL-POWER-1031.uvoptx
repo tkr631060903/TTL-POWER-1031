@@ -152,73 +152,89 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>261</LineNumber>
+          <LineNumber>285</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134287562</Address>
+          <Address>134243452</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
           <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\Application\Src\menu.c</Filename>
+          <Filename>..\Application\Src\Application_SC8815.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\TTL_POWER_1031\../Application/Src/menu.c\261</Expression>
+          <Expression>\\TTL_POWER_1031\../Application/Src/Application_SC8815.c\285</Expression>
         </Bp>
         <Bp>
           <Number>1</Number>
           <Type>0</Type>
-          <LineNumber>309</LineNumber>
+          <LineNumber>578</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134292814</Address>
+          <Address>134267600</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
           <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\Application\Src\Application.c</Filename>
+          <Filename>..\Application\Src\Application_SC8815.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\TTL_POWER_1031\../Application/Src/Application.c\309</Expression>
+          <Expression>\\\../Application/Src/Application_SC8815.c\578</Expression>
         </Bp>
         <Bp>
           <Number>2</Number>
           <Type>0</Type>
           <LineNumber>187</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134283750</Address>
+          <Address>0</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
+          <BreakIfRCount>0</BreakIfRCount>
           <Filename>..\Application\Src\Application.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\TTL_POWER_1031\../Application/Src/Application.c\187</Expression>
+          <Expression></Expression>
         </Bp>
         <Bp>
           <Number>3</Number>
           <Type>0</Type>
           <LineNumber>193</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134283760</Address>
+          <Address>0</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
+          <BreakIfRCount>0</BreakIfRCount>
           <Filename>..\Application\Src\Application.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\TTL_POWER_1031\../Application/Src/Application.c\193</Expression>
+          <Expression></Expression>
+        </Bp>
+        <Bp>
+          <Number>4</Number>
+          <Type>0</Type>
+          <LineNumber>261</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>0</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>0</BreakIfRCount>
+          <Filename>..\Application\Src\menu.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression></Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>
         <Ww>
           <count>0</count>
           <WinNumber>1</WinNumber>
-          <ItemText>app_config_save_config</ItemText>
+          <ItemText>SC8815_HardwareInitStruct.FB_Mode</ItemText>
         </Ww>
         <Ww>
           <count>1</count>
@@ -244,8 +260,8 @@
       <MemoryWindow1>
         <Mm>
           <WinNumber>1</WinNumber>
-          <SubType>0</SubType>
-          <ItemText>0x0801EC00</ItemText>
+          <SubType>6</SubType>
+          <ItemText>calibration_table_temp</ItemText>
           <AccSizeX>0</AccSizeX>
         </Mm>
       </MemoryWindow1>

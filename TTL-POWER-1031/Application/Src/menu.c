@@ -485,8 +485,8 @@ void temperature_page_process(menu_u8 KeyValue)
         break;
     case RIGHT:
         APP_config.temperature = APP_config.temperature + SC8815_Config.SC8815_VBUS_IBUS_Step;
-        if (APP_config.temperature > 90) {
-            APP_config.temperature = 90;
+        if (APP_config.temperature > 85) {
+            APP_config.temperature = 85;
         }
         temperature_page_ui_process(APP_config.temperature);
         break;
@@ -683,6 +683,7 @@ void vbus_protect_page_process(menu_u8 KeyValue)
             SC8815_Config.SC8815_VBUS = SC8815_Config.SC8815_VBUS_protect;
             SC8815_Config.SC8815_VBUS_Old = SC8815_Config.SC8815_VBUS_protect;
         }
+        app_config_save_config.SC8815_VBUS_protect = SC8815_Config.SC8815_VBUS_protect;
         App_SC8815_SetOutputVoltage(SC8815_Config.SC8815_VBUS);
         app_config_save();
         main_page_init();
