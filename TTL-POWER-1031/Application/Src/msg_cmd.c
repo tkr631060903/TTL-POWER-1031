@@ -26,7 +26,7 @@ static ascii_handler_fn
     set_voltage_handler, set_voltage_step_handler, set_voltage_prot_handler, set_voltage_limit_handler,
     get_fetch_current_handler, get_fetch_voltage_handler, get_fetch_power_handler, get_versions_handler,
     set_preset_handler, save_config_handler, upgrade_app_handler, set_power_limit_handler, set_name_handler, 
-    set_key_handler, PDP_search_handler;
+    set_key_handler, PDP_search_handler, set_SFB_handler;
 typedef struct lookup_table
 {
     const char *desc;
@@ -41,9 +41,31 @@ static const lookup_table_t handler_map_static[] = {
     {"VOLT", set_voltage_handler}, {"VOLT:STEP", set_voltage_step_handler}, {"VOLT:PROT", set_voltage_prot_handler},
     {"VOLT:LIMIT", set_voltage_limit_handler}, {"MEAS:CURR?", get_fetch_current_handler}, {"MEAS:VOLT?", get_fetch_voltage_handler}, {"SYST:VERS?\r\n", get_versions_handler},
     {"MEAS:POW?", get_fetch_power_handler}, {"SYST:VERS?", get_versions_handler}, {"preset", set_preset_handler}, {"save", save_config_handler}, {"upgrade", upgrade_app_handler},
-    {"setpower", set_power_limit_handler}, {"setname", set_name_handler}, {"setkey", set_key_handler}, {"PDPsearch", PDP_search_handler}
+    {"setpower", set_power_limit_handler}, {"setname", set_name_handler}, {"setkey", set_key_handler}, {"PDPsearch", PDP_search_handler}, {"setSFB", set_SFB_handler}
 };
 const lookup_table_t* handler_map = handler_map_static;
+
+int set_SFB_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
+{
+    if (param_cnt == 1) {
+        return 0;
+    }
+    SC8815_Config.SC8815_Status = SC8815_Standby;
+    Application_SC8815_Standby();
+    int value = 0;
+    sscanf(param[1], "%d", &value);
+    if (value) {
+        app_config_save_config.SC8815_SFB = SCHWI_SFB_Enable;
+        SC8815_SFB_Enable();
+        usb_printf("SFB Enable succeed");
+    } else {
+        app_config_save_config.SC8815_SFB = SCHWI_SFB_Disable;
+        SC8815_SFB_Disable();
+        usb_printf("SFB Disable succeed");
+    }
+    app_config_save();
+    return 1;
+}
 
 /**
  * @brief 设置 SC8815 电池路径上的限流值,双向通用
@@ -567,11 +589,11 @@ int get_fetch_power_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
     // }
     if (cmd_source)
     {
-        usb_printf("%d\r\n", (unsigned int)(App_getVBUS_V() * App_getIBUS_A()));
+        usb_printf("%.4f\r\n", (App_getVBUS_V() * App_getIBUS_A()));
     }
     else
     {
-        printf("%d\r\n", (unsigned int)(App_getVBUS_V() * App_getIBUS_A()));
+        printf("%.4f\r\n", (App_getVBUS_V() * App_getIBUS_A()));
     }
     return 1;
 }
@@ -709,6 +731,7 @@ int set_name_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
     }
     memset(APP_config.device_name, 0, sizeof(APP_config.device_name));
     memcpy(APP_config.device_name, param[1], sizeof(APP_config.device_name));
+    memcpy(app_config_save_config.device_name, APP_config.device_name, sizeof(APP_config.device_name));
     app_config_save();
     return 1;
 }
@@ -754,6 +777,16 @@ int get_temperature_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
     return 1;
 }
 
+
+void remove_crlf(char *str) {
+    size_t len = strlen(str);
+    if (len >= 2 && str[len - 2] == '\r' && str[len - 1] == '\n') {
+        str[len - 2] = '\0';
+    } else if (len >= 1 && (str[len - 1] == '\r' || str[len - 1] == '\n')) {
+        str[len - 1] = '\0';
+    }
+}
+
 /**
  * @brief 解析命令字符串
  * 
@@ -795,6 +828,7 @@ int ascii_process(char *cmd, uint8_t cmd_source)
     int map_cnt = sizeof(handler_map_static) / sizeof(lookup_table_t);
     char* tokens[10];
     // param_cnt = splitString(cmd, ':', tokens, 10, param);
+    remove_crlf(cmd);
     param_cnt = splitString(cmd, ' ', tokens, 10, param);
     for (i = 0; i < map_cnt; i++)
     {

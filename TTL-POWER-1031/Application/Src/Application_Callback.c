@@ -101,7 +101,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
         if (SC8815_Config.sc8815_sfb_delay_ms) {
             SC8815_Config.sc8815_sfb_delay_ms--;
             if (SC8815_Config.sc8815_sfb_delay_ms == 0) {
-		        SC8815_SFB_Enable();
+                if (app_config_save_config.SC8815_SFB == SCHWI_SFB_Enable) {
+                    SC8815_SFB_Enable();
+                }
                 set_i2c_mutex(0);
             } else if (SC8815_Config.sc8815_sfb_delay_ms <= I2C_MUTEX_TIME_MS) {
                 set_i2c_mutex(1);

@@ -6,9 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>288</width>
-    <height>268</height>
+    <width>297</width>
+    <height>273</height>
    </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>285</width>
+    <height>265</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>TTL-POWER升级工具</string>
@@ -18,28 +24,40 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>281</width>
-     <height>261</height>
+     <width>289</width>
+     <height>265</height>
     </rect>
    </property>
    <layout class="QGridLayout" name="gridLayout_2">
     <item row="2" column="0">
      <widget class="QGroupBox" name="groupBoxMenu">
+      <property name="minimumSize">
+       <size>
+        <width>90</width>
+        <height>235</height>
+       </size>
+      </property>
       <property name="title">
        <string>功能</string>
       </property>
       <widget class="QWidget" name="layoutWidget">
        <property name="geometry">
         <rect>
-         <x>10</x>
-         <y>10</y>
-         <width>71</width>
-         <height>191</height>
+         <x>0</x>
+         <y>20</y>
+         <width>91</width>
+         <height>221</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="verticalLayoutMenu">
         <item>
          <widget class="QPushButton" name="refreshCOM">
+          <property name="minimumSize">
+           <size>
+            <width>70</width>
+            <height>20</height>
+           </size>
+          </property>
           <property name="styleSheet">
            <string notr="true">color: rgb(0, 85, 255);</string>
           </property>
@@ -50,6 +68,12 @@
         </item>
         <item>
          <widget class="QPushButton" name="loadFile">
+          <property name="minimumSize">
+           <size>
+            <width>70</width>
+            <height>20</height>
+           </size>
+          </property>
           <property name="styleSheet">
            <string notr="true">color: rgb(0, 85, 255);</string>
           </property>
@@ -65,8 +89,8 @@
           </property>
           <property name="minimumSize">
            <size>
-            <width>0</width>
-            <height>0</height>
+            <width>70</width>
+            <height>20</height>
            </size>
           </property>
           <property name="styleSheet">
@@ -81,8 +105,8 @@
          <widget class="QPushButton" name="clearMessage">
           <property name="minimumSize">
            <size>
-            <width>0</width>
-            <height>0</height>
+            <width>70</width>
+            <height>20</height>
            </size>
           </property>
           <property name="styleSheet">
@@ -101,27 +125,36 @@
      <widget class="QLabel" name="labelUART">
       <property name="minimumSize">
        <size>
-        <width>0</width>
-        <height>0</height>
+        <width>90</width>
+        <height>20</height>
        </size>
       </property>
       <property name="text">
-       <string>      设备列表：</string>
+       <string>设备列表：</string>
       </property>
      </widget>
     </item>
-    <item row="1" column="1" colspan="2">
-     <widget class="QComboBox" name="comboBoxUART">
-      <property name="minimumSize">
+    <item row="2" column="3">
+     <spacer name="horizontalSpacer">
+      <property name="orientation">
+       <enum>Qt::Orientation::Horizontal</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
        <size>
-        <width>120</width>
-        <height>0</height>
+        <width>40</width>
+        <height>20</height>
        </size>
       </property>
-     </widget>
+     </spacer>
     </item>
     <item row="2" column="1" colspan="2">
      <widget class="QGroupBox" name="groupBoxRev">
+      <property name="minimumSize">
+       <size>
+        <width>185</width>
+        <height>235</height>
+       </size>
+      </property>
       <property name="title">
        <string>消息</string>
       </property>
@@ -134,7 +167,36 @@
          <height>211</height>
         </rect>
        </property>
+       <property name="minimumSize">
+        <size>
+         <width>170</width>
+         <height>210</height>
+        </size>
+       </property>
       </widget>
+     </widget>
+    </item>
+    <item row="3" column="1">
+     <spacer name="verticalSpacer">
+      <property name="orientation">
+       <enum>Qt::Orientation::Vertical</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>20</width>
+        <height>40</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item row="1" column="1" colspan="2">
+     <widget class="QComboBox" name="comboBoxUART">
+      <property name="minimumSize">
+       <size>
+        <width>185</width>
+        <height>20</height>
+       </size>
+      </property>
      </widget>
     </item>
    </layout>

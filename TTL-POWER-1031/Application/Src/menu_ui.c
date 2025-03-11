@@ -550,16 +550,20 @@ void about_page_ui_process(void)
     current_menu_index = ABOUT_PAGE;
     char name[sizeof(APP_config.device_name) + 1] = ":";
     LCD_Clear();
-    LCD_ShowChinese(0, 0, "名称", LIGHTBLUE, BLACK, 32, 0);
-    // LCD_ShowString(0, 0, "Name", LIGHTBLUE, BLACK, 32, 0);
+    LCD_Fill_DMA(0, 32, LCD_W, 34, GRAY2);
+    LCD_Fill_DMA(0, 66, LCD_W, 68, GRAY2);
+    LCD_Fill_DMA(0, 100, LCD_W, 102, GRAY2);
+    LCD_Fill_DMA(0, 0, LCD_W, 32, RED);
+    LCD_Fill_DMA(0, 34, LCD_W, 66, RED);
+    LCD_Fill_DMA(0, 68, LCD_W, 100, RED);
+    LCD_Fill_DMA(0, 102, LCD_W, 135, RED);
+    LCD_ShowChinese(0, 0, "名称", WHITE, RED, 32, 0);
     strcat(name, APP_config.device_name);
-    LCD_ShowString(64, 0, (uint8_t*)name, LIGHTBLUE, BLACK, 32, 0);
-    LCD_ShowChinese(0, 33, "型号", LIGHTBLUE, BLACK, 32, 0);
-    LCD_ShowString(64, 33, ":PD POCKET", LIGHTBLUE, BLACK, 32, 0);
-    // LCD_ShowString(0, 33, "Type:PD POCKET", LIGHTBLUE, BLACK, 32, 0);
-    LCD_ShowChinese(0, 66, "版本", LIGHTBLUE, BLACK, 32, 0);
-    LCD_ShowString(64, 66, ":1.1.0", LIGHTBLUE, BLACK, 32, 0);
-    // LCD_ShowString(0, 66, "Version:1.1.0", LIGHTBLUE, BLACK, 32, 0);
+    LCD_ShowString(64, 0, (uint8_t*)name, WHITE, RED, 32, 0);
+    LCD_ShowChinese(0, 34, "型号", WHITE, RED, 32, 0);
+    LCD_ShowString(64, 34, ":PD POCKET", WHITE, RED, 32, 0);
+    LCD_ShowChinese(0, 68, "版本", WHITE, RED, 32, 0);
+    LCD_ShowString(64, 68, ":1.1.0", WHITE, RED, 32, 0);
 }
 
 void DC_limit_page_ui_process(menu_u8 KeyValue)

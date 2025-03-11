@@ -81,8 +81,8 @@ void Error_Handler(void);
 #define ADC_VIN_GPIO_Port GPIOA
 #define CH224K_CFG3_Pin GPIO_PIN_0
 #define CH224K_CFG3_GPIO_Port GPIOB
-#define CH224K_CFG2_Pin GPIO_PIN_1
-#define CH224K_CFG2_GPIO_Port GPIOB
+#define LCD_RST_Pin GPIO_PIN_1
+#define LCD_RST_GPIO_Port GPIOB
 #define CH224K_CFG1_Pin GPIO_PIN_2
 #define CH224K_CFG1_GPIO_Port GPIOB
 #define KEY3_Pin GPIO_PIN_10

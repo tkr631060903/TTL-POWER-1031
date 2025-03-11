@@ -30,7 +30,7 @@ extern void SoftwareDelay(uint8_t ms);                                          
 
 //设置 SC8815 功率路径上的感测电阻值, 应为 10 或 5 这样的整数 (单位:mOhm)
 // #define SCHW_VBUS_RSHUNT        5          //VBUS 电流路径上的感测电阻值
-#define SCHW_BATT_RSHUNT        5          //电池电流路径上的感测电阻值
+#define SCHW_BATT_RSHUNT        5.12          //电池电流路径上的感测电阻值
 
 //设置 FB 引脚上的分压电阻器值, 使用的 VBUS 反馈模式为外部反馈时, 库通过这些值计算对应输出电压 (单位:Ohm)
 #define SCHW_FB_RUP             120000      //RUP 为从 FB 连接到 VBUS 之间的电阻值

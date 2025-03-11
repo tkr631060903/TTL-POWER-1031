@@ -71,6 +71,7 @@ void Application_main()
         {
             presset_running_page_process(KEY4_SHORT);
             SC8815_Config.SC8815_Status = SC8815_TIM_WORK;
+            SC8815_Config.sc8815_tim_work_lcd_flush = tim_work_lcd_running;
         }
 
         if (HAL_GetTick() - temperature_protect_time >= 5000) {
@@ -326,6 +327,7 @@ void app_config_load(void)
                 app_config_save_config.temperature = 65;
                 app_config_save_config.lock_buzzer = 0;
                 app_config_save_config.SW_FREQ = SCHWI_FREQ_150KHz;
+                app_config_save_config.SC8815_SFB = SCHWI_SFB_Enable;
                 app_config_save_config.SC8815_VBUS_protect = SC8815_VBUS_MAX;
                 memcpy(app_config_save_config.device_name, "PDP-", 4);
                 snprintf(app_config_save_config.device_name + 4, 7, "%X", CpuID);
@@ -354,6 +356,7 @@ void app_config_load(void)
     APP_config.temperature = app_config_save_config.temperature;
     APP_config.lock_buzzer = app_config_save_config.lock_buzzer;
     SC8815_HardwareInitStruct.SW_FREQ = app_config_save_config.SW_FREQ;
+    SC8815_HardwareInitStruct.ShortFoldBack = app_config_save_config.SC8815_SFB;
     memcpy(APP_config.device_name, app_config_save_config.device_name, sizeof(APP_config.device_name));
 }
 

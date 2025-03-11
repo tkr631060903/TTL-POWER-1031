@@ -53,9 +53,9 @@ float INA226_ReadCurrent(void)
 {
     float temp;
     if (SC8815_Config.SC8815_VBUS >= APP_config.fastCharge_InVoltage * 1000 - 200) {
-        temp = (INA226_Read2Byte(Current_Reg) * 0.263) - 9;  //boost
+        temp = (INA226_Read2Byte(Current_Reg) * 0.260) - 5;  //boost
     } else {
-        temp = (INA226_Read2Byte(Current_Reg) * 0.264) - 1;   //buck
+        temp = (INA226_Read2Byte(Current_Reg) * 0.2602) - 1;   //buck
     }
     if (temp < 0)
         temp = 0;

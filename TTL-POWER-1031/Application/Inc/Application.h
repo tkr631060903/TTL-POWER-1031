@@ -60,6 +60,7 @@ typedef struct
 {
     uint8_t lock_buzzer;     //蜂鸣器锁定 1锁 0不锁
     uint8_t SW_FREQ;        //开关频率
+    uint8_t SC8815_SFB;        //SC8815短路保护
     float temperature;     //温度监控值
     float SC8815_IBUS_Limit;
     float SC8815_VBUS;

@@ -33,6 +33,7 @@ void Application_Init(void)
     extern menu_i32 current_menu_index;
     uint32_t set_key_id;
     HAL_GPIO_WritePin(POWER_RELEASE_GPIO_Port, POWER_RELEASE_Pin, GPIO_PIN_SET);	//放电
+    HAL_GPIO_WritePin(LCD_RST_GPIO_Port, LCD_RST_Pin, GPIO_PIN_SET);
     HAL_Delay(500);
     LCD_Init();
     STMFLASH_ReadBytes(APP_SET_KEY_ADDR, (uint8_t*)&set_key_id, sizeof(uint32_t));
