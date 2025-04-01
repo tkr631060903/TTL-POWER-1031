@@ -15,6 +15,4 @@
 
 #define Cmd_Length 20
 
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart);
-
 #endif

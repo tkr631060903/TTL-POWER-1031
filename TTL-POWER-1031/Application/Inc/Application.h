@@ -54,6 +54,7 @@ typedef struct
     float fastCharge_InCurrent; // 快充最大输入电流A
     uint32_t app_config_save_time;   //应用参数保存时间
     char device_name[11];
+    uint8_t buzzer_delay_ms;
 } Application_Config;
 
 typedef struct
@@ -67,6 +68,7 @@ typedef struct
     float DC_IBAT_Limit;
     char device_name[11];
     float SC8815_VBUS_protect;
+    uint8_t USE_HORIZONTAL;
 } Application_SaveConfig;
 
 extern Application_Config APP_config;

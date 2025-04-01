@@ -16,6 +16,8 @@
 #include "Application_ADC.h"
 #include "stmflash.h"
 #include "string.h"
+#include "Application_Callback.h"
+#include "husb238.h"
 
 #define APP_CONFIG_FLASH_ADDR     (STM32_FLASH_BASE+STM_SECTOR_SIZE*123)
 #define APP_UPGRADE_FLAG_ADDR 0x801FFFE
@@ -45,6 +47,7 @@ void Application_main()
         rotary_knob_process();
         key3_button_process();
         SET_LED1_Status();
+        HUSB238_Refresh_Voltage();
 
         if ((current_menu_index == MAIN_PAGE || current_menu_index == VOUT_PAGE || current_menu_index == IOUT_PAGE) && HAL_GetTick() - APP_LCD_main_show_time >= 100)
         {
@@ -280,19 +283,28 @@ void SET_LED1_Status(void)
 uint8_t rotary_knob_value = 0;
 void rotary_knob_process(void)
 {
+    extern uint8_t USE_HORIZONTAL;
     if (APP_config.lock_key == 1) {
         rotary_knob_value = 0;
         return;
     }
     if (rotary_knob_value == LEFT)
     {
-        Menu_Select_Item(RIGHT);    //向左旋转因为旋钮因为旋钮位置改动逻辑相反了
+        if (USE_HORIZONTAL == 2) {
+            Menu_Select_Item(LEFT);     //向右旋转因为旋钮因为旋钮位置改动逻辑相反了
+        } else {
+            Menu_Select_Item(RIGHT);    //向左旋转因为旋钮因为旋钮位置改动逻辑相反了
+        }
         BUZZER_OPEN(100);
         rotary_knob_value = 0;
     }
     else if (rotary_knob_value == RIGHT)
     {
-        Menu_Select_Item(LEFT);     //向右旋转因为旋钮因为旋钮位置改动逻辑相反了
+        if (USE_HORIZONTAL == 2) {
+            Menu_Select_Item(RIGHT);    //向左旋转因为旋钮因为旋钮位置改动逻辑相反了
+        } else {
+            Menu_Select_Item(LEFT);     //向右旋转因为旋钮因为旋钮位置改动逻辑相反了
+        }
         BUZZER_OPEN(100);
         rotary_knob_value = 0;
     }
@@ -306,16 +318,25 @@ uint32_t htonl(uint32_t hostlong)
            ((hostlong & 0x000000FF) << 24);
 }
 
+static void app_config_clear(void)
+{
+    int i = 0;
+    uint16_t data[128];
+    size_t datalen = sizeof(data);
+    memset(data, 0xFF, datalen);
+    for (i = 0; i < 4;i++) {
+        STMFLASH_Write(APP_CONFIG_FLASH_ADDR + datalen * i, data, datalen >> 1);
+    }
+}
+
 void app_config_load(void)
 {
     int i, if_config_default = 0;
+    extern uint8_t USE_HORIZONTAL;
     for (i = 0; i < STM_SECTOR_SIZE;)
     {
         STMFLASH_ReadBytes(APP_CONFIG_FLASH_ADDR + i, (uint8_t*)&app_config_save_config, sizeof(Application_SaveConfig));
-        // 校验是否为新添加数据
-        if (app_config_save_config.SC8815_VBUS_protect > SC8815_VBUS_MAX || app_config_save_config.SC8815_VBUS_protect < SC8815_VBUS_MIN) {
-            if_config_default = 1;
-        }
+        
         if ((app_config_save_config.lock_buzzer != 0 && app_config_save_config.lock_buzzer != 1) || if_config_default)
         {
             if (i == 0)
@@ -329,6 +350,7 @@ void app_config_load(void)
                 app_config_save_config.SW_FREQ = SCHWI_FREQ_150KHz;
                 app_config_save_config.SC8815_SFB = SCHWI_SFB_Enable;
                 app_config_save_config.SC8815_VBUS_protect = SC8815_VBUS_MAX;
+                app_config_save_config.USE_HORIZONTAL = 3;
                 memcpy(app_config_save_config.device_name, "PDP-", 4);
                 snprintf(app_config_save_config.device_name + 4, 7, "%X", CpuID);
                 app_config_save();
@@ -338,7 +360,14 @@ void app_config_load(void)
             {
                 i -= sizeof(Application_SaveConfig);
                 STMFLASH_ReadBytes(APP_CONFIG_FLASH_ADDR + i, (uint8_t*)&app_config_save_config, sizeof(Application_SaveConfig));
-                break;
+                // 校验是否为新添加数据
+                if (app_config_save_config.USE_HORIZONTAL != 2 && app_config_save_config.USE_HORIZONTAL != 3) {
+                    if_config_default = 1;
+                    app_config_clear();
+                    i = 0;
+                } else {
+                    break;
+                }
             }
         }
         i += sizeof(Application_SaveConfig);
@@ -357,6 +386,7 @@ void app_config_load(void)
     APP_config.lock_buzzer = app_config_save_config.lock_buzzer;
     SC8815_HardwareInitStruct.SW_FREQ = app_config_save_config.SW_FREQ;
     SC8815_HardwareInitStruct.ShortFoldBack = app_config_save_config.SC8815_SFB;
+    USE_HORIZONTAL = app_config_save_config.USE_HORIZONTAL;
     memcpy(APP_config.device_name, app_config_save_config.device_name, sizeof(APP_config.device_name));
 }
 
@@ -367,6 +397,7 @@ void app_config_save(void)
     for (i = 0; i < STM_SECTOR_SIZE;)
     {
         STMFLASH_ReadBytes(APP_CONFIG_FLASH_ADDR + i, (uint8_t*)&app_config_save_config_temp, sizeof(Application_SaveConfig));
+        // if (app_config_save_config_temp.lock_buzzer == 0xFF)
         if (app_config_save_config_temp.lock_buzzer != 0 && app_config_save_config_temp.lock_buzzer != 1)
         {
             STMFLASH_Write(APP_CONFIG_FLASH_ADDR + i, (uint16_t*)&app_config_save_config, sizeof(Application_SaveConfig) >> 1);

@@ -47,15 +47,15 @@ void APP_LCD_main_init(void)
     LCD_ShowPicture(0, 84, 16, 16, gImage_smallleft2);
     LCD_ShowPicture(62, 68, 16, 16, gImage_smallright1);
     LCD_ShowPicture(62, 84, 16, 16, gImage_smallright2);
-    LCD_ShowString(25, 0, "Vset", LIGHTBLUE, MAIN_PAGE_COLOR, 16, 0);
-    LCD_ShowString(25, 34, "Iset", LIGHTBLUE, MAIN_PAGE_COLOR, 16, 0);
+    LCD_ShowString(25, 0, "Vset", WHITE, MAIN_PAGE_COLOR, 16, 0);
+    LCD_ShowString(25, 34, "Iset", WHITE, MAIN_PAGE_COLOR, 16, 0);
     LCD_ShowString(214, 16, "V", GREEN, MAIN_PAGE_COLOR, 32, 0);
     LCD_ShowString(214, 56, "A", MAGENTA, MAIN_PAGE_COLOR, 32, 0);
     LCD_ShowString(214, 100, "W", ORANGE, MAIN_PAGE_COLOR, 32, 0);
     LCD_show_vset();
     LCD_show_iset();
 
-    LCD_ShowString(28, 68, "Vin", LIGHTBLUE, MAIN_PAGE_COLOR, 16, 0);
+    LCD_ShowString(28, 68, "Vin", WHITE, MAIN_PAGE_COLOR, 16, 0);
     float temp = App_getVBAT_V();
     char str[10] = { 0 };
     if (temp >= 0 && temp < 9.990) {
@@ -63,7 +63,7 @@ void APP_LCD_main_init(void)
     } else if (temp >= 9.990 && temp < 36) {
         sprintf(str, "%.2fV", temp);
     }
-    LCD_ShowString(12, 84, (const uint8_t*)str, LIGHTBLUE, MAIN_PAGE_COLOR, 16, 0);
+    LCD_ShowString(12, 84, (const uint8_t*)str, WHITE, MAIN_PAGE_COLOR, 16, 0);
 }
 
 static void LCD_show_main_page_status(void)
@@ -173,25 +173,25 @@ void APP_LCD_main_show(void)
     if (HAL_GetTick() - vbat_temp_time > 3000) {
         if (vbat_temp_flag == 0) {
             LCD_Fill_DMA(25, 68, 60, 84, MAIN_PAGE_COLOR);
-            LCD_ShowString(28, 68, "Vin", LIGHTBLUE, MAIN_PAGE_COLOR, 16, 0);
+            LCD_ShowString(28, 68, "Vin", WHITE, MAIN_PAGE_COLOR, 16, 0);
             LCD_Fill_DMA(12, 84, 60, 100, MAIN_PAGE_COLOR);
             if (temp >= 0 && temp < 9.990) {
                 sprintf(str, " %.2fV", temp);
             } else if (temp >= 9.990 && temp < 36) {
                 sprintf(str, "%.2fV", temp);
             }
-            LCD_ShowString(12, 84, (const uint8_t*)str, LIGHTBLUE, MAIN_PAGE_COLOR, 16, 0);
+            LCD_ShowString(12, 84, (const uint8_t*)str, WHITE, MAIN_PAGE_COLOR, 16, 0);
             vbat_temp_flag = 1;
         } else if (vbat_temp_flag == 1) {
             temp = App_getTemp();
-            LCD_ShowString(25, 68, "Temp", LIGHTBLUE, MAIN_PAGE_COLOR, 16, 0);
+            LCD_ShowString(25, 68, "Temp", WHITE, MAIN_PAGE_COLOR, 16, 0);
             LCD_Fill_DMA(12, 84, 60, 100, MAIN_PAGE_COLOR);
             if (temp >= 0 && temp < 9.990) {
                 sprintf(str, " %.1fC ", temp);
-                LCD_ShowString(12, 84, (const uint8_t*)str, LIGHTBLUE, MAIN_PAGE_COLOR, 16, 0);
+                LCD_ShowString(12, 84, (const uint8_t*)str, WHITE, MAIN_PAGE_COLOR, 16, 0);
             } else if (temp >= 9.990 && temp < 99.90) {
                 sprintf(str, "%.1fC ", temp);
-                LCD_ShowString(20, 84, (const uint8_t*)str, LIGHTBLUE, MAIN_PAGE_COLOR, 16, 0);
+                LCD_ShowString(20, 84, (const uint8_t*)str, WHITE, MAIN_PAGE_COLOR, 16, 0);
             }
             vbat_temp_flag = 0;
         }
@@ -234,10 +234,10 @@ void APP_LCD_presset_running_init(void)
     LCD_ShowString(214, 16, "V", GREEN, MAIN_PAGE_COLOR, 32, 0);
     LCD_ShowString(214, 56, "A", MAGENTA, MAIN_PAGE_COLOR, 32, 0);
     LCD_ShowString(214, 100, "W", ORANGE, MAIN_PAGE_COLOR, 32, 0);
-    LCD_ShowString(15, 0, "Runing", LIGHTBLUE, MAIN_PAGE_COLOR, 16, 0);
-    LCD_ShowString(25, 34, "Loop", LIGHTBLUE, MAIN_PAGE_COLOR, 16, 0);
-    LCD_ShowString(28, 68, "Key", LIGHTBLUE, MAIN_PAGE_COLOR, 16, 0);
-    LCD_ShowString(25, 84, "Lock", LIGHTBLUE, MAIN_PAGE_COLOR, 16, 0);
+    LCD_ShowString(15, 0, "Runing", WHITE, MAIN_PAGE_COLOR, 16, 0);
+    LCD_ShowString(25, 34, "Loop", WHITE, MAIN_PAGE_COLOR, 16, 0);
+    LCD_ShowString(28, 68, "Key", WHITE, MAIN_PAGE_COLOR, 16, 0);
+    LCD_ShowString(25, 84, "Lock", WHITE, MAIN_PAGE_COLOR, 16, 0);
 }
 
 void APP_LCD_presset_running_show(void)
@@ -249,31 +249,31 @@ void APP_LCD_presset_running_show(void)
     static uint8_t key_temp_flag = 0;
     float temp = 0;
     sprintf(str, ":%d", sub_index.presset_current_index);
-    LCD_ShowChinese(14, 16, "Ô¤Éè", LIGHTBLUE, MAIN_PAGE_COLOR, 16, 0);
-    // LCD_ShowString(14, 16, "Preset", LIGHTBLUE, MAIN_PAGE_COLOR, 16, 0);
-    LCD_ShowString(46, 16, (const uint8_t*)str, LIGHTBLUE, MAIN_PAGE_COLOR, 16, 0);
+    LCD_ShowChinese(14, 16, "Ô¤Éè", WHITE, MAIN_PAGE_COLOR, 16, 0);
+    // LCD_ShowString(14, 16, "Preset", WHITE, MAIN_PAGE_COLOR, 16, 0);
+    LCD_ShowString(46, 16, (const uint8_t*)str, WHITE, MAIN_PAGE_COLOR, 16, 0);
 
     memset(str, 0, 10);
     sprintf(str, "%d ", presset_config_set.set_circular);
-    // LCD_ShowIntNum(15, 51, presset_config_set.set_circular, LIGHTBLUE, BLACK, 16, 0);
-    LCD_ShowString(27, 50, (const uint8_t*)str, LIGHTBLUE, MAIN_PAGE_COLOR, 16, 0);
+    // LCD_ShowIntNum(15, 51, presset_config_set.set_circular, WHITE, BLACK, 16, 0);
+    LCD_ShowString(27, 50, (const uint8_t*)str, WHITE, MAIN_PAGE_COLOR, 16, 0);
     if (HAL_GetTick() - key_temp_time > 3000) {
         if (key_temp_flag == 0) {
             LCD_Fill_DMA(25, 68, 60, 84, MAIN_PAGE_COLOR);
-            LCD_ShowString(28, 68, "Key", LIGHTBLUE, MAIN_PAGE_COLOR, 16, 0);
+            LCD_ShowString(28, 68, "Key", WHITE, MAIN_PAGE_COLOR, 16, 0);
             LCD_Fill_DMA(12, 84, 60, 100, MAIN_PAGE_COLOR);
-            LCD_ShowString(25, 84, "Lock", LIGHTBLUE, MAIN_PAGE_COLOR, 16, 0);
+            LCD_ShowString(25, 84, "Lock", WHITE, MAIN_PAGE_COLOR, 16, 0);
             key_temp_flag = 1;
         } else if (key_temp_flag == 1) {
             temp = App_getTemp();
-            LCD_ShowString(25, 68, "Temp", LIGHTBLUE, MAIN_PAGE_COLOR, 16, 0);
+            LCD_ShowString(25, 68, "Temp", WHITE, MAIN_PAGE_COLOR, 16, 0);
             LCD_Fill_DMA(12, 84, 60, 100, MAIN_PAGE_COLOR);
             if (temp >= 0 && temp < 9.990) {
                 sprintf(str, " %.1fC ", temp);
-                LCD_ShowString(12, 84, (const uint8_t*)str, LIGHTBLUE, MAIN_PAGE_COLOR, 16, 0);
+                LCD_ShowString(12, 84, (const uint8_t*)str, WHITE, MAIN_PAGE_COLOR, 16, 0);
             } else if (temp >= 9.990 && temp < 99.90) {
                 sprintf(str, "%.1fC ", temp);
-                LCD_ShowString(20, 84, (const uint8_t*)str, LIGHTBLUE, MAIN_PAGE_COLOR, 16, 0);
+                LCD_ShowString(20, 84, (const uint8_t*)str, WHITE, MAIN_PAGE_COLOR, 16, 0);
             }
             key_temp_flag = 0;
         }
@@ -551,7 +551,7 @@ void LCD_show_vset(void)
     } else if (temp >= 10 && temp < 100) {
         sprintf(str, "%.2fV", temp);
     }
-    LCD_ShowString(12, 16, (const uint8_t*)str, LIGHTBLUE, MAIN_PAGE_COLOR, 16, 0);
+    LCD_ShowString(12, 16, (const uint8_t*)str, WHITE, MAIN_PAGE_COLOR, 16, 0);
 }
 
 void LCD_show_iset(void)
@@ -560,7 +560,7 @@ void LCD_show_iset(void)
     float temp = SC8815_Config.SC8815_IBUS_Limit / 1000;
     sprintf(str, "%.2fA", temp);
     if (temp >= 0 && temp < 10) {
-        LCD_ShowString(20, 50, (const uint8_t*)str, LIGHTBLUE, MAIN_PAGE_COLOR, 16, 0);
+        LCD_ShowString(20, 50, (const uint8_t*)str, WHITE, MAIN_PAGE_COLOR, 16, 0);
     }
 }
 

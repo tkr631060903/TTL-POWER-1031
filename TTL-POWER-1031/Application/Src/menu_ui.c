@@ -20,7 +20,7 @@ static menu_u8 cursor_secondary_menu = 0; //二级菜单光标位置
 static uint8_t secondary_menu_index = 0; //二级菜单第一行显示索引
 static uint8_t main_menu_index = 0; //主菜单第一行显示索引
 static Menu_NameTypeDef menu_name[] = {
-    {0, gImage_presset, "预设配置"}, {1, gImage_start_presset, "开启预设"}, {2, gImage_temp, "过温保护"}, {3, gImage_PDinput, "快充输入"}, {4, gImage_buzzer, "蜂鸣器配置"}, {5, gImage_vbus_protect, "过压保护"}, {6, gImage_about, "关于"}
+    {0, gImage_presset, "预设配置"}, {1, gImage_start_presset, "开启预设"}, {2, gImage_temp, "过温保护"}, {3, gImage_PDinput, "快充输入"}, {4, gImage_buzzer, "蜂鸣器配置"}, {5, gImage_vbus_protect, "过压保护"}, {6, gImage_screen, "翻转屏幕"}, {7, gImage_about, "关于"}
     // {0, gImage_presset, "SetPreset"}, {1, gImage_start_presset, "OpenPreset"}, {2, gImage_temp, "OTP"}, {3, gImage_PDinput, "FastCharge"}, {4, gImage_buzzer, "Buzzer"}, {5, gImage_calibration, "Language"}, {6, gImage_about, "About"}
 };
 
@@ -70,6 +70,10 @@ void Enter_Page(menu_i32 index, menu_u8 KeyValue)
         vbus_protect_page_ui_process(sub_index.VBUS_calibration_current_index);
         break;
     case 6:
+        LCD_Clear();
+        screen_flip_page_process(0);
+        break;
+    case 7:
         about_page_ui_process();
         break;
     default:
@@ -175,11 +179,11 @@ void vout_page_ui_process(menu_u8 KeyValue)
             }
         }
         if (SC8815_Config.SC8815_VBUS_IBUS_Step == 100) {
-            LCD_ShowIntNum(36, 16, digits[2], 1, BLACK, LIGHTBLUE, 16);
+            LCD_ShowIntNum(36, 16, digits[2], 1, BLACK, WHITE, 16);
         } else if (SC8815_Config.SC8815_VBUS_IBUS_Step == 1000) {
-            LCD_ShowIntNum(20, 16, digits[3], 1, BLACK, LIGHTBLUE, 16);
+            LCD_ShowIntNum(20, 16, digits[3], 1, BLACK, WHITE, 16);
         } else if (SC8815_Config.SC8815_VBUS_IBUS_Step == 10000) {
-            LCD_ShowIntNum(12, 16, digits[4], 1, BLACK, LIGHTBLUE, 16);
+            LCD_ShowIntNum(12, 16, digits[4], 1, BLACK, WHITE, 16);
         }
         break;
     default:
@@ -212,11 +216,11 @@ void iout_page_ui_process(menu_u8 KeyValue)
             }
         }
         if (SC8815_Config.SC8815_VBUS_IBUS_Step == 100) {
-            LCD_ShowIntNum(36, 50, digits[2], 1, BLACK, LIGHTBLUE, 16);
+            LCD_ShowIntNum(36, 50, digits[2], 1, BLACK, WHITE, 16);
         } else if (SC8815_Config.SC8815_VBUS_IBUS_Step == 1000) {
-            LCD_ShowIntNum(20, 50, digits[3], 1, BLACK, LIGHTBLUE, 16);
+            LCD_ShowIntNum(20, 50, digits[3], 1, BLACK, WHITE, 16);
         } else if (SC8815_Config.SC8815_VBUS_IBUS_Step == 10000) {
-            LCD_ShowIntNum(12, 50, digits[4], 1, BLACK, LIGHTBLUE, 16);
+            LCD_ShowIntNum(12, 50, digits[4], 1, BLACK, WHITE, 16);
         }
         break;
     default:
@@ -437,8 +441,7 @@ void fastch_page_ui_process(menu_u8 KeyValue, uint16_t fastCharge_InVoltage)
         }
     }
     if (count == 0) {
-        LCD_ShowChinese(36, 30, "未检测到", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowChinese(68, 62, "快充输入", LIGHTBLUE, BLACK, 32, 0);
+        LCD_ShowChinese(46, 50, "无快充输入", WHITE, BLACK, 32, 0);
         return;
     }
 
@@ -505,13 +508,13 @@ void VBUS_calibration_page_ui_process(menu_u8 index)
     switch (index)
     {
     case 0:
-        LCD_ShowChinese(60, 32, "开启校准", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowString(60, 64, "Yes", BLACK, LIGHTBLUE, 32, 0);
-        LCD_ShowString(156, 64, "No", LIGHTBLUE, BLACK, 32, 0);
+        // LCD_ShowChinese(60, 32, "开启校准", WHITE, BLACK, 32, 0);
+        LCD_ShowString(60, 64, "Yes", BLACK, WHITE, 32, 0);
+        LCD_ShowString(156, 64, "No", WHITE, BLACK, 32, 0);
         break;
     case 1:
-        LCD_ShowString(60, 64, "Yes", LIGHTBLUE, BLACK, 32, 0);
-        LCD_ShowString(156, 64, "No", BLACK, LIGHTBLUE, 32, 0);
+        LCD_ShowString(60, 64, "Yes", WHITE, BLACK, 32, 0);
+        LCD_ShowString(156, 64, "No", BLACK, WHITE, 32, 0);
         break;
     default:
         break;
@@ -563,7 +566,7 @@ void about_page_ui_process(void)
     LCD_ShowChinese(0, 34, "型号", WHITE, RED, 32, 0);
     LCD_ShowString(64, 34, ":PD POCKET", WHITE, RED, 32, 0);
     LCD_ShowChinese(0, 68, "版本", WHITE, RED, 32, 0);
-    LCD_ShowString(64, 68, ":1.1.0", WHITE, RED, 32, 0);
+    LCD_ShowString(64, 68, ":1.1.1", WHITE, RED, 32, 0);
 }
 
 void DC_limit_page_ui_process(menu_u8 KeyValue)
@@ -581,9 +584,9 @@ void DC_limit_page_ui_process(menu_u8 KeyValue)
         temp = app_config_save_config.DC_IBAT_Limit / 1000;
         sprintf(str, "%.2fA", temp);
         if (temp < 10) {
-            LCD_ShowString(70, 80, (const uint8_t*)str, LIGHTBLUE, BLACK, 32, 0);
+            LCD_ShowString(70, 80, (const uint8_t*)str, WHITE, BLACK, 32, 0);
         } else {
-            LCD_ShowString(36, 80, (const uint8_t*)str, LIGHTBLUE, BLACK, 32, 0);
+            LCD_ShowString(36, 80, (const uint8_t*)str, WHITE, BLACK, 32, 0);
         }
         if (app_config_save_config.DC_IBAT_Limit >= SC8815_Config.SC8815_VBUS_IBUS_Step) {
             // Take the tens, thousands, and hundreds values and store them in variate digits
@@ -599,11 +602,11 @@ void DC_limit_page_ui_process(menu_u8 KeyValue)
             }
         }
         if (SC8815_Config.SC8815_VBUS_IBUS_Step == 10) {
-            LCD_ShowIntNum(118, 80, digits[1], 1, BLACK, LIGHTBLUE, 32);
+            LCD_ShowIntNum(118, 80, digits[1], 1, BLACK, WHITE, 32);
         } else if (SC8815_Config.SC8815_VBUS_IBUS_Step == 100) {
-            LCD_ShowIntNum(102, 80, digits[2], 1, BLACK, LIGHTBLUE, 32);
+            LCD_ShowIntNum(102, 80, digits[2], 1, BLACK, WHITE, 32);
         } else if (SC8815_Config.SC8815_VBUS_IBUS_Step == 1000) {
-            LCD_ShowIntNum(70, 80, digits[3], 1, BLACK, LIGHTBLUE, 32);
+            LCD_ShowIntNum(70, 80, digits[3], 1, BLACK, WHITE, 32);
         }
         break;
     default:

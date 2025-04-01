@@ -5,12 +5,14 @@
 #include "Application_LCD.h"
 #include "string.h"
 #include "husb238.h"
+#include "Application_ADC.h"
 
 #define presset_menu_index 10
 
 Key_Index sub_index;    //子页面索引
 menu_i32 current_menu_index;    //当前菜单索引
 presset_config_set_typeDef presset_config_set;
+extern uint8_t USE_HORIZONTAL;
 
 // 菜单操作表定义
 static OP_MENU_PAGE g_opStruct[] =
@@ -33,6 +35,37 @@ static OP_MENU_PAGE g_opStruct[] =
     {DC_LIMIT_PAGE, DC_limit_page_process},
     {VBUS_PROTECT_PAGE, vbus_protect_page_process},
 };
+
+static int vbus_condition_check(void)
+{
+    if (App_getVBAT_V() > 25.5) {
+        HAL_Delay(300);
+        if (App_getVBAT_V() > 25.5) {
+            if (SC8815_Config.SC8815_Status == SC8815_TIM_WORK) {
+                SC8815_Preset_Mode_Quit();
+            } else {
+                SC8815_Config.SC8815_Status = SC8815_Standby;
+                Application_SC8815_Standby();
+            }
+            protect_page_ui_process(VBAT_PROTECT);
+            return 1;
+        }
+    }
+    if (APP_config.temperature < App_getTemp()) {
+        HAL_Delay(500);
+        if (APP_config.temperature < App_getTemp()) {
+            if (SC8815_Config.SC8815_Status == SC8815_TIM_WORK) {
+                SC8815_Preset_Mode_Quit();
+            } else {
+                SC8815_Config.SC8815_Status = SC8815_Standby;
+                Application_SC8815_Standby();
+            }
+            protect_page_ui_process(TEMP_PROTECT);
+            return 1;
+        }
+    }
+    return 0;
+}
 
 /**
  * @brief 跳转到表所对应的页面
@@ -72,15 +105,18 @@ void main_page_process(menu_u8 KeyValue)
     switch (KeyValue)
     {
     case KEY1_SHORT:
+        SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
         iout_page_ui_process(KeyValue);
         break;   
     case KEY2_LONG:
         main_menu_Init();
         break;
     case KEY2_SHORT:
+        SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
         vout_page_ui_process(KeyValue);
         break;
     case KEY3_SHORT:
+        if(vbus_condition_check()) break;
         if (HAL_GPIO_ReadPin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin) == RESET)
         {
             SC8815_Config.SC8815_Status = SC8815_Standby;
@@ -141,6 +177,13 @@ void vout_page_process(menu_u8 KeyValue)
     case RIGHT:
     case KEY1_SHORT:
     case KEY2_SHORT:
+        if (USE_HORIZONTAL == 2) {
+            if (KeyValue == KEY1_SHORT) {
+                KeyValue = KEY2_SHORT;
+            } else if (KeyValue == KEY2_SHORT) {
+                KeyValue = KEY1_SHORT;
+            }
+        }
         set_vout(KeyValue);
         vout_page_ui_process(KeyValue);
         break;
@@ -175,6 +218,13 @@ void iout_page_process(menu_u8 KeyValue)
     case RIGHT:
     case KEY1_SHORT:
     case KEY2_SHORT:
+        if (USE_HORIZONTAL == 2) {
+            if (KeyValue == KEY1_SHORT) {
+                KeyValue = KEY2_SHORT;
+            } else if (KeyValue == KEY2_SHORT) {
+                KeyValue = KEY1_SHORT;
+            }
+        }
         set_iout(KeyValue);
         iout_page_ui_process(KeyValue);
         break;
@@ -312,6 +362,15 @@ void presset_config_set_page_process(menu_u8 KeyValue)
         main_page_init();
         break;
     case KEY3_SHORT:
+        if (presset_config_set.set_flag == PRESSET_SET_CIRCULAR) {
+            sub_index.presset_config_current_index = 0;
+            LCD_Clear();
+            LCD_Fill_DMA(0, 32, LCD_W, 34, GRAY2);
+            LCD_Fill_DMA(0, 66, LCD_W, 68, GRAY2);
+            LCD_Fill_DMA(0, 100, LCD_W, 102, GRAY2);
+            presset_config_page_ui_process(0);
+            break;
+        }
         presset_config_set.set_flag = PRESSET_SET_CIRCULAR;
         presset_config_set.set_setp = 1;
         presset_config_set_page_ui_process(KeyValue);
@@ -386,6 +445,7 @@ void presset_start_page_process(menu_u8 KeyValue)
             protect_page_ui_process(PRESSET_PROTECT);
             break;
         }
+        if(vbus_condition_check()) break;
         SC8815_Config.sc8815_tim_work_time = SC8815_TIM_WORK_TIME_FAST;
         SC8815_Config.sc8815_tim_work_step = 0;
         memcpy(&presset_config_set.set_circular, &SC8815_TIM_Work[sub_index.presset_current_index].circular, sizeof(uint16_t));
@@ -421,12 +481,7 @@ void presset_running_page_process(menu_u8 KeyValue)
         APP_LCD_presset_running_show();
         break;
     case KEY3_LONG:
-        current_menu_index = MAIN_PAGE;
-        SC8815_Config.SC8815_Status = SC8815_Standby;
-        Application_SC8815_Standby();
-        SC8815_Config.sc8815_tim_work_lcd_flush = tim_work_lcd_main;
-        App_SC8815_SetOutputVoltage(SC8815_Config.SC8815_VBUS);
-        App_SC8815_SetBusCurrentLimit(SC8815_Config.SC8815_IBUS_Limit);
+        SC8815_Preset_Mode_Quit();
         break;
     default:
         break;
@@ -491,11 +546,19 @@ void temperature_page_process(menu_u8 KeyValue)
         temperature_page_ui_process(APP_config.temperature);
         break;
     case KEY1_SHORT:
-        SC8815_Config.SC8815_VBUS_IBUS_Step = 1;
+        if (USE_HORIZONTAL == 2) {
+            SC8815_Config.SC8815_VBUS_IBUS_Step = 10;
+        } else {
+            SC8815_Config.SC8815_VBUS_IBUS_Step = 1;
+        }
         temperature_page_ui_process(APP_config.temperature);
         break;
     case KEY2_SHORT:
-        SC8815_Config.SC8815_VBUS_IBUS_Step = 10;
+        if (USE_HORIZONTAL == 2) {
+            SC8815_Config.SC8815_VBUS_IBUS_Step = 1;
+        } else {
+            SC8815_Config.SC8815_VBUS_IBUS_Step = 10;
+        }
         temperature_page_ui_process(APP_config.temperature);
         break;
     case KEY3_SHORT:
@@ -627,6 +690,13 @@ void DC_limit_page_process(menu_u8 KeyValue)
     case RIGHT:
     case KEY1_SHORT:
     case KEY2_SHORT:
+        if (USE_HORIZONTAL == 2) {
+            if (KeyValue == KEY1_SHORT) {
+                KeyValue = KEY2_SHORT;
+            } else if (KeyValue == KEY2_SHORT) {
+                KeyValue = KEY1_SHORT;
+            }
+        }
         set_dc_limit(KeyValue);
         DC_limit_page_ui_process(KeyValue);
         break;
@@ -659,17 +729,33 @@ void vbus_protect_page_process(menu_u8 KeyValue)
         vbus_protect_page_ui_process(KeyValue);
         break;
     case KEY1_SHORT:
-        if (SC8815_Config.SC8815_VBUS_IBUS_Step == 1000)
-            SC8815_Config.SC8815_VBUS_IBUS_Step = 100;
-        else if (SC8815_Config.SC8815_VBUS_IBUS_Step == 10000)
-            SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
-            vbus_protect_page_ui_process(KeyValue);
+        if (USE_HORIZONTAL == 2) {
+            if (SC8815_Config.SC8815_VBUS_IBUS_Step == 100)
+                SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
+            else if (SC8815_Config.SC8815_VBUS_IBUS_Step == 1000)
+                SC8815_Config.SC8815_VBUS_IBUS_Step = 10000;
+            KeyValue = KEY2_SHORT;
+        } else {
+            if (SC8815_Config.SC8815_VBUS_IBUS_Step == 1000)
+                SC8815_Config.SC8815_VBUS_IBUS_Step = 100;
+            else if (SC8815_Config.SC8815_VBUS_IBUS_Step == 10000)
+                SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
+        }
+        vbus_protect_page_ui_process(KeyValue);
         break;
     case KEY2_SHORT:
-        if (SC8815_Config.SC8815_VBUS_IBUS_Step == 100)
-            SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
-        else if (SC8815_Config.SC8815_VBUS_IBUS_Step == 1000)
-            SC8815_Config.SC8815_VBUS_IBUS_Step = 10000;
+        if (USE_HORIZONTAL == 2) {
+            if (SC8815_Config.SC8815_VBUS_IBUS_Step == 1000)
+                SC8815_Config.SC8815_VBUS_IBUS_Step = 100;
+            else if (SC8815_Config.SC8815_VBUS_IBUS_Step == 10000)
+                SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
+            KeyValue = KEY1_SHORT;
+        } else {
+            if (SC8815_Config.SC8815_VBUS_IBUS_Step == 100)
+                SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
+            else if (SC8815_Config.SC8815_VBUS_IBUS_Step == 1000)
+                SC8815_Config.SC8815_VBUS_IBUS_Step = 10000;
+        }
         vbus_protect_page_ui_process(KeyValue);
         break;
     case KEY3_SHORT:
@@ -696,4 +782,23 @@ void vbus_protect_page_process(menu_u8 KeyValue)
     default:
         break;
     }
+}
+
+void screen_flip_page_process(menu_u8 KeyValue)
+{
+    extern uint8_t USE_HORIZONTAL;
+    if (app_config_save_config.USE_HORIZONTAL == 3) 
+        app_config_save_config.USE_HORIZONTAL = 2; 
+    else 
+        app_config_save_config.USE_HORIZONTAL = 3;
+    USE_HORIZONTAL = app_config_save_config.USE_HORIZONTAL;
+    app_config_save();
+    HAL_GPIO_WritePin(LCD_RST_GPIO_Port, LCD_RST_Pin, GPIO_PIN_RESET);
+    HAL_Delay(100);
+    HAL_GPIO_WritePin(LCD_RST_GPIO_Port, LCD_RST_Pin, GPIO_PIN_SET);
+    HAL_Delay(100);
+    LCD_Init();
+    main_page_init();
+    // __set_FAULTMASK(1); //关闭所有中断
+    // NVIC_SystemReset(); //进行软件复位
 }

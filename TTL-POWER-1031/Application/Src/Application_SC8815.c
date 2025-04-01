@@ -582,8 +582,8 @@ void SC8815_output_calibration(uint8_t calibration)
 		char percentage_str[5] = {0};
 		int percentage;
 		LCD_Clear();
-		LCD_ShowChinese(30, 50, "校准电压", LIGHTBLUE, BLACK, 32, 0);
-		// LCD_ShowString(30, 50, "calibration", LIGHTBLUE, BLACK, 32, 0);
+		// LCD_ShowChinese(30, 50, "校准电压", WHITE, BLACK, 32, 0);
+		LCD_ShowString(30, 50, "VOUT", WHITE, BLACK, 32, 0);
 		SC8815_Config.SC8815_Status = SC8815_Standby;
     	Application_SC8815_Standby();
 		memset(SC8815_TIM_Work, 0, sizeof(SC8815_TIM_WorkTypeDef) * SC8815_TIM_WORK_SIZE);
@@ -628,10 +628,10 @@ void SC8815_output_calibration(uint8_t calibration)
 			voltage += 100;
 			percentage = (int)(100 / (float)((SC8815_VBUS_MAX - SC8815_VBUS_MIN) / 100 + 1) * i);
 			sprintf(percentage_str, "%d%%", percentage);
-			LCD_ShowString(172, 50, (const uint8_t*)percentage_str, LIGHTBLUE, BLACK, 32, 0);
-			LCD_Fill_DMA(0, LCD_H - 10, percentage * 2.4, LCD_H, LIGHTBLUE);
+			LCD_ShowString(172, 50, (const uint8_t*)percentage_str, WHITE, BLACK, 32, 0);
+			LCD_Fill_DMA(0, LCD_H - 10, percentage * 2.4, LCD_H, WHITE);
 			if (percentage >= 100) {
-				LCD_Fill_DMA(0, LCD_H - 10, LCD_W, LCD_H, LIGHTBLUE);
+				LCD_Fill_DMA(0, LCD_H - 10, LCD_W, LCD_H, WHITE);
 			}
 		}
 		STMFLASH_Write(SC8815_OUTPUT_CALIBRATION_TABLE_ADDR, (uint16_t*)calibration_table_temp, sizeof(float) * ((SC8815_VBUS_MAX - SC8815_VBUS_MIN) / 100 + 1) >> 1);
@@ -643,8 +643,10 @@ void SC8815_output_calibration(uint8_t calibration)
 		}
 		SC8815_SetBusCurrentLimit(SC8815_Config.SC8815_IBUS_Limit);
 		App_SC8815_SetOutputVoltage(SC8815_Config.SC8815_VBUS);
-		__set_FAULTMASK(1); //关闭所有中断
-  		NVIC_SystemReset(); //进行软件复位
+		LCD_ShowString(30, 45, "vbus ok", WHITE, BLACK, 32, 0);
+		while (1) {
+			HAL_Delay(1000);
+		}
 	}
 }
 
@@ -681,9 +683,9 @@ void SC8815_IBUS_calibration(void)
 				calibration_table_temp[i] = SCHW_VBUS_RSHUNT_DEFAULT;
 				LCD_Clear();
 				char str[8];
-				LCD_ShowString(30, 50, "calibration err", LIGHTBLUE, BLACK, 32, 0);
+				LCD_ShowString(30, 50, "calibration err", WHITE, BLACK, 32, 0);
 				sprintf(str, "%dmA", ibus_calibration);
-				LCD_ShowString(30, 66, (uint8_t*)str, LIGHTBLUE, BLACK, 32, 0);
+				LCD_ShowString(30, 82, (uint8_t*)str, WHITE, BLACK, 32, 0);
 				SC8815_Config.SC8815_Status = SC8815_Standby;
     			Application_SC8815_Standby();
 				while (1) {
@@ -711,8 +713,10 @@ void SC8815_IBUS_calibration(void)
 	SC8815_Preset_Read();
 	App_SC8815_SetOutputVoltage(SC8815_Config.SC8815_VBUS);
 	App_SC8815_SetBusCurrentLimit(SC8815_Config.SC8815_IBUS_Limit);
-	__set_FAULTMASK(1); //关闭所有中断
-  	NVIC_SystemReset(); //进行软件复位
+	LCD_ShowString(30, 45, "ibus ok", WHITE, BLACK, 32, 0);
+	while (1) {
+		HAL_Delay(1000);
+	}
 }
 
 void SC8815_auto_output(void)

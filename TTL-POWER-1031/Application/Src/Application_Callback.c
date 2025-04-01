@@ -92,6 +92,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
             SC8815_Config.sc8815_pfm_delay_ms--;
             if (SC8815_Config.sc8815_pfm_delay_ms == 0) {
 			    SC8815_PFM_Disable();
+			    SC8815_PFM_Disable();
                 set_i2c_mutex(0);
 	            // HAL_GPIO_WritePin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin, GPIO_PIN_RESET);
             } else if (SC8815_Config.sc8815_pfm_delay_ms <= I2C_MUTEX_TIME_MS) {
@@ -137,7 +138,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
 
 static void get_msg(void)
 {
-    if (APP_config.msg_get_timestamp > APP_config.msg_get_time * 1000)
+    if (APP_config.msg_get_timestamp > APP_config.msg_get_time)
     {
         extern Application_Config APP_config;
         uint32_t temp[6];

@@ -99,6 +99,7 @@ typedef struct
     // float SC8815_IBAT_Limit;      // 8815电池(输入)限流mA
     float SC8815_IBUS_Limit[SC8815_TIM_WORK_STEP];     // 8815 VBUS(输出)限流mA
     float SC8815_VBUS[SC8815_TIM_WORK_STEP];           // 8815 VBUS输出电压mv
+    // uint8_t pad[2];  考虑四字节对齐看看是否能解决数据错误
 } SC8815_TIM_WorkTypeDef;            // SC8815定时工作预设结构体
 
 extern SC8815_ConfigTypeDef SC8815_Config;

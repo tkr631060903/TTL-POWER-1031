@@ -9,6 +9,7 @@
 #include "Application_ADC.h"
 #include "menu.h"
 #include "stmflash.h"
+#include <math.h>  // 使用 modff 分离整数和小数部分
 
 #define CMD_STR_CNT 6 // 命令参数数量
 
@@ -22,28 +23,95 @@ static ascii_handler_fn
     setIBAT_handler, setIRCOMP_handler, setVBAT_SEL_handler, setCSEL_handler, calibration_ibus_handler, get_temperature_handler,
     setVCELL_handler, setSW_FREQ_handler, setDeadTime_handler, setFB_Mode_handler, setDITHER_handler,
     setSLEW_SET_handler, setILIM_BW_handler, get_msg_handler, lock_key_handler, start_preset_handler,
-    set_switch_handler, set_current_handler, set_current_port_handler, set_current_step_handler,
-    set_voltage_handler, set_voltage_step_handler, set_voltage_prot_handler, set_voltage_limit_handler,
+    set_switch_handler, set_current_handler, set_current_step_handler, set_voltage_handler, set_voltage_step_handler,
     get_fetch_current_handler, get_fetch_voltage_handler, get_fetch_power_handler, get_versions_handler,
     set_preset_handler, save_config_handler, upgrade_app_handler, set_power_limit_handler, set_name_handler, 
-    set_key_handler, PDP_search_handler, set_SFB_handler;
+    set_key_handler, PDP_search_handler, set_SFB_handler, get_value_handler;
 typedef struct lookup_table
 {
     const char *desc;
     ascii_handler_fn *handler;
 } lookup_table_t;
 static const lookup_table_t handler_map_static[] = {
-    {"setibat", setIBAT_handler}, {"setircomp", setIRCOMP_handler}, {"calibus", calibration_ibus_handler}, {"gettemp", get_temperature_handler},
+    {"MEAS:CURR?", get_fetch_current_handler}, {"MEAS:VOLT?", get_fetch_voltage_handler}, {"OUTP", set_switch_handler}, {"gettemp", get_temperature_handler},
+    {"CURR", set_current_handler}, {"VOLT", set_voltage_handler}, {"MEAS:POW?", get_fetch_power_handler}, {"CURR:STEP", set_current_step_handler},
+    {"VOLT:STEP", set_voltage_step_handler}, {"SYST:VERS?", get_versions_handler}, {"get", get_value_handler}, 
+    {"setSFB", set_SFB_handler}, {"setpower", set_power_limit_handler},
+    {"getmsg", get_msg_handler}, {"setkey", set_key_handler}, {"preset", set_preset_handler}, {"save", save_config_handler}, {"setname", set_name_handler}, 
+    {"startPreset", start_preset_handler},  {"lockkey", lock_key_handler},
+
+    {"setircomp", setIRCOMP_handler}, {"calibus", calibration_ibus_handler},
     {"setvbatsel", setVBAT_SEL_handler}, {"setcsel", setCSEL_handler}, {"setvcell", setVCELL_handler}, {"setswfreq", setSW_FREQ_handler}, 
     {"setdeadtime", setDeadTime_handler}, {"setfbmode", setFB_Mode_handler}, {"setdither", setDITHER_handler},
-    {"setslewset", setSLEW_SET_handler}, {"setilimbw", setILIM_BW_handler}, {"getmsg", get_msg_handler}, {"lockkey", lock_key_handler}, {"startPreset", start_preset_handler},
-    {"OUTP", set_switch_handler}, {"CURR", set_current_handler}, {"CURR:PROT", set_current_port_handler}, {"CURR:STEP", set_current_step_handler},
-    {"VOLT", set_voltage_handler}, {"VOLT:STEP", set_voltage_step_handler}, {"VOLT:PROT", set_voltage_prot_handler},
-    {"VOLT:LIMIT", set_voltage_limit_handler}, {"MEAS:CURR?", get_fetch_current_handler}, {"MEAS:VOLT?", get_fetch_voltage_handler}, {"SYST:VERS?\r\n", get_versions_handler},
-    {"MEAS:POW?", get_fetch_power_handler}, {"SYST:VERS?", get_versions_handler}, {"preset", set_preset_handler}, {"save", save_config_handler}, {"upgrade", upgrade_app_handler},
-    {"setpower", set_power_limit_handler}, {"setname", set_name_handler}, {"setkey", set_key_handler}, {"PDPsearch", PDP_search_handler}, {"setSFB", set_SFB_handler}
+    {"setslewset", setSLEW_SET_handler}, {"setilimbw", setILIM_BW_handler},
+    {"upgrade", upgrade_app_handler}, {"PDPsearch", PDP_search_handler}, {"setibat", setIBAT_handler}
 };
 const lookup_table_t* handler_map = handler_map_static;
+
+/**
+ *@brief 将浮点数转换为字符串表示，考虑四舍五入和缓冲区大小限制
+ *  传入的缓冲区至少需要 9字节（3位整数 + 1位小数点 + 4位小数 + 终止符）。
+ *  函数假设输入值在 0 ≤ num ≤ 255 范围内，超出可能导致错误。
+ *
+ * @param num 
+ * @param buffer 
+ * @param buffer_size 
+ */
+static void float_to_str(float num, char* buffer, int buffer_size) {
+    if (buffer_size <= 0) return;
+    int index = 0;
+
+    // 分离整数和小数部分
+    float int_part, frac_part;
+    frac_part = modff(num, &int_part);
+
+    // 四舍五入到4位小数，并处理进位
+    int frac_int = (int)(frac_part * 10000.0f + 0.5f);
+    if (frac_int >= 10000) {
+        int_part += 1.0f;
+        frac_int = 0;
+    }
+
+    // 转换整数部分（0-255）
+    char int_str[4] = { '0', '0', '0', '\0' }; // 最多3位整数
+    int int_len = 0;
+    float temp = int_part;
+    do {
+        int_str[int_len++] = '0' + (int)temp % 10;
+        temp = floorf(temp / 10.0f);
+    } while (temp > 0 && int_len < 3);
+
+    // 反转整数部分（例如 "532" → "235"）
+    for (int i = 0; i < int_len / 2; i++) {
+        char c = int_str[i];
+        int_str[i] = int_str[int_len - i - 1];
+        int_str[int_len - i - 1] = c;
+    }
+
+    // 转换小数部分（固定4位，不去除末尾零）
+    char frac_str[4];
+    for (int i = 0; i < 4; i++) {
+        frac_str[i] = '0' + (frac_int / (int)powf(10, 3 - i)) % 10;
+    }
+
+    // 组合到缓冲区
+    // 1. 写入整数部分
+    for (int i = 0; i < int_len; i++) {
+        if (index >= buffer_size - 1) break;
+        buffer[index++] = int_str[i];
+    }
+
+    // 2. 写入小数点和小数部分（固定4位）
+    if (index >= buffer_size - 1) goto end;
+    buffer[index++] = '.';
+    for (int i = 0; i < 4; i++) {
+        if (index >= buffer_size - 1) break;
+        buffer[index++] = frac_str[i];
+    }
+
+end:
+    buffer[index] = '\0'; // 终止符
+}
 
 int set_SFB_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
 {
@@ -408,11 +476,14 @@ int set_current_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
         if (SC8815_Config.SC8815_IBUS_Limit > SC8815_IBUS_MAX)
             SC8815_Config.SC8815_IBUS_Limit = SC8815_IBUS_MAX;
         App_SC8815_SetBusCurrentLimit(SC8815_Config.SC8815_IBUS_Limit);
+    } else if (strstr(param[1], "DOWN") != NULL) {
+        SC8815_Config.SC8815_IBUS_Limit -= SC8815_Config.SC8815_IBUS_CMD_Step;
+        if (SC8815_Config.SC8815_IBUS_Limit < SC8815_IBUS_MIN)
+            SC8815_Config.SC8815_IBUS_Limit = SC8815_IBUS_MIN;
+        App_SC8815_SetBusCurrentLimit(SC8815_Config.SC8815_IBUS_Limit);
     }
     else
     {
-//        SC8815_Config.SC8815_Status = SC8815_Standby;
-//        Application_SC8815_Standby();
         float value;
         sscanf(param[1], "%f", &value);
         if (value > SC8815_IBUS_MAX / 1000)
@@ -425,21 +496,6 @@ int set_current_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
         SC8815_Config.SC8815_IBUS_Limit = value;
         App_SC8815_SetBusCurrentLimit(value);
     }
-    return 1;
-}
-
-int set_current_port_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
-{
-    if (param_cnt == 1)
-    {
-        return 0;
-    }
-    // float value;
-    // sscanf(param[1], "%f", &value);
-    // value = value * 1000; 
-    // SC8815_Config.SC8815_IBUS_Limit = value;
-    // SC8815_Config.SC8815_IBUS_Limit_Old = value;
-    // App_SC8815_SetBusCurrentLimit(value);
     return 1;
 }
 
@@ -477,6 +533,11 @@ int set_voltage_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
         if (SC8815_Config.SC8815_VBUS > SC8815_VBUS_MAX)
             SC8815_Config.SC8815_VBUS = SC8815_VBUS_MAX;
         App_SC8815_SetOutputVoltage(SC8815_Config.SC8815_VBUS);
+    } else if (strstr(param[1], "DOWN") != NULL) {
+        SC8815_Config.SC8815_VBUS -= SC8815_Config.SC8815_VBUS_CMD_Step;
+        if (SC8815_Config.SC8815_VBUS < SC8815_VBUS_MIN)
+            SC8815_Config.SC8815_VBUS = SC8815_VBUS_MIN;
+        App_SC8815_SetOutputVoltage(SC8815_Config.SC8815_VBUS);
     }
     else
     {
@@ -508,88 +569,63 @@ int set_voltage_step_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
     return 1;
 }
 
-int set_voltage_prot_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
-{
-    if (param_cnt == 1)
-    {
-        return 0;
-    }
-    return 1;
-}
-
-int set_voltage_limit_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
-{
-    if (param_cnt == 1)
-    {
-        return 0;
-    }
-    return 1;
-}
-
 int get_fetch_current_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
 {
-    // uint32_t value[1];
-    // // sscanf(param[1], "%d", &value);
-    // value[0] = htonl(App_getIBUS_mA());
-    // if (cmd_source)
-    // {
-    //     CDC_Transmit_FS((uint8_t*)&value, sizeof(uint32_t));
-    // }
-    // else
-    // {
-    //     HAL_UART_Transmit(&huart1, (uint8_t*)&value, sizeof(uint32_t), 1000);
-    // }
+    char str[12];
+    float_to_str(App_getIBUS_A(), str, 12);
+    strcat(str, "\r\n");
     if (cmd_source)
     {
-        usb_printf("%.4f\r\n", App_getIBUS_A());
+        // CDC_Transmit_FS((uint8_t*)str, strlen(str));
+        usb_printf(str);
     }
     else
     {
-        printf("%.4f\r\n", App_getIBUS_A());
+        // printf("%.4f\r\n", App_getIBUS_A()); //sprintf等打印浮点数会出错
+        printf(str);
     }
     return 1;
 }
 
 int get_fetch_voltage_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
 {
-    // uint32_t value[1];
-    // // sscanf(param[1], "%d", &value);
-    // value[0] = htonl(App_getVBUS_mV());
-    // if (cmd_source)
-    // {
-    //     CDC_Transmit_FS((uint8_t*)&value, sizeof(uint32_t));
+    char str[12];
+    // int temp = (int)App_getVBUS_mV();
+    // if (temp <= 0) {
+    //     sprintf(str, "0.0000\r\n");
+    // } else {
+    //     sprintf(str, "%d\r\n", temp);
+    //     if (temp < 10000) {
+    //         memcpy(&str[2], &str[1], 4);
+    //         str[1] = '.';
+    //     } else {
+    //         memcpy(&str[3], &str[2], 4);
+    //         str[2] = '.';
+    //     }
     // }
-    // else
-    // {
-    //     HAL_UART_Transmit(&huart1, (uint8_t*)&value, sizeof(uint32_t), 1000);
-    // }
+    float_to_str(App_getVBUS_V(), str, 12);
+    strcat(str, "\r\n");
     if (cmd_source)
     {
-        usb_printf("%.4f\r\n", App_getVBUS_V());
+        // CDC_Transmit_FS((uint8_t*)str, strlen(str));
+        usb_printf(str);
     }
     else
     {
-        printf("%.4f\r\n", App_getVBUS_V());
+        // printf("%.4f\r\n", App_getVBUS_V());
+        printf(str);
     }
     return 1;
 }
 
 int get_fetch_power_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
 {
-    // uint32_t value[1];
-    // // sscanf(param[1], "%d", &value);
-    // value[0] = htonl((App_getVBUS_mV() / 1000) * (App_getIBUS_mA() / 1000));
-    // if (cmd_source)
-    // {
-    //     CDC_Transmit_FS((uint8_t*)&value, sizeof(uint32_t));
-    // }
-    // else
-    // {
-    //     HAL_UART_Transmit(&huart1, (uint8_t*)&value, sizeof(uint32_t), 1000);
-    // }
+    char str[12];
+    float_to_str((App_getVBUS_V() * App_getIBUS_A()), str, 12);
+    strcat(str, "\r\n");
     if (cmd_source)
     {
-        usb_printf("%.4f\r\n", (App_getVBUS_V() * App_getIBUS_A()));
+        usb_printf(str);
     }
     else
     {
@@ -602,11 +638,28 @@ int get_versions_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
 {
     if (cmd_source)
     {
-        CDC_Transmit_FS("1.1.0\r\n", strlen("1.1.0\r\n"));
+        CDC_Transmit_FS("1.1.1\r\n", strlen("1.1.1\r\n"));
     }
     else
     {
-        printf("1.1.0\r\n");
+        printf("1.1.1\r\n");
+    }
+    return 1;
+}
+
+int get_value_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
+{
+    char str[12] = {0};
+    if (strstr(param[1], "vset") != NULL) {
+        float_to_str(SC8815_Config.SC8815_VBUS / 1000, str, 12);
+    } else if (strstr(param[1], "iset") != NULL) {
+        float_to_str(SC8815_Config.SC8815_IBUS_Limit / 1000, str, 12);
+    }
+    strcat(str, "\r\n");
+    if (cmd_source) {
+        CDC_Transmit_FS((uint8_t*)str, strlen(str));
+    } else {
+        printf(str);
     }
     return 1;
 }
@@ -627,11 +680,33 @@ int set_power_limit_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
 
 int set_preset_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
 {
-    if (param_cnt < 4)
+    if (param_cnt == 1)
     {
         return 0;
     }
-    int value, value1;
+    int value, value1, offset = 0, len = 0;
+    extern uint8_t UserTxBufferFS[APP_TX_DATA_SIZE];
+    char *p = (char*)UserTxBufferFS;
+    if (strstr(param[1], "quit") != NULL) {
+        SC8815_Preset_Mode_Quit();
+        return 1;
+    } else if (strstr(param[1], "read") != NULL) {
+        sscanf(param[2], "%d", &value);
+        for (value1 = 0; value1 < SC8815_TIM_WORK_STEP; value1++) {
+            sprintf(p, "%.1f %.1f %d ", SC8815_TIM_Work[value].SC8815_VBUS[value1] / 1000, SC8815_TIM_Work[value].SC8815_IBUS_Limit[value1] / 1000, SC8815_TIM_Work[value].SC8815_TIM_Work_second[value1]);
+            len = strlen(p);
+            p += len;
+            offset += len;
+        }
+        sprintf(p, "%d\r\n", SC8815_TIM_Work[value].circular);
+        len = strlen(p);
+        p += len;
+        offset += len;
+        CDC_Transmit_FS((uint8_t*)UserTxBufferFS, offset);
+        offset = 0;
+        p = (char*)UserTxBufferFS;
+        return 1;
+    }
     sscanf(param[1], "%d", &value);
     sscanf(param[2], "%d", &value1);
     if (strstr(param[2], "30") != NULL && param_cnt == 4)
@@ -648,7 +723,7 @@ int set_preset_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
         value2 *= 1000;
         sscanf(param[4], "%f", &value3);
         value3 *= 1000;
-        if (value2 > SC8815_VBUS_MAX || value2 < SC8815_VBUS_MIN || value3 > SC8815_IBUS_MAX || value3 < SC8815_IBUS_MIN)
+        if (value2 > SC8815_VBUS_MAX || value2 < 0 || value3 > SC8815_IBUS_MAX || value3 < 0)
             return 0;
         sscanf(param[5], "%f", &value4);
         SC8815_TIM_Work[value].SC8815_VBUS[value1] = value2;
@@ -769,8 +844,11 @@ int get_temperature_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
     if (param_cnt == 1) {
         return 0;
     }
+    char str[12];
+    sprintf(str, "%.1f", App_getTemp());
     if (cmd_source) {
-        usb_printf("%.1f", App_getTemp());
+        // usb_printf("%.1f", App_getTemp());
+        CDC_Transmit_FS((uint8_t*)str, strlen(str));
     } else {
         printf("%.1f", App_getTemp());
     }

@@ -44,8 +44,6 @@ static uint8_t INA226_Write2Byte(uint8_t reg_addr, uint16_t reg_data)
 float INA226_ReadVoltage(void)
 {
     float temp = INA226_Read2Byte(Bus_V_Reg) * 1.25;
-    if (temp < 0)
-        temp = 0;
     return temp;
 }
 
@@ -57,8 +55,6 @@ float INA226_ReadCurrent(void)
     } else {
         temp = (INA226_Read2Byte(Current_Reg) * 0.2602) - 1;   //buck
     }
-    if (temp < 0)
-        temp = 0;
     return temp;
 }
 

@@ -5,7 +5,7 @@
 #include "Hardware_setting.h"
 #include "Application.h"
 
-#define MENU_PAGE_NUM 7
+#define MENU_PAGE_NUM 8 //菜单页面数量
 
 typedef struct Menu_Key_Index
 {
@@ -87,5 +87,6 @@ void protect_page_process(menu_u8 KeyValue);
 void about_page_process(menu_u8 KeyValue);
 void DC_limit_page_process(menu_u8 KeyValue);
 void vbus_protect_page_process(menu_u8 KeyValue);
+void screen_flip_page_process(menu_u8 KeyValue);
 
 #endif //__MENU_H

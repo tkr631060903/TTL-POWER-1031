@@ -166,5 +166,6 @@ void HUSB238_HardReset(void);
 // 读取全部数据
 void HUSB238_ReadAllReg(uint8_t* regs);
 void husb238_init(void);
+void HUSB238_Refresh_Voltage(void);
 
 #endif /* __HUSB238_H */

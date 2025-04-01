@@ -25,9 +25,18 @@ static uint32_t reflesh_vbus_ibus_time = 0;
 
 void reflesh_VBUS_IBUS(void)
 {
+    float temp = 0;
     if (HAL_GetTick() - reflesh_vbus_ibus_time >= REFLESH_VBUS_IBUS_TIME) {
-        ina226_voltage = INA226_ReadVoltage();
-        ina226_current = INA226_ReadCurrent();
+        temp = INA226_ReadVoltage();
+        if (!(temp > 36000)) {
+            ina226_voltage = temp;
+        }
+        temp = INA226_ReadCurrent();
+        if (!(temp > 6000)) {
+            ina226_current = temp;
+        } else if (temp <= 0) {
+            ina226_current = 0;
+        }
         reflesh_vbus_ibus_time = HAL_GetTick();
     }
 }
