@@ -15,6 +15,7 @@
 #include "SC8815.h"
 #include "Application.h"
 #include "Application_SC8815.h"
+#include <math.h>
 
 SC8815_BatteryConfigTypeDef SC8815_BatteryConfigStruct = { 0 };
 SC8815_HardwareInitTypeDef SC8815_HardwareInitStruct = { 0 };
@@ -372,7 +373,8 @@ void SC8815_SetBusCurrentLimit(uint16_t NewILIM)
 	uint16_t RATIO_Value;
 
 	RATIO_Value = ((I2C_ReadRegByte(SC8815_ADDR, SCREG_RATIO) & 0x0C) == 4) ? 6 : 3;    //取得 IBUS 的比率
-	tmp = (16 * (NewILIM) * (SCHW_VBUS_RSHUNT)) / (625 * RATIO_Value) - 1;              //计算 LIM 设置值
+	//tmp = (16 * (NewILIM) * (SCHW_VBUS_RSHUNT)) / (625 * RATIO_Value) - 1;              //计算 LIM 设置值
+	tmp = ceil((16 * (NewILIM) * (SCHW_VBUS_RSHUNT)) / (625 * RATIO_Value) - 1);              //计算 LIM 设置值
 	I2C_WriteRegByte(SC8815_ADDR, SCREG_IBUS_LIM_SET, tmp);                             //写入到 SC8815 寄存器
 
 	//printf("SC8815_SetBusCurrentLimit = %d.\n",NewILIM);

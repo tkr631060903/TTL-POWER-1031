@@ -28,7 +28,6 @@ static OP_MENU_PAGE g_opStruct[] =
     {PRESSET_RUNNING_PAGE, presset_running_page_process},
     {BUZZER_PAGE, buzzer_page_process},
     {TEMPERATURE_PAGE, temperature_page_process},
-    {FASTCH_PAGE, fastch_page_process},
     {VBUS_CALIBRATION_PAGE, VBUS_calibration_page_process},
     {PROTECT_PAGE, protect_page_process},
     {ABOUT_PAGE, about_page_process},
@@ -575,36 +574,6 @@ void temperature_page_process(menu_u8 KeyValue)
     case KEY2_LONG:
         SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
         app_config_load();
-        main_page_init();
-        break;
-    default:
-        break;
-    }
-}
-
-/**
- * @brief 快充设置页面处理
- * 
- * @param KeyValue 触发键值
- */
-void fastch_page_process(menu_u8 KeyValue)
-{
-    switch (KeyValue)
-    {
-    case LEFT:
-        fastch_page_ui_process(LEFT, 0);
-        break;
-    case RIGHT:
-        fastch_page_ui_process(RIGHT, 0);
-        break;
-    case KEY3_SHORT:
-        main_menu_page_ui_process(sub_index.main_menu_current_index, KeyValue);
-        break;
-    case KEY4_SHORT:
-        set_fastcharge(sub_index.fastch_current_index);
-        main_page_init();
-        break;
-    case KEY2_LONG:
         main_page_init();
         break;
     default:

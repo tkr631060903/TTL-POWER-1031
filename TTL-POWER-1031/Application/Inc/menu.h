@@ -5,7 +5,7 @@
 #include "Hardware_setting.h"
 #include "Application.h"
 
-#define MENU_PAGE_NUM 8 //菜单页面数量
+#define MENU_PAGE_NUM 7 //菜单页面数量
 
 typedef struct Menu_Key_Index
 {
@@ -40,7 +40,6 @@ typedef enum
     PRESSET_RUNNING_PAGE,   // 预设运行页面
     BUZZER_PAGE,    // 设置蜂鸣器页面
     TEMPERATURE_PAGE,      // 设置温度预警页面
-    FASTCH_PAGE,    // 设置快充输入页面
     VBUS_CALIBRATION_PAGE,    // vbus校准页面
     PROTECT_PAGE,   //保护状态页面
     ABOUT_PAGE,   //保护状态页面

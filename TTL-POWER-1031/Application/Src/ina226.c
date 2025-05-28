@@ -69,9 +69,12 @@ void INA226_Init(void)
         printf("INA226 Error!\r\n");
         return;
     }
-    // INA226_Write2Byte(Config_Reg, 0x4BB7);
-    // INA226_Write2Byte(Config_Reg, 0x4527);
-    INA226_Write2Byte(Config_Reg, 0x41FF);
+    //INA226_Write2Byte(Config_Reg, 0x4BB7);
+    //INA226_Write2Byte(Config_Reg, 0x4527);
+    //INA226_Write2Byte(Config_Reg, 0x41FF);
+	//	INA226_Write2Byte(Config_Reg, 0x404F);
+	//	INA226_Write2Byte(Config_Reg, 0x42DF);
+		INA226_Write2Byte(Config_Reg, 0x424F);
     HAL_Delay(5);
     // INA226_Write2Byte(Calib_Reg, 0x17D7);
     INA226_Write2Byte(Calib_Reg, 0x0F6C);

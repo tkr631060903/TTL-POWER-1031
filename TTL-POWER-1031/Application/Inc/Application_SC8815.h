@@ -38,7 +38,7 @@
 
 #define i2c_delay(us) TIM2_Delay1us(us)
 #define SC8815_VBUS_MAX 36000
-#define SC8815_VBUS_MIN 500
+#define SC8815_VBUS_MIN 1000
 #define SC8815_IBUS_MAX 8000
 #define SC8815_IBUS_MIN 300
 #define SC8815_TIM_WORK_TIME_FAST 0xFFFFFFFF //判断当前开启是否为首次
@@ -81,6 +81,7 @@ typedef struct
     uint8_t sc8815_pfm_delay_ms;  // 8815 关闭PFM延时ms
     uint8_t sc8815_sfb_delay_ms;  // 8815 开启SFB延时ms
     uint8_t sc8815_calibration_flag;  // 是否开启校准标志位
+    uint8_t sc8815_ibus_flag;  // 是否调节限流标志位
 } SC8815_ConfigTypeDef;                 // SC8815配置结构体
 
 typedef struct
@@ -133,5 +134,6 @@ void App_SC8815_SetBusCurrentLimit(float voltage);
 void SC8815_output_calibration(uint8_t calibration);
 void SC8815_IBUS_calibration(void);
 void SC8815_auto_output(void);
+void SC8815_IBUS_adjust(void);
 
 #endif

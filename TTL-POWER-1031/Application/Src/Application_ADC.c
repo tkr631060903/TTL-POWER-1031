@@ -13,32 +13,35 @@
 #include "Application_SC8815.h"
 #include "menu.h"
 
-#define REFLESH_VBUS_IBUS_TIME 50
-#define WAIT_PRESSET (presset_config_set.set_time[SC8815_Config.sc8815_tim_work_step] != 0 && \
-                    (presset_config_set.set_time[SC8815_Config.sc8815_tim_work_step] * 1000) - SC8815_Config.sc8815_tim_work_time <= 5)
-
 uint16_t ADC_Value[4];
 extern presset_config_set_typeDef presset_config_set;
 static float ina226_voltage = 0;
 static float ina226_current = 0;
-static uint32_t reflesh_vbus_ibus_time = 0;
+uint32_t reflesh_vbus_ibus_time = 0;
+uint32_t reflesh_vbus_ibus_time_t = 100;
 
 void reflesh_VBUS_IBUS(void)
 {
-    float temp = 0;
-    if (HAL_GetTick() - reflesh_vbus_ibus_time >= REFLESH_VBUS_IBUS_TIME) {
-        temp = INA226_ReadVoltage();
-        if (!(temp > 36000)) {
-            ina226_voltage = temp;
-        }
-        temp = INA226_ReadCurrent();
-        if (!(temp > 6000)) {
-            ina226_current = temp;
-        } else if (temp <= 0) {
-            ina226_current = 0;
-        }
-        reflesh_vbus_ibus_time = HAL_GetTick();
+    if (HAL_GetTick() - reflesh_vbus_ibus_time < reflesh_vbus_ibus_time_t) {
+        return;
     }
+    float temp = INA226_ReadVoltage();
+    if (temp <= 0) {
+        ina226_voltage = 0;
+    } else {
+        ina226_voltage = temp;
+    }
+    temp = INA226_ReadCurrent();
+		if (temp >= 12000) {
+        temp = 0;
+    }
+    if (temp <= 0) {
+        ina226_current = 0;
+    } else {
+        ina226_current = temp;
+    }
+    SC8815_IBUS_adjust();
+    reflesh_vbus_ibus_time = HAL_GetTick();
 }
 
 /**
@@ -48,12 +51,6 @@ void reflesh_VBUS_IBUS(void)
  */
 float App_getVBUS_mV(void)
 {
-    // return (12 * ((float)ADC_Value[0] * SAMPLING_RATE)) * 1000;
-    // while (WAIT_PRESSET || get_i2c_mutex());
-    // ina226_voltage = INA226_ReadVoltage();
-    // if (ina226_voltage < 0) {
-    //     ina226_voltage = 0;
-    // }
     return ina226_voltage;
 }
 
@@ -64,12 +61,6 @@ float App_getVBUS_mV(void)
  */
 float App_getVBUS_V(void)
 {
-    // return 12 * ((float)ADC_Value[0] * SAMPLING_RATE);
-    // while (WAIT_PRESSET || get_i2c_mutex());
-    // ina226_voltage = INA226_ReadVoltage();
-    // if (ina226_voltage < 0) {
-    //     ina226_voltage = 0;
-    // }
     return App_getVBUS_mV() / 1000;
 }
 
@@ -115,12 +106,6 @@ float App_getTemp(void)
  */
 float App_getIBUS_mA(void)
 {
-    // return (((float)ADC_Value[2] * SAMPLING_RATE) / 0.5 * 1000);
-    // while (WAIT_PRESSET || get_i2c_mutex());
-    // ina226_current = INA226_ReadCurrent();
-    // if (ina226_current < 0) {
-    //     ina226_current = 0;
-    // }
     return ina226_current;
 }
 
@@ -131,12 +116,6 @@ float App_getIBUS_mA(void)
  */
 float App_getIBUS_A(void)
 {
-    // return (((float)ADC_Value[2] * SAMPLING_RATE) / 0.5);
-    // while (WAIT_PRESSET || get_i2c_mutex());
-    // ina226_current = INA226_ReadCurrent();
-    // if (ina226_current < 0) {
-    //     ina226_current = 0;
-    // }
     return App_getIBUS_mA() / 1000;
 }
 
