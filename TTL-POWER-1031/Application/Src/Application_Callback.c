@@ -92,12 +92,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
             SC8815_Config.sc8815_pfm_delay_ms--;
             if (SC8815_Config.sc8815_pfm_delay_ms == 0) {
 			    SC8815_PFM_Disable();
-			    SC8815_PFM_Disable();
-			    SC8815_PFM_Disable();
-                set_i2c_mutex(0);
 	            // HAL_GPIO_WritePin(SC8815_PSTOP_GPIO_Port, SC8815_PSTOP_Pin, GPIO_PIN_RESET);
-            } else if (SC8815_Config.sc8815_pfm_delay_ms <= I2C_MUTEX_TIME_MS) {
-                set_i2c_mutex(1);
             }
         }
         if (SC8815_Config.sc8815_sfb_delay_ms) {
@@ -106,9 +101,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
                 if (app_config_save_config.SC8815_SFB == SCHWI_SFB_Enable) {
                     SC8815_SFB_Enable();
                 }
-                set_i2c_mutex(0);
-            } else if (SC8815_Config.sc8815_sfb_delay_ms <= I2C_MUTEX_TIME_MS) {
-                set_i2c_mutex(1);
             }
         }
         sc8815_tim_work();

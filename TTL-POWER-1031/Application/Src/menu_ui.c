@@ -481,7 +481,7 @@ void about_page_ui_process(void)
     LCD_ShowChinese(0, 34, "ÐÍºÅ", WHITE, RED, 32, 0);
     LCD_ShowString(64, 34, ":PD POCKET", WHITE, RED, 32, 0);
     LCD_ShowChinese(0, 68, "°æ±¾", WHITE, RED, 32, 0);
-    LCD_ShowString(64, 68, ":1.1.2", WHITE, RED, 32, 0);
+    LCD_ShowString(64, 68, ":1.1.3", WHITE, RED, 32, 0);
 }
 
 void DC_limit_page_ui_process(menu_u8 KeyValue)

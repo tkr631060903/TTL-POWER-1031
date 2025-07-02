@@ -234,14 +234,14 @@ void set_presset_config(menu_u8 KeyValue)
             presset_config_set.set_vbus[presset_config_set.current_index] -= presset_config_set.set_setp;
             if (presset_config_set.set_vbus[presset_config_set.current_index] <= SC8815_VBUS_MIN)
             {
-                presset_config_set.set_vbus[presset_config_set.current_index] = SC8815_VBUS_MIN;
+                presset_config_set.set_vbus[presset_config_set.current_index] = 0;
             }
             break;
         case PRESSET_SET_IOUT:
             presset_config_set.set_ibus[presset_config_set.current_index] -= presset_config_set.set_setp;
             if (presset_config_set.set_ibus[presset_config_set.current_index] <= SC8815_IBUS_MIN)
             {
-                presset_config_set.set_ibus[presset_config_set.current_index] = SC8815_IBUS_MIN;
+                presset_config_set.set_ibus[presset_config_set.current_index] = 0;
             }
             break;
         case PRESSET_SET_TIME:

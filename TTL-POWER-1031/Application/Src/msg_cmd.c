@@ -26,7 +26,7 @@ static ascii_handler_fn
     set_switch_handler, set_current_handler, set_current_step_handler, set_voltage_handler, set_voltage_step_handler,
     get_fetch_current_handler, get_fetch_voltage_handler, get_fetch_power_handler, get_versions_handler,
     set_preset_handler, save_config_handler, upgrade_app_handler, set_power_limit_handler, set_name_handler, 
-    set_key_handler, PDP_search_handler, set_SFB_handler, get_value_handler;
+    set_key_handler, PDP_search_handler, set_SFB_handler, get_value_handler, reset_handler;
 typedef struct lookup_table
 {
     const char *desc;
@@ -44,7 +44,7 @@ static const lookup_table_t handler_map_static[] = {
     {"setvbatsel", setVBAT_SEL_handler}, {"setcsel", setCSEL_handler}, {"setvcell", setVCELL_handler}, {"setswfreq", setSW_FREQ_handler}, 
     {"setdeadtime", setDeadTime_handler}, {"setfbmode", setFB_Mode_handler}, {"setdither", setDITHER_handler},
     {"setslewset", setSLEW_SET_handler}, {"setilimbw", setILIM_BW_handler},
-    {"upgrade", upgrade_app_handler}, {"PDPsearch", PDP_search_handler}, {"setibat", setIBAT_handler}
+    {"upgrade", upgrade_app_handler}, {"PDPsearch", PDP_search_handler}, {"setibat", setIBAT_handler}, {"SYST:RST", reset_handler}
 };
 const lookup_table_t* handler_map = handler_map_static;
 
@@ -638,11 +638,11 @@ int get_versions_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
 {
     if (cmd_source)
     {
-        CDC_Transmit_FS("1.1.2\r\n", strlen("1.1.2\r\n"));
+        CDC_Transmit_FS("1.1.3\r\n", strlen("1.1.3\r\n"));
     }
     else
     {
-        printf("1.1.2\r\n");
+        printf("1.1.3\r\n");
     }
     return 1;
 }
@@ -855,6 +855,12 @@ int get_temperature_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
     return 1;
 }
 
+int reset_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
+{
+    __set_FAULTMASK(1); //关闭所有中断
+    NVIC_SystemReset(); //进行软件复位
+    return 1;
+}
 
 void remove_crlf(char *str) {
     size_t len = strlen(str);

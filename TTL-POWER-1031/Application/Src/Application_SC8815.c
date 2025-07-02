@@ -30,19 +30,8 @@
 
 SC8815_ConfigTypeDef SC8815_Config;
 SC8815_TIM_WorkTypeDef SC8815_TIM_Work[SC8815_TIM_WORK_SIZE] = { 0 };
-static uint8_t i2c_mutex = 0;	//I2C总线互斥信号,0表示总线空闲，1表示总线忙
 static uint8_t sc8815_power = 120; //SC8815输出功率值
 float SCHW_VBUS_RSHUNT = SCHW_VBUS_RSHUNT_DEFAULT;
-
-uint8_t get_i2c_mutex(void)
-{
-	return i2c_mutex;
-}
-
-void set_i2c_mutex(uint8_t status)
-{
-	i2c_mutex = status;
-}
 
 uint8_t get_sc8815_power(void)
 {
@@ -187,6 +176,7 @@ uint8_t i2c_ReadByte(void)
 
 uint8_t I2C_ReadRegByte(uint8_t SlaveAddress, uint8_t RegAddress)
 {
+    __disable_irq();
 	i2c_Start();
 	i2c_SendByte(SlaveAddress & 0xfe);	//write
 	i2c_WaitAck();
@@ -198,12 +188,14 @@ uint8_t I2C_ReadRegByte(uint8_t SlaveAddress, uint8_t RegAddress)
 	uint8_t data = i2c_ReadByte();
 	i2c_NAck();
 	i2c_Stop();
+	__enable_irq();
 	return data;
 }
 
 void I2C_WriteRegByte(uint8_t SlaveAddress, uint8_t RegAddress, uint8_t ByteData)
 {
 	uint16_t check_timeout = 0;
+    __disable_irq();
 	do
 	{
 		i2c_Start();
@@ -221,6 +213,7 @@ void I2C_WriteRegByte(uint8_t SlaveAddress, uint8_t RegAddress, uint8_t ByteData
 		// __set_FAULTMASK(1); //关闭所有中断
 		// NVIC_SystemReset(); //进行软件复位
 	}
+	__enable_irq();
 }
 
 
@@ -610,11 +603,11 @@ void SC8815_output_calibration(uint8_t calibration)
 			if (voltage < 7500 && SC8815_HardwareInitStruct.FB_Mode) {
 				SC8815_SetVBUSFBMode(0);
 				SC8815_SetOutputVoltage(voltage);
-				HAL_Delay(10000);
+				HAL_Delay(20000);
 			} else if (voltage >= 7500 && SC8815_HardwareInitStruct.FB_Mode == SCHWI_FB_Internal) {
 				SC8815_SetVBUSFBMode(1);
 				SC8815_SetOutputVoltage(voltage);
-				HAL_Delay(10000);
+				HAL_Delay(20000);
 			}
 			SC8815_SetOutputVoltage(voltage);
 			voltage_target = voltage;
@@ -667,7 +660,7 @@ void SC8815_output_calibration(uint8_t calibration)
 					}
 				}
 				SC8815_SetOutputVoltage(voltage);
-				HAL_Delay(30);
+				HAL_Delay(50);
 			}
 			calibration_table_temp[i] = voltage;
 			voltage = voltage_target;
