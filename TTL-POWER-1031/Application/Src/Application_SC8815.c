@@ -391,18 +391,18 @@ void SC8815_Soft_Protect(void)
 			protect_page_ui_process(VBUS_PROTECT);
 		}
 	}
-	if (App_getVBAT_V() > 25.5) {
-		HAL_Delay(300);
-		if (App_getVBAT_V() > 25.5) {
-			if (SC8815_Config.SC8815_Status == SC8815_TIM_WORK) {
-				SC8815_Preset_Mode_Quit();
-			} else {
-				SC8815_Config.SC8815_Status = SC8815_Standby;
-				Application_SC8815_Standby();
-			}
-			protect_page_ui_process(VBAT_PROTECT);
-		}
-	}
+	// if (App_getVBAT_V() > 25.5) {
+	// 	HAL_Delay(300);
+	// 	if (App_getVBAT_V() > 25.5) {
+	// 		if (SC8815_Config.SC8815_Status == SC8815_TIM_WORK) {
+	// 			SC8815_Preset_Mode_Quit();
+	// 		} else {
+	// 			SC8815_Config.SC8815_Status = SC8815_Standby;
+	// 			Application_SC8815_Standby();
+	// 		}
+	// 		protect_page_ui_process(VBAT_PROTECT);
+	// 	}
+	// }
 	// if (HAL_GetTick() - SC8815_Config.VOUT_Open_Time >= 100)
 	// {
 	// 	if (App_getIBUS_mA() >= SC8815_Config.SC8815_IBUS_Limit || App_getVBUS_mV() <= SC8815_Config.SC8815_VBUS - (SC8815_Config.SC8815_VBUS * 0.1)) // Êä³ö±£»¤

@@ -19,9 +19,15 @@ static menu_u8 cursor_main_menu = 0; //主菜单光标位置
 static menu_u8 cursor_secondary_menu = 0; //二级菜单光标位置
 static uint8_t secondary_menu_index = 0; //二级菜单第一行显示索引
 static uint8_t main_menu_index = 0; //主菜单第一行显示索引
+#ifdef ENABLE_EN_FONT
+static Menu_NameTypeDef menu_name[] = {
+    {0, gImage_presset, "PresetConfig"}, {1, gImage_start_presset, "EnablePreset"}, {2, gImage_temp, "OTP"}, {3, gImage_buzzer, "BuzzerConfig"}, {4, gImage_vbus_protect, "OVP"}, {5, gImage_screen, "RotateScreen"}, {6, gImage_about, "About"}
+};
+#else
 static Menu_NameTypeDef menu_name[] = {
     {0, gImage_presset, "预设配置"}, {1, gImage_start_presset, "开启预设"}, {2, gImage_temp, "过温保护"}, {3, gImage_buzzer, "蜂鸣器配置"}, {4, gImage_vbus_protect, "过压保护"}, {5, gImage_screen, "翻转屏幕"}, {6, gImage_about, "关于"}
 };
+#endif
 
 /**
  * @brief 进入相应的页面
@@ -250,7 +256,11 @@ void presset_page_ui_process(menu_u8 index, menu_u8 KeyValue)
     }
     if (index_move_flag || KeyValue == KEY3_SHORT || KeyValue == KEY4_SHORT) {
         for (size_t i = 0; i < 4; i++) {
+#ifdef ENABLE_EN_FONT
+            sprintf(presset_str, "Preset:%d", secondary_menu_index + i);
+#else
             sprintf(presset_str, "预设:%d", secondary_menu_index + i);
+#endif
             if (i == cursor_secondary_menu) {
                 LCD_on_menu_line(i, (uint8_t*)gImage_presset, (uint8_t*)presset_str);
             } else {
@@ -258,10 +268,18 @@ void presset_page_ui_process(menu_u8 index, menu_u8 KeyValue)
             }
         }
     } else {
+#ifdef ENABLE_EN_FONT
+        sprintf(presset_str, "Preset:%d", secondary_menu_index + cursor_temp);
+        LCD_off_menu_line(cursor_temp, (uint8_t*)gImage_presset, (uint8_t*)presset_str);
+        sprintf(presset_str, "Preset:%d", secondary_menu_index + cursor_secondary_menu);
+        LCD_on_menu_line(cursor_secondary_menu, (uint8_t*)gImage_presset, (uint8_t*)presset_str);
+#else
         sprintf(presset_str, "预设:%d", secondary_menu_index + cursor_temp);
         LCD_off_menu_line(cursor_temp, (uint8_t*)gImage_presset, (uint8_t*)presset_str);
         sprintf(presset_str, "预设:%d", secondary_menu_index + cursor_secondary_menu);
         LCD_on_menu_line(cursor_secondary_menu, (uint8_t*)gImage_presset, (uint8_t*)presset_str);
+#endif
+        
     }
 }
 
@@ -294,7 +312,11 @@ void presset_start_page_ui_process(menu_u8 index, menu_u8 KeyValue)
     }
     if (index_move_flag || KeyValue == KEY3_SHORT || KeyValue == KEY4_SHORT) {
         for (size_t i = 0; i < 4; i++) {
+#ifdef ENABLE_EN_FONT
+            sprintf(presset_str, "Preset:%d", secondary_menu_index + i);
+#else
             sprintf(presset_str, "预设:%d", secondary_menu_index + i);
+#endif            
             if (i == cursor_secondary_menu) {
                 LCD_on_menu_line(i, (uint8_t*)gImage_start_presset, (uint8_t*)presset_str);
             } else {
@@ -302,10 +324,17 @@ void presset_start_page_ui_process(menu_u8 index, menu_u8 KeyValue)
             }
         }
     } else {
+#ifdef ENABLE_EN_FONT
+        sprintf(presset_str, "Preset:%d", secondary_menu_index + cursor_temp);
+        LCD_off_menu_line(cursor_temp, (uint8_t*)gImage_start_presset, (uint8_t*)presset_str);
+        sprintf(presset_str, "Preset:%d", secondary_menu_index + cursor_secondary_menu);
+        LCD_on_menu_line(cursor_secondary_menu, (uint8_t*)gImage_start_presset, (uint8_t*)presset_str);
+#else
         sprintf(presset_str, "预设:%d", secondary_menu_index + cursor_temp);
         LCD_off_menu_line(cursor_temp, (uint8_t*)gImage_start_presset, (uint8_t*)presset_str);
         sprintf(presset_str, "预设:%d", secondary_menu_index + cursor_secondary_menu);
         LCD_on_menu_line(cursor_secondary_menu, (uint8_t*)gImage_start_presset, (uint8_t*)presset_str);
+#endif        
     }
 }
 
@@ -377,12 +406,22 @@ void buzzer_page_ui_process(menu_u8 index)
     switch (index)
     {
     case 0:
+#ifdef ENABLE_EN_FONT
+        LCD_on_menu_line(0, (uint8_t*)gImage_buzzer, "OpenBuzzer");
+        LCD_off_menu_line(1, (uint8_t*)gImage_buzzer, "CloseBuzzer");
+#else
         LCD_on_menu_line(0, (uint8_t*)gImage_buzzer, "开启蜂鸣器");
         LCD_off_menu_line(1, (uint8_t*)gImage_buzzer, "关闭蜂鸣器");
+#endif        
         break;
     case 1:
+#ifdef ENABLE_EN_FONT
+        LCD_off_menu_line(0, (uint8_t*)gImage_buzzer, "OpenBuzzer");
+        LCD_on_menu_line(1, (uint8_t*)gImage_buzzer, "CloseBuzzer");
+#else
         LCD_off_menu_line(0, (uint8_t*)gImage_buzzer, "开启蜂鸣器");
         LCD_on_menu_line(1, (uint8_t*)gImage_buzzer, "关闭蜂鸣器");
+#endif
         break;
     default:
         break;
@@ -392,9 +431,14 @@ void buzzer_page_ui_process(menu_u8 index)
 void temperature_page_ui_process(float index)
 {
     char str[10] = {0};
-    int number = 0, length = 0, digits[2] = {0};
+    int number = 0, length = 0, digits[2] = {0}, show_x = 144;
     current_menu_index = TEMPERATURE_PAGE;
+#ifdef ENABLE_EN_FONT
+    show_x = 104;
+    sprintf(str, "TEMP:%.0fC", index);
+#else
     sprintf(str, "温度:%.0fC", index);
+#endif    
     LCD_on_menu_line(0, (uint8_t*)gImage_temp, (uint8_t*)str);
     if (index >= SC8815_Config.SC8815_VBUS_IBUS_Step) {
         // Take the tens, thousands, and hundreds values and store them in variate digits
@@ -410,9 +454,9 @@ void temperature_page_ui_process(float index)
         }
     }
     if (SC8815_Config.SC8815_VBUS_IBUS_Step == 1) {
-        LCD_ShowIntNum(144 + 16 * 2, 0, digits[0], 1, RED, WHITE, 32);
+        LCD_ShowIntNum(show_x + 16 * 2, 0, digits[0], 1, RED, WHITE, 32);
     } else if (SC8815_Config.SC8815_VBUS_IBUS_Step == 10) {
-        LCD_ShowIntNum(144 + 16, 0, digits[1], 1, RED, WHITE, 32);
+        LCD_ShowIntNum(show_x + 16, 0, digits[1], 1, RED, WHITE, 32);
     }
 }
 
@@ -445,17 +489,33 @@ void protect_page_ui_process(menu_u8 index)
     switch (index)
     {
     case VBUS_PROTECT:
+#ifdef ENABLE_EN_FONT
+        LCD_ShowString(88, 102, "OCP", BLACK, WARNING_YELLOW, 32, 0);
+#else
         LCD_ShowChinese(60, 102, "过流保护", BLACK, WARNING_YELLOW, 32, 0);
+#endif
         break;
     case TEMP_PROTECT:
+#ifdef ENABLE_EN_FONT
+        LCD_ShowString(88, 102, "OTP", BLACK, WARNING_YELLOW, 32, 0);
+#else
         LCD_ShowChinese(60, 102, "过温保护", BLACK, WARNING_YELLOW, 32, 0);
+#endif        
         break;
     case VBAT_PROTECT:
+#ifdef ENABLE_EN_FONT
+        LCD_ShowString(36, 102, "Input", BLACK, WARNING_YELLOW, 32, 0);
+#else
         LCD_ShowChinese(20, 102, "输入电压", BLACK, WARNING_YELLOW, 32, 0);
+#endif        
         LCD_ShowString(148, 102, ">25.5V", BLACK, WARNING_YELLOW, 32, 0);
         break;
     case PRESSET_PROTECT:
+#ifdef ENABLE_EN_FONT
+        LCD_ShowString(36, 102, "Input", BLACK, WARNING_YELLOW, 32, 0);
+#else
         LCD_ShowChinese(20, 102, "输入电压", BLACK, WARNING_YELLOW, 32, 0);
+#endif        
         LCD_ShowString(148, 102, "<=9V", BLACK, WARNING_YELLOW, 32, 0);
         break;
     default:
@@ -475,13 +535,24 @@ void about_page_ui_process(void)
     LCD_Fill_DMA(0, 34, LCD_W, 66, RED);
     LCD_Fill_DMA(0, 68, LCD_W, 100, RED);
     LCD_Fill_DMA(0, 102, LCD_W, 135, RED);
+#ifdef ENABLE_EN_FONT
+    LCD_ShowString(0, 0, "Name", WHITE, RED, 32, 0);
+#else
     LCD_ShowChinese(0, 0, "名称", WHITE, RED, 32, 0);
+#endif
     strcat(name, APP_config.device_name);
     LCD_ShowString(64, 0, (uint8_t*)name, WHITE, RED, 32, 0);
+    
+#ifdef ENABLE_EN_FONT
+    LCD_ShowString(0, 34, "Type", WHITE, RED, 32, 0);
+    LCD_ShowString(0, 68, "Version", WHITE, RED, 32, 0);
+    LCD_ShowString(112, 68, ":1.1.3", WHITE, RED, 32, 0);
+#else
     LCD_ShowChinese(0, 34, "型号", WHITE, RED, 32, 0);
-    LCD_ShowString(64, 34, ":PD POCKET", WHITE, RED, 32, 0);
     LCD_ShowChinese(0, 68, "版本", WHITE, RED, 32, 0);
     LCD_ShowString(64, 68, ":1.1.3", WHITE, RED, 32, 0);
+#endif    
+    LCD_ShowString(64, 34, ":PD POCKET", WHITE, RED, 32, 0);
 }
 
 void DC_limit_page_ui_process(menu_u8 KeyValue)
@@ -532,13 +603,24 @@ void DC_limit_page_ui_process(menu_u8 KeyValue)
 void vbus_protect_page_ui_process(float index)
 {
     char str[10] = {0};
-    int number = 0, length = 0, digits[5] = {0};
+    int number = 0, length = 0, digits[5] = {0}, show_x = 144;
     current_menu_index = VBUS_PROTECT_PAGE;
+#ifdef ENABLE_EN_FONT
+    show_x = 120;
+#endif
     if (SC8815_Config.SC8815_VBUS_protect < 10000)
+#ifdef ENABLE_EN_FONT
+        sprintf(str, "Volts:0%.1fV", SC8815_Config.SC8815_VBUS_protect / 1000);
+#else
         sprintf(str, "电压:0%.1fV", SC8815_Config.SC8815_VBUS_protect / 1000);
+#endif
     else
+#ifdef ENABLE_EN_FONT
+        sprintf(str, "Volts:%.1fV", SC8815_Config.SC8815_VBUS_protect / 1000);
+#else
         sprintf(str, "电压:%.1fV", SC8815_Config.SC8815_VBUS_protect / 1000);
-    LCD_on_menu_line(0, (uint8_t*)gImage_temp, (uint8_t*)str);
+#endif        
+    LCD_on_menu_line(0, (uint8_t*)gImage_vbus_protect, (uint8_t*)str);
     if (SC8815_Config.SC8815_VBUS_protect >= SC8815_Config.SC8815_VBUS_IBUS_Step) {
         // Take the tens, thousands, and hundreds values and store them in variate digits
         number = SC8815_Config.SC8815_VBUS_protect;
@@ -553,10 +635,10 @@ void vbus_protect_page_ui_process(float index)
         }
     }
     if (SC8815_Config.SC8815_VBUS_IBUS_Step == 100) {
-        LCD_ShowIntNum(144 + 16 * 4, 0, digits[2], 1, RED, WHITE, 32);
+        LCD_ShowIntNum(show_x + 16 * 4, 0, digits[2], 1, RED, WHITE, 32);
     } else if (SC8815_Config.SC8815_VBUS_IBUS_Step == 1000) {
-        LCD_ShowIntNum(144 + 16 * 2, 0, digits[3], 1, RED, WHITE, 32);
+        LCD_ShowIntNum(show_x + 16 * 2, 0, digits[3], 1, RED, WHITE, 32);
     } else if (SC8815_Config.SC8815_VBUS_IBUS_Step == 10000) {
-        LCD_ShowIntNum(144 + 16, 0, digits[4], 1, RED, WHITE, 32);
+        LCD_ShowIntNum(show_x + 16, 0, digits[4], 1, RED, WHITE, 32);
     }
 }

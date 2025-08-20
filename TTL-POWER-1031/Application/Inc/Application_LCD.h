@@ -8,6 +8,8 @@
 #define LCD_Clear() LCD_Fill_DMA(0, 0, LCD_W, LCD_H, BLACK)
 #define LCD_Fill(color) LCD_Fill_DMA(0, 0, LCD_W, LCD_H, color)
 
+#define ENABLE_EN_FONT 0
+
 void APP_LCD_main_init(void);
 void APP_LCD_main_show(void);
 void APP_LCD_presset_running_init(void);

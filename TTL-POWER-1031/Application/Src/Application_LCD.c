@@ -249,9 +249,13 @@ void APP_LCD_presset_running_show(void)
     static uint8_t key_temp_flag = 0;
     float temp = 0;
     sprintf(str, ":%d", sub_index.presset_current_index);
+#ifdef ENABLE_EN_FONT
+    LCD_ShowString(14, 16, "Preset", WHITE, MAIN_PAGE_COLOR, 16, 0);
+    LCD_ShowString(96, 16, (const uint8_t*)str, WHITE, MAIN_PAGE_COLOR, 16, 0);
+#else
     LCD_ShowChinese(14, 16, "预设", WHITE, MAIN_PAGE_COLOR, 16, 0);
-    // LCD_ShowString(14, 16, "Preset", WHITE, MAIN_PAGE_COLOR, 16, 0);
     LCD_ShowString(46, 16, (const uint8_t*)str, WHITE, MAIN_PAGE_COLOR, 16, 0);
+#endif
 
     memset(str, 0, 10);
     sprintf(str, "%d ", presset_config_set.set_circular);
@@ -631,7 +635,10 @@ void LCD_fill_line(uint8_t line, uint16_t color)
 
 void LCD_on_menu_line(uint8_t line, uint8_t* image, uint8_t* text)
 {
-    uint16_t y;
+    uint16_t y, icon_x = 15;
+#ifdef ENABLE_EN_FONT
+    icon_x = 0;
+#endif 
     uint8_t str[2];
     LCD_Fill_DMA(0, 32, LCD_W, 34, GRAY2);
     LCD_Fill_DMA(0, 66, LCD_W, 68, GRAY2);
@@ -639,22 +646,22 @@ void LCD_on_menu_line(uint8_t line, uint8_t* image, uint8_t* text)
     switch (line) {
     case 0:
         LCD_Fill_DMA(0, 0, LCD_W, 32, RED);
-        LCD_show_icon(15, 0, 32, 32, image, RED);
+        LCD_show_icon(icon_x, 0, 32, 32, image, RED);
         y = 0;
         break;
     case 1:
         LCD_Fill_DMA(0, 34, LCD_W, 66, RED);
-        LCD_show_icon(15, 34, 32, 32, image, RED);
+        LCD_show_icon(icon_x, 34, 32, 32, image, RED);
         y = 34;
         break;
     case 2:
         LCD_Fill_DMA(0, 68, LCD_W, 100, RED);
-        LCD_show_icon(15, 68, 32, 32, image, RED);
+        LCD_show_icon(icon_x, 68, 32, 32, image, RED);
         y = 68;
         break;
     case 3:
         LCD_Fill_DMA(0, 102, LCD_W, 135, RED);
-        LCD_show_icon(15, 102, 32, 32, image, RED);
+        LCD_show_icon(icon_x, 102, 32, 32, image, RED);
         y = 102;
         break;
     default:
@@ -672,34 +679,41 @@ void LCD_on_menu_line(uint8_t line, uint8_t* image, uint8_t* text)
             // 如果是ASCII字符
             str[0] = text[i];
             str[1] = 0;
+#ifdef ENABLE_EN_FONT
+            LCD_ShowString(40 + i * 16, y, str, WHITE, RED, 32, 0);
+#else
             LCD_ShowString(80 + i * 16, y, str, WHITE, RED, 32, 0);
+#endif            
         }
     }
 }
 
 void LCD_off_menu_line(uint8_t line, uint8_t* image, uint8_t* text)
 {
-    uint16_t y;
+    uint16_t y, icon_x = 15;
+#ifdef ENABLE_EN_FONT
+    icon_x = 0;
+#endif 
     uint8_t str[2];
     switch (line) {
     case 0:
         LCD_Fill_DMA(0, 0, LCD_W, 32, BLACK);
-        LCD_ShowPicture(15, 0, 32, 32, image);
+        LCD_ShowPicture(icon_x, 0, 32, 32, image);
         y = 0;
         break;
     case 1:
         LCD_Fill_DMA(0, 34, LCD_W, 66, BLACK);
-        LCD_ShowPicture(15, 34, 32, 32, image);
+        LCD_ShowPicture(icon_x, 34, 32, 32, image);
         y = 34;
         break;
     case 2:
         LCD_Fill_DMA(0, 68, LCD_W, 100, BLACK);
-        LCD_ShowPicture(15, 68, 32, 32, image);
+        LCD_ShowPicture(icon_x, 68, 32, 32, image);
         y = 68;
         break;
     case 3:
         LCD_Fill_DMA(0, 102, LCD_W, 135, BLACK);
-        LCD_ShowPicture(15, 102, 32, 32, image);
+        LCD_ShowPicture(icon_x, 102, 32, 32, image);
         y = 102;
         break;
     default:
@@ -717,7 +731,11 @@ void LCD_off_menu_line(uint8_t line, uint8_t* image, uint8_t* text)
             // 如果是ASCII字符
             str[0] = text[i];
             str[1] = 0;
+#ifdef ENABLE_EN_FONT
+            LCD_ShowString(40 + i * 16, y, str, WHITE, BLACK, 32, 0);
+#else
             LCD_ShowString(80 + i * 16, y, str, WHITE, BLACK, 32, 0);
+#endif             
         }
     }
 }
