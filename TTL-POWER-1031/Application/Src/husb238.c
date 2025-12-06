@@ -1,9 +1,6 @@
 #include "husb238.h"
 #include <string.h>
 #include "Application_SC8815.h"
-#include "Application_LCD.h"
-#include "Application_SC8815.h"
-#include "menu_ui.h"
 
 // 电压值
 uint16_t votlage_Table[] = { 0, 5, 9, 12, 15, 18, 20 };
@@ -64,14 +61,22 @@ void HUSB238_ReadAllReg(uint8_t* regs)
 // @brief regs 寄存器值 转化可输出能力列表
 // @param regs 大小为 10 
 // @param pdoList 大小为 6 ！
-void HUSB238_ExtractCap(HUSB238_Capability_t* pdoList)
+unsigned char HUSB238_ExtractCap(HUSB238_Capability_t* pdoList)
 {
-    uint8_t regs[10];
+    uint8_t regs[10] = {0}, regs_temp[10] = {0};
+    uint8_t i = 0;
+
 
     if (!pdoList) {
-        return;
+        return 0;
+    }
+    for (i = 0; i < 10; i++) {
+        regs_temp[i] = 0xFF;
     }
     HUSB238_ReadAllReg(regs);
+	if (memcmp(regs_temp, regs, 10) == 0) {
+        return 0;
+    }
     HUSB238_Reg_SRC_PDO* reg;
     HUSB238_Capability_t cap;
     for (int i = 0; i < 6; i++) {
@@ -88,6 +93,7 @@ void HUSB238_ExtractCap(HUSB238_Capability_t* pdoList)
         cap.voltage = HUSB238_Voltage2PDO((HUSB238_Voltage_e)(i + 1));
         pdoList[i] = cap;
     }
+    return 1;
 }
 
 
@@ -171,84 +177,4 @@ float to_current(HUSB238_CURRENT_e c)
     } else {
         return 0.0f;
     }
-}
-
-void husb238_init(void)
-{
-    // PD 芯片相关变量
-    uint8_t index = 0;
-    // uint16_t PD_Voltage = 0;
-    // float PD_Current = 0;
-    float PD_Power = 0;
-    char str[16];
-    HUSB238_SELECT_Voltage_e votlage[6] = { PDO_5V, PDO_9V, PDO_12V, PDO_15V, PDO_18V, PDO_20V };
-    HUSB238_Capability_t PDCapabilities[6];
-    HUSB238_ExtractCap(PDCapabilities);
-    // printf("\n输出能力列表:\n");
-    for (int i = 0; i < 6; i++) {
-        if (PDCapabilities[i].detected == true && PDCapabilities[i].voltage * PDCapabilities[i].current >= PD_Power) {
-            // printf("| 输出电压: %dV | 输出电流: %.2fA\n", PDCapabilities[i].voltage, PDCapabilities[i].current);
-            PD_Power = PDCapabilities[i].voltage * PDCapabilities[i].current;
-            index = i;
-        }
-    }
-    // printf("\n");
-    if (PD_Power > 0) {
-        //HUSB238_GetCapabilities(&PD_Voltage, &PD_Current);
-#ifdef ENABLE_EN_FONT
-        LCD_ShowString(32, 32, "FastCharge", WHITE, BLACK, 32, 0);
-#else
-        LCD_ShowChinese(20, 32, "快充输入能力", WHITE, BLACK, 32, 0);
-#endif
-        // LCD_ShowString(20, 32, "Fast charging", WHITE, BLACK, 32, 0);
-        // LCD_ShowString(20, 32, "input capability", WHITE, BLACK, 32, 0);
-        if (PD_Power < 100) {
-            sprintf(str, "%dV %.1fA %.1fW", PDCapabilities[index].voltage, PDCapabilities[index].current, PD_Power);
-        } else {
-            sprintf(str, "%dV %.1fA %.0fW", PDCapabilities[index].voltage, PDCapabilities[index].current, PD_Power);
-        }
-        LCD_ShowString(6, 80, (const uint8_t*)str, WHITE, BLACK, 32, 0);
-        APP_config.fastCharge_InVoltage = PDCapabilities[index].voltage;
-        APP_config.fastCharge_InCurrent = PDCapabilities[index].current;
-        SC8815_Config.SC8815_IBAT_Limit = PDCapabilities[index].current * 1000;
-        HAL_Delay(1000);
-        HUSB238_SelVoltage(votlage[index]);
-    } else {
-        SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
-#ifdef ENABLE_EN_FONT
-        LCD_ShowString(16, 32, "InputCurrent", WHITE, BLACK, 32, 0);
-#else
-        LCD_ShowChinese(20, 32, "设置输入电流", WHITE, BLACK, 32, 0);
-#endif        
-        // LCD_ShowString(20, 32, "Set input current", WHITE, BLACK, 32, 0);
-        DC_limit_page_ui_process(KEY2_SHORT);
-    }
-}
-
-static uint8_t refresh_count = 0;
-static uint32_t last_refresh_time = 0;
-void HUSB238_Refresh_Voltage(void)
-{
-    if (refresh_count > 10 || HAL_GetTick() - last_refresh_time < 5000) {
-        return;
-    }
-    refresh_count++;
-    uint8_t index = 0;
-    float PD_Power = 0;
-    HUSB238_SELECT_Voltage_e votlage[6] = { PDO_5V, PDO_9V, PDO_12V, PDO_15V, PDO_18V, PDO_20V };
-    HUSB238_Capability_t PDCapabilities[6];
-    HUSB238_ExtractCap(PDCapabilities);
-    for (int i = 0; i < 6; i++) {
-        if (PDCapabilities[i].detected == true && PDCapabilities[i].voltage * PDCapabilities[i].current >= PD_Power) {
-            PD_Power = PDCapabilities[i].voltage * PDCapabilities[i].current;
-            index = i;
-        }
-    }
-    if (PD_Power > 0 && PDCapabilities[index].voltage > APP_config.fastCharge_InVoltage) {
-        APP_config.fastCharge_InVoltage = PDCapabilities[index].voltage;
-        APP_config.fastCharge_InCurrent = PDCapabilities[index].current;
-        SC8815_Config.SC8815_IBAT_Limit = PDCapabilities[index].current * 1000;
-        HUSB238_SelVoltage(votlage[index]);
-    }
-    last_refresh_time = HAL_GetTick();
 }

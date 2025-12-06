@@ -37,9 +37,10 @@ static OP_MENU_PAGE g_opStruct[] =
 
 static int vbus_condition_check(void)
 {
-    if (App_getVBAT_V() > 25.5) {
+	extern uint8_t fast_charge_input_limited;
+    if (App_getVBAT_V() > fast_charge_input_limited) {
         HAL_Delay(300);
-        if (App_getVBAT_V() > 25.5) {
+        if (App_getVBAT_V() > fast_charge_input_limited) {
             if (SC8815_Config.SC8815_Status == SC8815_TIM_WORK) {
                 SC8815_Preset_Mode_Quit();
             } else {

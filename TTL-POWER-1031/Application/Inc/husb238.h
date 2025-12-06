@@ -141,7 +141,7 @@ typedef struct
 /// @brief regs 寄存器值 转化可输出能力列表
 /// @param regs 大小为 10 
 /// @param pdoList 大小为 6 ！
-void HUSB238_ExtractCap(HUSB238_Capability_t* pdoList);
+unsigned char HUSB238_ExtractCap(HUSB238_Capability_t* pdoList);
 
 /// @brief 获取当前PD输出能力
 /// @param voltage 

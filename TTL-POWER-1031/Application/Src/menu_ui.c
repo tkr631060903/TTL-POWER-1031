@@ -482,6 +482,7 @@ void VBUS_calibration_page_ui_process(menu_u8 index)
 
 void protect_page_ui_process(menu_u8 index)
 {
+	extern uint8_t fast_charge_input_limited;
     current_menu_index = PROTECT_PAGE;
     LCD_Fill_DMA(0, 102, LCD_W, 135, WARNING_YELLOW);
     LCD_show_on_off(0, 102, 16, 16, gImage_left1, WARNING_YELLOW);
@@ -508,7 +509,11 @@ void protect_page_ui_process(menu_u8 index)
 #else
         LCD_ShowChinese(20, 102, "ÊäÈëµçÑ¹", BLACK, WARNING_YELLOW, 32, 0);
 #endif        
-        LCD_ShowString(148, 102, ">25.5V", BLACK, WARNING_YELLOW, 32, 0);
+        if (fast_charge_input_limited <= 28) {
+            LCD_ShowString(148, 102, ">26V", BLACK, WARNING_YELLOW, 32, 0);
+        } else {
+            LCD_ShowString(148, 102, ">30V", BLACK, WARNING_YELLOW, 32, 0);
+        }
         break;
     case PRESSET_PROTECT:
 #ifdef ENABLE_EN_FONT

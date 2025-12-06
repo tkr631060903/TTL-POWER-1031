@@ -17,7 +17,7 @@
 #include "stmflash.h"
 #include "string.h"
 #include "Application_Callback.h"
-#include "husb238.h"
+#include "fast_charge.h"
 
 #define APP_CONFIG_FLASH_ADDR     (STM32_FLASH_BASE+STM_SECTOR_SIZE*123)
 #define APP_UPGRADE_FLAG_ADDR 0x801FFFE

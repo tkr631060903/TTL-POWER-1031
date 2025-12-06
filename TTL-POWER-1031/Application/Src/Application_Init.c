@@ -13,14 +13,13 @@
 #include "Application_ADC.h"
 #include "Application_SC8815.h"
 #include "usart.h"
-#include "CH224K.h"
 #include "APPlication_LCD.h"
 #include "Application_BUZZER.h"
 #include "menu.h"
 #include "Application_Callback.h"
-#include "husb238.h"
 #include "ina226.h"
 #include "stmflash.h"
+#include "fast_charge.h"
 
 /**
  * @brief 应用初始化
@@ -48,8 +47,9 @@ void Application_Init(void)
     HAL_TIM_Base_Start_IT(&htim3);
     HAL_ADCEx_Calibration_Start(&hadc1);    // 校准ADC
     HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&ADC_Value, 4);    // 开始ADC DMA，会导致仿真报错
-    husb238_init();
     INA226_Init();
+    HAL_Delay(100);
+    fast_charge_init();
     HAL_Delay(500);
     Application_SC8815_Init();
     if (current_menu_index != DC_LIMIT_PAGE) {

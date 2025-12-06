@@ -30,7 +30,7 @@
 
 SC8815_ConfigTypeDef SC8815_Config;
 SC8815_TIM_WorkTypeDef SC8815_TIM_Work[SC8815_TIM_WORK_SIZE] = { 0 };
-static uint8_t sc8815_power = 120; //SC8815输出功率值
+static uint8_t sc8815_power = 140; //SC8815输出功率值
 float SCHW_VBUS_RSHUNT = SCHW_VBUS_RSHUNT_DEFAULT;
 
 uint8_t get_sc8815_power(void)
@@ -374,6 +374,7 @@ void SC8815_Soft_Protect(void)
 	}
 	float output_voltage = 0;
     extern presset_config_set_typeDef presset_config_set;
+	extern uint8_t fast_charge_input_limited;
 	if (SC8815_Config.SC8815_Status == SC8815_TIM_WORK) {
 		output_voltage = presset_config_set.set_vbus[SC8815_Config.sc8815_tim_work_step];
 	} else {
@@ -391,18 +392,18 @@ void SC8815_Soft_Protect(void)
 			protect_page_ui_process(VBUS_PROTECT);
 		}
 	}
-	// if (App_getVBAT_V() > 25.5) {
-	// 	HAL_Delay(300);
-	// 	if (App_getVBAT_V() > 25.5) {
-	// 		if (SC8815_Config.SC8815_Status == SC8815_TIM_WORK) {
-	// 			SC8815_Preset_Mode_Quit();
-	// 		} else {
-	// 			SC8815_Config.SC8815_Status = SC8815_Standby;
-	// 			Application_SC8815_Standby();
-	// 		}
-	// 		protect_page_ui_process(VBAT_PROTECT);
-	// 	}
-	// }
+	if (App_getVBAT_V() > fast_charge_input_limited) {
+		HAL_Delay(300);
+		if (App_getVBAT_V() > fast_charge_input_limited) {
+			if (SC8815_Config.SC8815_Status == SC8815_TIM_WORK) {
+				SC8815_Preset_Mode_Quit();
+			} else {
+				SC8815_Config.SC8815_Status = SC8815_Standby;
+				Application_SC8815_Standby();
+			}
+			protect_page_ui_process(VBAT_PROTECT);
+		}
+	}
 	// if (HAL_GetTick() - SC8815_Config.VOUT_Open_Time >= 100)
 	// {
 	// 	if (App_getIBUS_mA() >= SC8815_Config.SC8815_IBUS_Limit || App_getVBUS_mV() <= SC8815_Config.SC8815_VBUS - (SC8815_Config.SC8815_VBUS * 0.1)) // 输出保护

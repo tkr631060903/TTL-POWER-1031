@@ -1158,6 +1158,16 @@
               <FileType>1</FileType>
               <FilePath>..\Application\Src\ina226.c</FilePath>
             </File>
+            <File>
+              <FileName>CH224Q.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Application\Src\CH224Q.c</FilePath>
+            </File>
+            <File>
+              <FileName>fast_charge.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Application\Src\fast_charge.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
