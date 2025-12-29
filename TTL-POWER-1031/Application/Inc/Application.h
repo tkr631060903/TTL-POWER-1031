@@ -1,7 +1,7 @@
 /**
  * @file Application.h
  * @author TanKairong (tkr631060903@gmail.com)
- * @brief åº”ç”¨å…¥å£
+ * @brief Ó¦ÓÃÈë¿Ú
  * @version 0.1
  * @date 2023-12-27
  *
@@ -14,9 +14,9 @@
 #include "main.h"
 #include "UART_Debug.h"
 
-#define KEY_LONG_PRESS_THRESHOLD 1000 // å®šä¹‰KEY4é•¿æŒ‰é˜ˆå€¼ï¼Œå•ä½ä¸ºæ¯«ç§’
-#define SC8815_TIM_WORK_SIZE 10 //é¢„è®¾ä¿å­˜æ•°é‡
-#define SC8815_TIM_WORK_STEP 30 //æ¯ä¸ªé¢„è®¾è®¾å®šæ­¥éª¤
+#define KEY_LONG_PRESS_THRESHOLD 1000 // ¶¨ÒåKEY4³¤°´ãĞÖµ£¬µ¥Î»ÎªºÁÃë
+#define SC8815_TIM_WORK_SIZE 10 //Ô¤Éè±£´æÊıÁ¿
+#define SC8815_TIM_WORK_STEP 30 //Ã¿¸öÔ¤ÉèÉè¶¨²½Öè
 
 #define TEMPERATURE_65 (float)0.93
 #define TEMPERATURE_75 (float)0.788
@@ -44,31 +44,37 @@ typedef enum
 
 typedef struct
 {
-    uint8_t lock_key;   //é”å®šæŒ‰é”® 1é” 0ä¸é”
-    uint8_t lock_buzzer;     //èœ‚é¸£å™¨é”å®š 1é” 0ä¸é”
-    uint8_t app_config_save_flag;   //åº”ç”¨å‚æ•°ä¿å­˜æ ‡å¿—ä½ 1ä¿å­˜ 0ä¸ä¿å­˜
-    float temperature;     //æ¸©åº¦ç›‘æ§å€¼
-    uint16_t msg_get_time;   //ä¿¡æ¯ä¸ŠæŠ¥æ—¶é—´é—´éš”
-    uint32_t msg_get_timestamp;   //ä¿¡æ¯ä¸ŠæŠ¥æ—¶é—´æˆ³
-    uint16_t fastCharge_InVoltage; // å¿«å……è¾“å…¥ç”µå‹v
-    float fastCharge_InCurrent; // å¿«å……æœ€å¤§è¾“å…¥ç”µæµA
-    uint32_t app_config_save_time;   //åº”ç”¨å‚æ•°ä¿å­˜æ—¶é—´
+    uint8_t lock_key;   //Ëø¶¨°´¼ü 1Ëø 0²»Ëø
+    uint8_t lock_buzzer;     //·äÃùÆ÷Ëø¶¨ 1Ëø 0²»Ëø
+    uint8_t app_config_save_flag;   //Ó¦ÓÃ²ÎÊı±£´æ±êÖ¾Î» 1±£´æ 0²»±£´æ
+    uint8_t pad;
+    float temperature;     //ÎÂ¶È¼à¿ØÖµ
+    uint16_t msg_get_time;   //ĞÅÏ¢ÉÏ±¨Ê±¼ä¼ä¸ô
+    uint16_t fastCharge_InVoltage; // ¿ì³äÊäÈëµçÑ¹v
+    uint32_t msg_get_timestamp;   //ĞÅÏ¢ÉÏ±¨Ê±¼ä´Á
+    float fastCharge_InCurrent; // ¿ì³ä×î´óÊäÈëµçÁ÷A
+    uint32_t app_config_save_time;   //Ó¦ÓÃ²ÎÊı±£´æÊ±¼ä
     char device_name[11];
     uint8_t buzzer_delay_ms;
 } Application_Config;
 
 typedef struct
 {
-    uint8_t lock_buzzer;     //èœ‚é¸£å™¨é”å®š 1é” 0ä¸é”
-    uint8_t SW_FREQ;        //å¼€å…³é¢‘ç‡
-    uint8_t SC8815_SFB;        //SC8815çŸ­è·¯ä¿æŠ¤
-    float temperature;     //æ¸©åº¦ç›‘æ§å€¼
+    uint16_t tag; //0xC3A6
+    uint8_t lock_buzzer;     //·äÃùÆ÷Ëø¶¨ 1Ëø 0²»Ëø
+    uint8_t SW_FREQ;        //¿ª¹ØÆµÂÊ
+    uint8_t SC8815_SFB;        //SC8815¶ÌÂ·±£»¤
+    uint8_t is_set_SC8815_IBUS_Limit; //ÊÇ·ñÌø¹ıÉèÖÃSC8815ÊäÈëµçÁ÷ÏŞÖÆ ,1Ìø¹ı0²»Ìø¹ı
+    uint8_t pad[2];
+    float temperature;     //ÎÂ¶È¼à¿ØÖµ
     float SC8815_IBUS_Limit;
     float SC8815_VBUS;
     float DC_IBAT_Limit;
     char device_name[11];
+    uint8_t pad1;
     float SC8815_VBUS_protect;
     uint8_t USE_HORIZONTAL;
+    uint8_t pad2[23];
 } Application_SaveConfig;
 
 extern Application_Config APP_config;

@@ -278,6 +278,8 @@ void USART1_IRQHandler(void)
     {
       extern int ascii_process(char *cmd, uint8_t cmd_source);
       ascii_process(uart1_Cmd, 0);
+      // memset(uart1_Cmd, 0, Cmd_Length);
+      // uart1_Cmd_len = 0;
       // if (ascii_process(uart1_Cmd))
       // {
       //   printf("%s ok\n", uart1_Cmd);
@@ -290,6 +292,8 @@ void USART1_IRQHandler(void)
     else
     {
       printf("cmd error\n");
+      // memset(uart1_Cmd, 0, Cmd_Length);
+      // uart1_Cmd_len = 0;
     }
 
     HAL_UART_Receive_IT(&huart1, (uint8_t*)uart1_Cmd, Cmd_Length);

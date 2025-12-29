@@ -9,13 +9,13 @@
 #include "Application_ADC.h"
 #include "menu.h"
 #include "stmflash.h"
-#include <math.h>  // ä½¿ç”¨ modff åˆ†ç¦»æ•´æ•°å’Œå°æ•°éƒ¨åˆ†
+#include <math.h>  // Ê¹ÓÃ modff ·ÖÀëÕûÊıºÍĞ¡Êı²¿·Ö
 
-#define CMD_STR_CNT 6 // å‘½ä»¤å‚æ•°æ•°é‡
+#define CMD_STR_CNT 6 // ÃüÁî²ÎÊıÊıÁ¿
 
-char uart1_Cmd[Cmd_Length];    //å‘½ä»¤ç¼“å†²åŒº
-uint32_t cmd_Index = 0;  //ä¸²å£1å‘½ä»¤è®¡æ•°æŒ‡é’ˆ
-// uint8_t uart1_Receive_Data = 0;  //ä¸²å£1ä¸­æ–­æ¥æ”¶æ•°æ®ç¼“å­˜
+char uart1_Cmd[Cmd_Length];    //ÃüÁî»º³åÇø
+uint32_t cmd_Index = 0;  //´®¿Ú1ÃüÁî¼ÆÊıÖ¸Õë
+// uint8_t uart1_Receive_Data = 0;  //´®¿Ú1ÖĞ¶Ï½ÓÊÕÊı¾İ»º´æ
 
 typedef char *CmdStr[CMD_STR_CNT];
 typedef int ascii_handler_fn(CmdStr param, short param_cnt, uint8_t cmd_source);
@@ -26,7 +26,7 @@ static ascii_handler_fn
     set_switch_handler, set_current_handler, set_current_step_handler, set_voltage_handler, set_voltage_step_handler,
     get_fetch_current_handler, get_fetch_voltage_handler, get_fetch_power_handler, get_versions_handler,
     set_preset_handler, save_config_handler, upgrade_app_handler, set_power_limit_handler, set_name_handler, 
-    set_key_handler, PDP_search_handler, set_SFB_handler, get_value_handler, reset_handler;
+    set_key_handler, PDP_search_handler, set_SFB_handler, get_value_handler, reset_handler, close_dc_iset_handler;
 typedef struct lookup_table
 {
     const char *desc;
@@ -44,14 +44,14 @@ static const lookup_table_t handler_map_static[] = {
     {"setvbatsel", setVBAT_SEL_handler}, {"setcsel", setCSEL_handler}, {"setvcell", setVCELL_handler}, {"setswfreq", setSW_FREQ_handler}, 
     {"setdeadtime", setDeadTime_handler}, {"setfbmode", setFB_Mode_handler}, {"setdither", setDITHER_handler},
     {"setslewset", setSLEW_SET_handler}, {"setilimbw", setILIM_BW_handler},
-    {"upgrade", upgrade_app_handler}, {"PDPsearch", PDP_search_handler}, {"setibat", setIBAT_handler}, {"SYST:RST", reset_handler}
+    {"upgrade", upgrade_app_handler}, {"PDPsearch", PDP_search_handler}, {"setibat", setIBAT_handler}, {"SYST:RST", reset_handler}, {"closeIset", close_dc_iset_handler}
 };
 const lookup_table_t* handler_map = handler_map_static;
 
 /**
- *@brief å°†æµ®ç‚¹æ•°è½¬æ¢ä¸ºå­—ç¬¦ä¸²è¡¨ç¤ºï¼Œè€ƒè™‘å››èˆäº”å…¥å’Œç¼“å†²åŒºå¤§å°é™åˆ¶
- *  ä¼ å…¥çš„ç¼“å†²åŒºè‡³å°‘éœ€è¦ 9å­—èŠ‚ï¼ˆ3ä½æ•´æ•° + 1ä½å°æ•°ç‚¹ + 4ä½å°æ•° + ç»ˆæ­¢ç¬¦ï¼‰ã€‚
- *  å‡½æ•°å‡è®¾è¾“å…¥å€¼åœ¨ 0 â‰¤ num â‰¤ 255 èŒƒå›´å†…ï¼Œè¶…å‡ºå¯èƒ½å¯¼è‡´é”™è¯¯ã€‚
+ *@brief ½«¸¡µãÊı×ª»»Îª×Ö·û´®±íÊ¾£¬¿¼ÂÇËÄÉáÎåÈëºÍ»º³åÇø´óĞ¡ÏŞÖÆ
+ *  ´«ÈëµÄ»º³åÇøÖÁÉÙĞèÒª 9×Ö½Ú£¨3Î»ÕûÊı + 1Î»Ğ¡Êıµã + 4Î»Ğ¡Êı + ÖÕÖ¹·û£©¡£
+ *  º¯Êı¼ÙÉèÊäÈëÖµÔÚ 0 ¡Ü num ¡Ü 255 ·¶Î§ÄÚ£¬³¬³ö¿ÉÄÜµ¼ÖÂ´íÎó¡£
  *
  * @param num 
  * @param buffer 
@@ -61,19 +61,19 @@ static void float_to_str(float num, char* buffer, int buffer_size) {
     if (buffer_size <= 0) return;
     int index = 0;
 
-    // åˆ†ç¦»æ•´æ•°å’Œå°æ•°éƒ¨åˆ†
+    // ·ÖÀëÕûÊıºÍĞ¡Êı²¿·Ö
     float int_part, frac_part;
     frac_part = modff(num, &int_part);
 
-    // å››èˆäº”å…¥åˆ°4ä½å°æ•°ï¼Œå¹¶å¤„ç†è¿›ä½
+    // ËÄÉáÎåÈëµ½4Î»Ğ¡Êı£¬²¢´¦Àí½øÎ»
     int frac_int = (int)(frac_part * 10000.0f + 0.5f);
     if (frac_int >= 10000) {
         int_part += 1.0f;
         frac_int = 0;
     }
 
-    // è½¬æ¢æ•´æ•°éƒ¨åˆ†ï¼ˆ0-255ï¼‰
-    char int_str[4] = { '0', '0', '0', '\0' }; // æœ€å¤š3ä½æ•´æ•°
+    // ×ª»»ÕûÊı²¿·Ö£¨0-255£©
+    char int_str[4] = { '0', '0', '0', '\0' }; // ×î¶à3Î»ÕûÊı
     int int_len = 0;
     float temp = int_part;
     do {
@@ -81,27 +81,27 @@ static void float_to_str(float num, char* buffer, int buffer_size) {
         temp = floorf(temp / 10.0f);
     } while (temp > 0 && int_len < 3);
 
-    // åè½¬æ•´æ•°éƒ¨åˆ†ï¼ˆä¾‹å¦‚ "532" â†’ "235"ï¼‰
+    // ·´×ªÕûÊı²¿·Ö£¨ÀıÈç "532" ¡ú "235"£©
     for (int i = 0; i < int_len / 2; i++) {
         char c = int_str[i];
         int_str[i] = int_str[int_len - i - 1];
         int_str[int_len - i - 1] = c;
     }
 
-    // è½¬æ¢å°æ•°éƒ¨åˆ†ï¼ˆå›ºå®š4ä½ï¼Œä¸å»é™¤æœ«å°¾é›¶ï¼‰
+    // ×ª»»Ğ¡Êı²¿·Ö£¨¹Ì¶¨4Î»£¬²»È¥³ıÄ©Î²Áã£©
     char frac_str[4];
     for (int i = 0; i < 4; i++) {
         frac_str[i] = '0' + (frac_int / (int)powf(10, 3 - i)) % 10;
     }
 
-    // ç»„åˆåˆ°ç¼“å†²åŒº
-    // 1. å†™å…¥æ•´æ•°éƒ¨åˆ†
+    // ×éºÏµ½»º³åÇø
+    // 1. Ğ´ÈëÕûÊı²¿·Ö
     for (int i = 0; i < int_len; i++) {
         if (index >= buffer_size - 1) break;
         buffer[index++] = int_str[i];
     }
 
-    // 2. å†™å…¥å°æ•°ç‚¹å’Œå°æ•°éƒ¨åˆ†ï¼ˆå›ºå®š4ä½ï¼‰
+    // 2. Ğ´ÈëĞ¡ÊıµãºÍĞ¡Êı²¿·Ö£¨¹Ì¶¨4Î»£©
     if (index >= buffer_size - 1) goto end;
     buffer[index++] = '.';
     for (int i = 0; i < 4; i++) {
@@ -110,7 +110,16 @@ static void float_to_str(float num, char* buffer, int buffer_size) {
     }
 
 end:
-    buffer[index] = '\0'; // ç»ˆæ­¢ç¬¦
+    buffer[index] = '\0'; // ÖÕÖ¹·û
+}
+
+static void cmd_response_ok(uint8_t cmd_source)
+{
+    if (cmd_source == 0) {
+        printf("OK");
+    } else if (cmd_source == 1) {
+        usb_printf("OK");
+    }
 }
 
 int set_SFB_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
@@ -125,22 +134,21 @@ int set_SFB_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
     if (value) {
         app_config_save_config.SC8815_SFB = SCHWI_SFB_Enable;
         SC8815_SFB_Enable();
-        usb_printf("SFB Enable succeed");
     } else {
         app_config_save_config.SC8815_SFB = SCHWI_SFB_Disable;
         SC8815_SFB_Disable();
-        usb_printf("SFB Disable succeed");
     }
     app_config_save();
+    cmd_response_ok(cmd_source);
     return 1;
 }
 
 /**
- * @brief è®¾ç½® SC8815 ç”µæ± è·¯å¾„ä¸Šçš„é™æµå€¼,åŒå‘é€šç”¨
+ * @brief ÉèÖÃ SC8815 µç³ØÂ·¾¶ÉÏµÄÏŞÁ÷Öµ,Ë«ÏòÍ¨ÓÃ
  * 
- * @param param å‘½ä»¤å‚æ•°
- * @param param_cnt å‘½ä»¤å‚æ•°ä¸ªæ•°
- * @return 1-å‘½ä»¤æ‰§è¡ŒæˆåŠŸï¼Œ0-å‘½ä»¤æ‰§è¡Œå¤±è´¥ 
+ * @param param ÃüÁî²ÎÊı
+ * @param param_cnt ÃüÁî²ÎÊı¸öÊı
+ * @return 1-ÃüÁîÖ´ĞĞ³É¹¦£¬0-ÃüÁîÖ´ĞĞÊ§°Ü 
  */
 int setIBAT_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
 {
@@ -155,15 +163,16 @@ int setIBAT_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
     value = value * 1000; 
     SC8815_Config.SC8815_IBAT_Limit = value;
     SC8815_SetBatteryCurrLimit(value);
+    cmd_response_ok(cmd_source);
     return 1;
 }
 
 /**
- * @brief é…ç½® SC8815 ç”µæ± å†…é˜»å‚æ•°
+ * @brief ÅäÖÃ SC8815 µç³ØÄÚ×è²ÎÊı
  * 
- * @param param å‘½ä»¤å‚æ•°
- * @param param_cnt å‘½ä»¤å‚æ•°ä¸ªæ•°
- * @return 1-å‘½ä»¤æ‰§è¡ŒæˆåŠŸï¼Œ0-å‘½ä»¤æ‰§è¡Œå¤±è´¥ 
+ * @param param ÃüÁî²ÎÊı
+ * @param param_cnt ÃüÁî²ÎÊı¸öÊı
+ * @return 1-ÃüÁîÖ´ĞĞ³É¹¦£¬0-ÃüÁîÖ´ĞĞÊ§°Ü 
  */
 int setIRCOMP_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
 {
@@ -178,15 +187,16 @@ int setIRCOMP_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
     extern SC8815_BatteryConfigTypeDef SC8815_BatteryConfigStruct;
 	SC8815_BatteryConfigStruct.IRCOMP = value;
 	SC8815_BatteryConfig(&SC8815_BatteryConfigStruct);
+    cmd_response_ok(cmd_source);
     return 1;
 }
 
 /**
- * @brief é…ç½® SC8815 ç”µæ± åé¦ˆæ¨¡å¼
+ * @brief ÅäÖÃ SC8815 µç³Ø·´À¡Ä£Ê½
  * 
- * @param param å‘½ä»¤å‚æ•°
- * @param param_cnt å‘½ä»¤å‚æ•°ä¸ªæ•°
- * @return 1-å‘½ä»¤æ‰§è¡ŒæˆåŠŸï¼Œ0-å‘½ä»¤æ‰§è¡Œå¤±è´¥ 
+ * @param param ÃüÁî²ÎÊı
+ * @param param_cnt ÃüÁî²ÎÊı¸öÊı
+ * @return 1-ÃüÁîÖ´ĞĞ³É¹¦£¬0-ÃüÁîÖ´ĞĞÊ§°Ü 
  */
 int setVBAT_SEL_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
 {
@@ -201,15 +211,16 @@ int setVBAT_SEL_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
     extern SC8815_BatteryConfigTypeDef SC8815_BatteryConfigStruct;
 	SC8815_BatteryConfigStruct.VBAT_SEL = value;
 	SC8815_BatteryConfig(&SC8815_BatteryConfigStruct);
+    cmd_response_ok(cmd_source);
     return 1;
 }
 
 /**
- * @brief é…ç½® SC8815 ç”µæ± ä¸ªæ•°å‚æ•°
+ * @brief ÅäÖÃ SC8815 µç³Ø¸öÊı²ÎÊı
  * 
- * @param param å‘½ä»¤å‚æ•°
- * @param param_cnt å‘½ä»¤å‚æ•°ä¸ªæ•°
- * @return 1-å‘½ä»¤æ‰§è¡ŒæˆåŠŸï¼Œ0-å‘½ä»¤æ‰§è¡Œå¤±è´¥ 
+ * @param param ÃüÁî²ÎÊı
+ * @param param_cnt ÃüÁî²ÎÊı¸öÊı
+ * @return 1-ÃüÁîÖ´ĞĞ³É¹¦£¬0-ÃüÁîÖ´ĞĞÊ§°Ü 
  */
 int setCSEL_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
 {
@@ -222,15 +233,16 @@ int setCSEL_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
     int value;
     sscanf(param[1], "%d", &value);
     SC8815_SetBatteryCell(value);
+    cmd_response_ok(cmd_source);
     return 1;
 }
 
 /**
- * @brief é…ç½® SC8815 ç”µæ± ç”µå‹å‚æ•°
+ * @brief ÅäÖÃ SC8815 µç³ØµçÑ¹²ÎÊı
  * 
- * @param param å‘½ä»¤å‚æ•°
- * @param param_cnt å‘½ä»¤å‚æ•°ä¸ªæ•°
- * @return 1-å‘½ä»¤æ‰§è¡ŒæˆåŠŸï¼Œ0-å‘½ä»¤æ‰§è¡Œå¤±è´¥ 
+ * @param param ÃüÁî²ÎÊı
+ * @param param_cnt ÃüÁî²ÎÊı¸öÊı
+ * @return 1-ÃüÁîÖ´ĞĞ³É¹¦£¬0-ÃüÁîÖ´ĞĞÊ§°Ü 
  */
 int setVCELL_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
 {
@@ -245,15 +257,16 @@ int setVCELL_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
     extern SC8815_BatteryConfigTypeDef SC8815_BatteryConfigStruct;
 	SC8815_BatteryConfigStruct.VCELL = value;
 	SC8815_BatteryConfig(&SC8815_BatteryConfigStruct);
+    cmd_response_ok(cmd_source);
     return 1;
 }
 
 /**
- * @brief è®¾ç½® SC8815 å¼€å…³åˆ‡æ¢é¢‘ç‡
+ * @brief ÉèÖÃ SC8815 ¿ª¹ØÇĞ»»ÆµÂÊ
  * 
- * @param param å‘½ä»¤å‚æ•°
- * @param param_cnt å‘½ä»¤å‚æ•°ä¸ªæ•°
- * @return 1-å‘½ä»¤æ‰§è¡ŒæˆåŠŸï¼Œ0-å‘½ä»¤æ‰§è¡Œå¤±è´¥ 
+ * @param param ÃüÁî²ÎÊı
+ * @param param_cnt ÃüÁî²ÎÊı¸öÊı
+ * @return 1-ÃüÁîÖ´ĞĞ³É¹¦£¬0-ÃüÁîÖ´ĞĞÊ§°Ü 
  */
 int setSW_FREQ_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
 {
@@ -279,15 +292,16 @@ int setSW_FREQ_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
         default:break;
     }
     app_config_save();
+    cmd_response_ok(cmd_source);
     return 1;
 }
 
 /**
- * @brief è®¾ç½® SC8815 æ­»åŒºæ—¶é—´
+ * @brief ÉèÖÃ SC8815 ËÀÇøÊ±¼ä
  * 
- * @param param å‘½ä»¤å‚æ•°
- * @param param_cnt å‘½ä»¤å‚æ•°ä¸ªæ•°
- * @return 1-å‘½ä»¤æ‰§è¡ŒæˆåŠŸï¼Œ0-å‘½ä»¤æ‰§è¡Œå¤±è´¥ 
+ * @param param ÃüÁî²ÎÊı
+ * @param param_cnt ÃüÁî²ÎÊı¸öÊı
+ * @return 1-ÃüÁîÖ´ĞĞ³É¹¦£¬0-ÃüÁîÖ´ĞĞÊ§°Ü 
  */
 int setDeadTime_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
 {
@@ -300,15 +314,16 @@ int setDeadTime_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
     int value;
     sscanf(param[1], "%d", &value);
     SC8815_SetDeadTime(value);
+    cmd_response_ok(cmd_source);
     return 1;
 }
 
 /**
- * @brief è®¾ç½® SC8815 VBUSç”µå‹åé¦ˆæ¨¡å¼
+ * @brief ÉèÖÃ SC8815 VBUSµçÑ¹·´À¡Ä£Ê½
  * 
- * @param param å‘½ä»¤å‚æ•°
- * @param param_cnt å‘½ä»¤å‚æ•°ä¸ªæ•°
- * @return 1-å‘½ä»¤æ‰§è¡ŒæˆåŠŸï¼Œ0-å‘½ä»¤æ‰§è¡Œå¤±è´¥ 
+ * @param param ÃüÁî²ÎÊı
+ * @param param_cnt ÃüÁî²ÎÊı¸öÊı
+ * @return 1-ÃüÁîÖ´ĞĞ³É¹¦£¬0-ÃüÁîÖ´ĞĞÊ§°Ü 
  */
 int setFB_Mode_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
 {
@@ -319,15 +334,16 @@ int setFB_Mode_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
     int value;
     sscanf(param[1], "%d", &value);
     SC8815_SetVBUSFBMode(value);
+    cmd_response_ok(cmd_source);
     return 1;
 }
 
 /**
- * @brief æ‰“å¼€æˆ–å…³é—­ SC8815 é¢‘ç‡æŠ–åŠ¨åŠŸèƒ½
+ * @brief ´ò¿ª»ò¹Ø±Õ SC8815 ÆµÂÊ¶¶¶¯¹¦ÄÜ
  * 
- * @param param å‘½ä»¤å‚æ•°
- * @param param_cnt å‘½ä»¤å‚æ•°ä¸ªæ•°
- * @return 1-å‘½ä»¤æ‰§è¡ŒæˆåŠŸï¼Œ0-å‘½ä»¤æ‰§è¡Œå¤±è´¥ 
+ * @param param ÃüÁî²ÎÊı
+ * @param param_cnt ÃüÁî²ÎÊı¸öÊı
+ * @return 1-ÃüÁîÖ´ĞĞ³É¹¦£¬0-ÃüÁîÖ´ĞĞÊ§°Ü 
  */
 int setDITHER_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
 {
@@ -342,15 +358,16 @@ int setDITHER_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
     extern SC8815_HardwareInitTypeDef SC8815_HardwareInitStruct;
     SC8815_HardwareInitStruct.DITHER = value;
     SC8815_HardwareInit(&SC8815_HardwareInitStruct);
+    cmd_response_ok(cmd_source);
     return 1;
 }
 
 /**
- * @brief è®¾ç½® SC8815 åå‘æ”¾ç”µæ¨¡å¼ä¸‹VBUSåŠ¨æ€å˜åŒ–çš„é€Ÿç‡
+ * @brief ÉèÖÃ SC8815 ·´Ïò·ÅµçÄ£Ê½ÏÂVBUS¶¯Ì¬±ä»¯µÄËÙÂÊ
  * 
- * @param param å‘½ä»¤å‚æ•°
- * @param param_cnt å‘½ä»¤å‚æ•°ä¸ªæ•°
- * @return 1-å‘½ä»¤æ‰§è¡ŒæˆåŠŸï¼Œ0-å‘½ä»¤æ‰§è¡Œå¤±è´¥ 
+ * @param param ÃüÁî²ÎÊı
+ * @param param_cnt ÃüÁî²ÎÊı¸öÊı
+ * @return 1-ÃüÁîÖ´ĞĞ³É¹¦£¬0-ÃüÁîÖ´ĞĞÊ§°Ü 
  */
 int setSLEW_SET_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
 {
@@ -365,15 +382,16 @@ int setSLEW_SET_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
     extern SC8815_HardwareInitTypeDef SC8815_HardwareInitStruct;
     SC8815_HardwareInitStruct.SLEW_SET = value;
     SC8815_HardwareInit(&SC8815_HardwareInitStruct);
+    cmd_response_ok(cmd_source);
     return 1;
 }
 
 /**
- * @brief è®¾ç½® SC8815 ç”µæµç¯è·¯å“åº”å¸¦å®½
+ * @brief ÉèÖÃ SC8815 µçÁ÷»·Â·ÏìÓ¦´ø¿í
  * 
- * @param param å‘½ä»¤å‚æ•°
- * @param param_cnt å‘½ä»¤å‚æ•°ä¸ªæ•°
- * @return 1-å‘½ä»¤æ‰§è¡ŒæˆåŠŸï¼Œ0-å‘½ä»¤æ‰§è¡Œå¤±è´¥ 
+ * @param param ÃüÁî²ÎÊı
+ * @param param_cnt ÃüÁî²ÎÊı¸öÊı
+ * @return 1-ÃüÁîÖ´ĞĞ³É¹¦£¬0-ÃüÁîÖ´ĞĞÊ§°Ü 
  */
 int setILIM_BW_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
 {
@@ -386,15 +404,16 @@ int setILIM_BW_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
     int value;
     sscanf(param[1], "%d", &value);
     SC8815_SetILIMBW(value);
+    cmd_response_ok(cmd_source);
     return 1;
 }
 
 /**
- * @brief è®¢é˜…ä¸ŠæŠ¥æ•°æ®
+ * @brief ¶©ÔÄÉÏ±¨Êı¾İ
  * 
- * @param param å‘½ä»¤å‚æ•°
- * @param param_cnt å‘½ä»¤å‚æ•°ä¸ªæ•°
- * @return 1-å‘½ä»¤æ‰§è¡ŒæˆåŠŸï¼Œ0-å‘½ä»¤æ‰§è¡Œå¤±è´¥ 
+ * @param param ÃüÁî²ÎÊı
+ * @param param_cnt ÃüÁî²ÎÊı¸öÊı
+ * @return 1-ÃüÁîÖ´ĞĞ³É¹¦£¬0-ÃüÁîÖ´ĞĞÊ§°Ü 
  */
 int get_msg_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
 {
@@ -406,6 +425,7 @@ int get_msg_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
     int value;
     sscanf(param[1], "%d", &value);
     APP_config.msg_get_time = value;
+    cmd_response_ok(cmd_source);
     return 1;
 }
 
@@ -418,6 +438,7 @@ int lock_key_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
     int value;
     sscanf(param[1], "%d", &value);
     APP_config.lock_key = value;
+    cmd_response_ok(cmd_source);
     return 1;
 }
 
@@ -431,8 +452,8 @@ int set_key_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
     if (value == 112233) {
         uint32_t CpuID = GetCPU_ID();
         STMFLASH_Write(APP_SET_KEY_ADDR, (uint16_t*)&CpuID, sizeof(uint32_t) >> 1);
-        __set_FAULTMASK(1); //å…³é—­æ‰€æœ‰ä¸­æ–­
-        NVIC_SystemReset(); //è¿›è¡Œè½¯ä»¶å¤ä½
+        __set_FAULTMASK(1); //¹Ø±ÕËùÓĞÖĞ¶Ï
+        NVIC_SystemReset(); //½øĞĞÈí¼ş¸´Î»
     }
     return 1;
 }
@@ -454,15 +475,16 @@ int set_switch_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
         SC8815_Config.SC8815_Status = SC8815_Standby;
         Application_SC8815_Standby();
     }
+    cmd_response_ok(cmd_source);
     return 1;
 }
 
 /**
- * @brief è®¾ç½® SC8815 VBUS è·¯å¾„ä¸Šçš„é™æµå€¼,åŒå‘é€šç”¨
+ * @brief ÉèÖÃ SC8815 VBUS Â·¾¶ÉÏµÄÏŞÁ÷Öµ,Ë«ÏòÍ¨ÓÃ
  * 
- * @param param å‘½ä»¤å‚æ•°
- * @param param_cnt å‘½ä»¤å‚æ•°ä¸ªæ•°
- * @return 1-å‘½ä»¤æ‰§è¡ŒæˆåŠŸï¼Œ0-å‘½ä»¤æ‰§è¡Œå¤±è´¥ 
+ * @param param ÃüÁî²ÎÊı
+ * @param param_cnt ÃüÁî²ÎÊı¸öÊı
+ * @return 1-ÃüÁîÖ´ĞĞ³É¹¦£¬0-ÃüÁîÖ´ĞĞÊ§°Ü 
  */
 int set_current_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
 {
@@ -496,6 +518,7 @@ int set_current_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
         SC8815_Config.SC8815_IBUS_Limit = value;
         App_SC8815_SetBusCurrentLimit(value);
     }
+    cmd_response_ok(cmd_source);
     return 1;
 }
 
@@ -511,15 +534,16 @@ int set_current_step_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
         return 0;
     value = value * 1000;
     SC8815_Config.SC8815_IBUS_CMD_Step = value;
+    cmd_response_ok(cmd_source);
     return 1;
 }
 
 /**
- * @brief è®¾ç½® SC8815 åœ¨ OTG åå‘è¾“å‡ºæ—¶çš„è¾“å‡ºç”µå‹
+ * @brief ÉèÖÃ SC8815 ÔÚ OTG ·´ÏòÊä³öÊ±µÄÊä³öµçÑ¹
  * 
- * @param param å‘½ä»¤å‚æ•°
- * @param param_cnt å‘½ä»¤å‚æ•°ä¸ªæ•°
- * @return 1-å‘½ä»¤æ‰§è¡ŒæˆåŠŸï¼Œ0-å‘½ä»¤æ‰§è¡Œå¤±è´¥ 
+ * @param param ÃüÁî²ÎÊı
+ * @param param_cnt ÃüÁî²ÎÊı¸öÊı
+ * @return 1-ÃüÁîÖ´ĞĞ³É¹¦£¬0-ÃüÁîÖ´ĞĞÊ§°Ü 
  */
 int set_voltage_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
 {
@@ -553,6 +577,7 @@ int set_voltage_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
         SC8815_Config.SC8815_VBUS = value;
         App_SC8815_SetOutputVoltage(value);
     }
+    cmd_response_ok(cmd_source);
     return 1;
 }
 
@@ -566,6 +591,7 @@ int set_voltage_step_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
     sscanf(param[1], "%f", &value);
     value = value * 1000; 
     SC8815_Config.SC8815_VBUS_CMD_Step = value;
+    cmd_response_ok(cmd_source);
     return 1;
 }
 
@@ -581,7 +607,7 @@ int get_fetch_current_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
     }
     else
     {
-        // printf("%.4f\r\n", App_getIBUS_A()); //sprintfç­‰æ‰“å°æµ®ç‚¹æ•°ä¼šå‡ºé”™
+        // printf("%.4f\r\n", App_getIBUS_A()); //sprintfµÈ´òÓ¡¸¡µãÊı»á³ö´í
         printf(str);
     }
     return 1;
@@ -638,11 +664,11 @@ int get_versions_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
 {
     if (cmd_source)
     {
-        CDC_Transmit_FS("1.1.3\r\n", strlen("1.1.3\r\n"));
+        CDC_Transmit_FS("1.1.4\r\n", strlen("1.1.4\r\n"));
     }
     else
     {
-        printf("1.1.3\r\n");
+        printf("1.1.4\r\n");
     }
     return 1;
 }
@@ -675,6 +701,7 @@ int set_power_limit_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
         return 0;
     }
     set_sc8815_power(value);
+    cmd_response_ok(cmd_source);
     return 1;
 }
 
@@ -730,6 +757,7 @@ int set_preset_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
         SC8815_TIM_Work[value].SC8815_IBUS_Limit[value1] = value3;
         SC8815_TIM_Work[value].SC8815_TIM_Work_second[value1] = value4;
     }
+    cmd_response_ok(cmd_source);
     return 1;
 }
 
@@ -744,6 +772,7 @@ int save_config_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
         SC8815_Preset_Save();
         return 1;
     }
+    cmd_response_ok(cmd_source);
     return 0;
 }
 
@@ -765,8 +794,8 @@ int upgrade_app_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
             printf("ok");
         }
         Application_SoftwareDelay(10);
-        __set_FAULTMASK(1); //å…³é—­æ‰€æœ‰ä¸­æ–­
-        NVIC_SystemReset(); //è¿›è¡Œè½¯ä»¶å¤ä½
+        __set_FAULTMASK(1); //¹Ø±ÕËùÓĞÖĞ¶Ï
+        NVIC_SystemReset(); //½øĞĞÈí¼ş¸´Î»
         return 1;
     }
     return 0;
@@ -793,6 +822,7 @@ int start_preset_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
     memcpy(&presset_config_set.set_vbus, &SC8815_TIM_Work[value].SC8815_VBUS, sizeof(float) * SC8815_TIM_WORK_STEP);
     APP_config.lock_key = 1;
     SC8815_Config.sc8815_tim_work_lcd_flush = tim_work_lcd_cmd;
+    cmd_response_ok(cmd_source);
     return 1;
 }
 
@@ -808,6 +838,7 @@ int set_name_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
     memcpy(APP_config.device_name, param[1], sizeof(APP_config.device_name));
     memcpy(app_config_save_config.device_name, APP_config.device_name, sizeof(APP_config.device_name));
     app_config_save();
+    cmd_response_ok(cmd_source);
     return 1;
 }
 
@@ -836,6 +867,7 @@ int calibration_ibus_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
     int value;
     sscanf(param[1], "%d", &value);
     SC8815_Config.sc8815_calibration_flag = value;
+    cmd_response_ok(cmd_source);
     return 1;
 }
 
@@ -857,8 +889,21 @@ int get_temperature_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
 
 int reset_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
 {
-    __set_FAULTMASK(1); //å…³é—­æ‰€æœ‰ä¸­æ–­
-    NVIC_SystemReset(); //è¿›è¡Œè½¯ä»¶å¤ä½
+    __set_FAULTMASK(1); //¹Ø±ÕËùÓĞÖĞ¶Ï
+    NVIC_SystemReset(); //½øĞĞÈí¼ş¸´Î»
+    return 1;
+}
+
+int close_dc_iset_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
+{
+    if (param_cnt == 1) {
+        return 0;
+    }
+    int value;
+    sscanf(param[1], "%d", &value);
+    app_config_save_config.is_set_SC8815_IBUS_Limit = value;
+    app_config_save();
+    cmd_response_ok(cmd_source);
     return 1;
 }
 
@@ -872,14 +917,14 @@ void remove_crlf(char *str) {
 }
 
 /**
- * @brief è§£æå‘½ä»¤å­—ç¬¦ä¸²
+ * @brief ½âÎöÃüÁî×Ö·û´®
  * 
- * @param input å‘½ä»¤å­—ç¬¦ä¸²
- * @param delimiter åˆ†éš”ç¬¦
- * @param tokens è§£æåçš„å‚æ•°æ•°ç»„
- * @param max_tokens æœ€å¤§å‚æ•°ä¸ªæ•°
- * @param param è§£æåçš„å‚æ•°æ•°ç»„
- * @return è§£æå‚æ•°çš„ä¸ªæ•° 
+ * @param input ÃüÁî×Ö·û´®
+ * @param delimiter ·Ö¸ô·û
+ * @param tokens ½âÎöºóµÄ²ÎÊıÊı×é
+ * @param max_tokens ×î´ó²ÎÊı¸öÊı
+ * @param param ½âÎöºóµÄ²ÎÊıÊı×é
+ * @return ½âÎö²ÎÊıµÄ¸öÊı 
  */
 int splitString(char* input, char delimiter, char** tokens, int max_tokens, CmdStr param) {
     int token_count = 0;
@@ -897,11 +942,11 @@ int splitString(char* input, char delimiter, char** tokens, int max_tokens, CmdS
 }
 
 /**
- * @brief ASCIIå‘½ä»¤å¤„ç†å‡½æ•°
+ * @brief ASCIIÃüÁî´¦Àíº¯Êı
  * 
- * @param cmd å‘½ä»¤å­—ç¬¦ä¸²
- * @param cmd_source å‘½ä»¤æºå¤´ï¼Œ0-UARTï¼Œ1-USB
- * @return 1-æˆåŠŸ 0-å¤±è´¥
+ * @param cmd ÃüÁî×Ö·û´®
+ * @param cmd_source ÃüÁîÔ´Í·£¬0-UART£¬1-USB
+ * @return 1-³É¹¦ 0-Ê§°Ü
  */
 int ascii_process(char *cmd, uint8_t cmd_source)
 {

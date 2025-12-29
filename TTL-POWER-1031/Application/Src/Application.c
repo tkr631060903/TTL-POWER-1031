@@ -1,7 +1,7 @@
 /**
  * @file Application.c
  * @author TanKairong (tkr631060903@gmail.com)
- * @brief åº”ç”¨å…¥å£
+ * @brief Ó¦ÓÃÈë¿Ú
  * @version 0.1
  * @date 2023-12-27
  *
@@ -22,15 +22,15 @@
 #define APP_CONFIG_FLASH_ADDR     (STM32_FLASH_BASE+STM_SECTOR_SIZE*123)
 #define APP_UPGRADE_FLAG_ADDR 0x801FFFE
 
-Application_Config APP_config;
-Application_SaveConfig app_config_save_config;
+Application_Config APP_config = {0};
+Application_SaveConfig app_config_save_config = {0};
 
 uint32_t APP_LCD_main_show_time = 0;
 static uint32_t temperature_protect_time = 0;
 extern menu_i32 current_menu_index;
 
 /**
- *@brief ç³»ç»Ÿè¿è¡Œ
+ *@brief ÏµÍ³ÔËĞĞ
  *
  */
 void Application_main()
@@ -53,7 +53,7 @@ void Application_main()
         {
             APP_LCD_main_show();
             APP_LCD_main_show_time = HAL_GetTick();
-            APP_config.fastCharge_InVoltage = App_getVBAT_V();  //åˆ·æ–°DCè¾“å‡ºç”µå‹å€¼
+            APP_config.fastCharge_InVoltage = App_getVBAT_V();  //Ë¢ĞÂDCÊä³öµçÑ¹Öµ
         }
 
         if (SC8815_Config.sc8815_tim_work_lcd_flush == tim_work_lcd_main)
@@ -117,13 +117,13 @@ void Application_main()
         }
 
         // printf("temperature:%f\n", App_getTemp_V());
-        // CDC_Transmit_FS((uint8_t*)&starttick, sizeof(uint32_t)); //CDC_Receive_FSä¸­æ–­æ¥æ”¶
+        // CDC_Transmit_FS((uint8_t*)&starttick, sizeof(uint32_t)); //CDC_Receive_FSÖĞ¶Ï½ÓÊÕ
         // printf("tick: %d\n", HAL_GetTick() - starttick);
     }
 }
 
 /**
- *@brief é”™è¯¯å¤„ç†
+ *@brief ´íÎó´¦Àí
  *
  */
 void Application_Error_Handler()
@@ -133,7 +133,7 @@ void Application_Error_Handler()
 }
 
 /**
- *@brief å‡½æ•°å‚æ•°é”™è¯¯å¤„ç†
+ *@brief º¯Êı²ÎÊı´íÎó´¦Àí
  *
  */
 void Application_Assert_Failed()
@@ -143,7 +143,7 @@ void Application_Assert_Failed()
 }
 
 /**
- *@brief è½¯ä»¶å»¶æ—¶72MHzæ—¶é’Ÿé…ç½® = 1ms
+ *@brief Èí¼şÑÓÊ±72MHzÊ±ÖÓÅäÖÃ = 1ms
  *
  * @param time
  */
@@ -152,13 +152,13 @@ void Application_SoftwareDelay(uint16_t time)
     uint16_t i = 0;
     while (time--)
     {
-        i = 9060;  //è‡ªå·±å®šä¹‰
+        i = 9060;  //×Ô¼º¶¨Òå
         while (i--);
     }
 }
 
 /**
- *@brief è¯†åˆ«æŒ‰é”®4å•å‡»å¹¶æ‰§è¡Œç›¸åº”æ“ä½œ
+ *@brief Ê¶±ğ°´¼ü4µ¥»÷²¢Ö´ĞĞÏàÓ¦²Ù×÷
  *
  */
 void key4_button_process(void)
@@ -172,9 +172,9 @@ void key4_button_process(void)
     BUZZER_OPEN(100);
 }
 
-uint8_t key1_press = 0; //ket1æ˜¯å¦æŒ‰ä¸‹æ ‡å¿—ä½
+uint8_t key1_press = 0; //ket1ÊÇ·ñ°´ÏÂ±êÖ¾Î»
 /**
- *@brief è¯†åˆ«æŒ‰é”®3å•å‡»å¹¶æ‰§è¡Œç›¸åº”æ“ä½œ
+ *@brief Ê¶±ğ°´¼ü3µ¥»÷²¢Ö´ĞĞÏàÓ¦²Ù×÷
  *
  */
 void key1_button_process(void)
@@ -191,25 +191,25 @@ void key1_button_process(void)
     }
 }
 
-uint32_t key2PressStartTime = 0;    //key2æŒ‰ä¸‹æ—¶é—´
-uint8_t key2_press = 0; //ket2æ˜¯å¦æŒ‰ä¸‹æ ‡å¿—ä½
+uint32_t key2PressStartTime = 0;    //key2°´ÏÂÊ±¼ä
+uint8_t key2_press = 0; //ket2ÊÇ·ñ°´ÏÂ±êÖ¾Î»
 /**
- *@brief è¯†åˆ«æŒ‰é”®2å•å‡»å’Œé•¿æŒ‰å¹¶æ‰§è¡Œç›¸åº”æ“ä½œ
+ *@brief Ê¶±ğ°´¼ü2µ¥»÷ºÍ³¤°´²¢Ö´ĞĞÏàÓ¦²Ù×÷
  *
  */
 void key2_button_process(void)
 {
     if (APP_config.lock_key == 1) {
         key2_press = 0;
-        key2PressStartTime = 0; // é‡ç½®è®¡æ—¶å™¨
+        key2PressStartTime = 0; // ÖØÖÃ¼ÆÊ±Æ÷
         return;
     }
     if (key2_press)
     {
         if (HAL_GPIO_ReadPin(KEY2_GPIO_Port, KEY2_Pin) == SET)
         {
-            //key2æ£€æµ‹åˆ°å•å‡»
-            key2PressStartTime = 0; // é‡ç½®è®¡æ—¶å™¨
+            //key2¼ì²âµ½µ¥»÷
+            key2PressStartTime = 0; // ÖØÖÃ¼ÆÊ±Æ÷
             key2_press = 0;
             BUZZER_OPEN(100);
             Menu_Select_Item(KEY2_SHORT);
@@ -217,8 +217,8 @@ void key2_button_process(void)
         }
         else if (HAL_GetTick() - key2PressStartTime >= KEY_LONG_PRESS_THRESHOLD)
         {
-            //key2æ£€æµ‹åˆ°é•¿æŒ‰
-            key2PressStartTime = 0; // é‡ç½®è®¡æ—¶å™¨
+            //key2¼ì²âµ½³¤°´
+            key2PressStartTime = 0; // ÖØÖÃ¼ÆÊ±Æ÷
             APP_config.lock_key = 0;
             key2_press = 0;
             BUZZER_OPEN(100);
@@ -228,25 +228,25 @@ void key2_button_process(void)
     }
 }
 
-uint32_t key3PressStartTime = 0;    //key3æŒ‰ä¸‹æ—¶é—´
-uint8_t key3_press = 0; //key3æ˜¯å¦æŒ‰ä¸‹æ ‡å¿—ä½
+uint32_t key3PressStartTime = 0;    //key3°´ÏÂÊ±¼ä
+uint8_t key3_press = 0; //key3ÊÇ·ñ°´ÏÂ±êÖ¾Î»
 /**
- *@brief è¯†åˆ«æŒ‰é”®3å•å‡»å¹¶æ‰§è¡Œç›¸åº”æ“ä½œ
+ *@brief Ê¶±ğ°´¼ü3µ¥»÷²¢Ö´ĞĞÏàÓ¦²Ù×÷
  *
  */
 void key3_button_process(void)
 {
     if (APP_config.lock_key == 1 && current_menu_index != PRESSET_RUNNING_PAGE) {
         key3_press = 0;
-        key3PressStartTime = 0; // é‡ç½®è®¡æ—¶å™¨
+        key3PressStartTime = 0; // ÖØÖÃ¼ÆÊ±Æ÷
         return;
     }
     if (key3_press)
     {
         if (HAL_GPIO_ReadPin(KEY3_GPIO_Port, KEY3_Pin) == SET && APP_config.lock_key == 0)
         {
-            //key3æ£€æµ‹åˆ°å•å‡»
-            key3PressStartTime = 0; // é‡ç½®è®¡æ—¶å™¨
+            //key3¼ì²âµ½µ¥»÷
+            key3PressStartTime = 0; // ÖØÖÃ¼ÆÊ±Æ÷
             key3_press = 0;
             BUZZER_OPEN(100);
             Menu_Select_Item(KEY3_SHORT);
@@ -254,8 +254,8 @@ void key3_button_process(void)
         }
         else if (HAL_GetTick() - key3PressStartTime >= KEY_LONG_PRESS_THRESHOLD && HAL_GPIO_ReadPin(KEY3_GPIO_Port, KEY3_Pin) == RESET)
         {
-            //key3æ£€æµ‹åˆ°é•¿æŒ‰
-            key3PressStartTime = 0; // é‡ç½®è®¡æ—¶å™¨
+            //key3¼ì²âµ½³¤°´
+            key3PressStartTime = 0; // ÖØÖÃ¼ÆÊ±Æ÷
             APP_config.lock_key = 0;
             key3_press = 0;
             BUZZER_OPEN(100);
@@ -266,7 +266,7 @@ void key3_button_process(void)
 }
 
 /**
- *@brief è®¾ç½®LED1çŠ¶æ€
+ *@brief ÉèÖÃLED1×´Ì¬
  *
  */
 void SET_LED1_Status(void)
@@ -291,9 +291,9 @@ void rotary_knob_process(void)
     if (rotary_knob_value == LEFT)
     {
         if (USE_HORIZONTAL == 2) {
-            Menu_Select_Item(LEFT);     //å‘å³æ—‹è½¬å› ä¸ºæ—‹é’®å› ä¸ºæ—‹é’®ä½ç½®æ”¹åŠ¨é€»è¾‘ç›¸åäº†
+            Menu_Select_Item(LEFT);     //ÏòÓÒĞı×ªÒòÎªĞıÅ¥ÒòÎªĞıÅ¥Î»ÖÃ¸Ä¶¯Âß¼­Ïà·´ÁË
         } else {
-            Menu_Select_Item(RIGHT);    //å‘å·¦æ—‹è½¬å› ä¸ºæ—‹é’®å› ä¸ºæ—‹é’®ä½ç½®æ”¹åŠ¨é€»è¾‘ç›¸åäº†
+            Menu_Select_Item(RIGHT);    //Ïò×óĞı×ªÒòÎªĞıÅ¥ÒòÎªĞıÅ¥Î»ÖÃ¸Ä¶¯Âß¼­Ïà·´ÁË
         }
         BUZZER_OPEN(100);
         rotary_knob_value = 0;
@@ -301,9 +301,9 @@ void rotary_knob_process(void)
     else if (rotary_knob_value == RIGHT)
     {
         if (USE_HORIZONTAL == 2) {
-            Menu_Select_Item(RIGHT);    //å‘å·¦æ—‹è½¬å› ä¸ºæ—‹é’®å› ä¸ºæ—‹é’®ä½ç½®æ”¹åŠ¨é€»è¾‘ç›¸åäº†
+            Menu_Select_Item(RIGHT);    //Ïò×óĞı×ªÒòÎªĞıÅ¥ÒòÎªĞıÅ¥Î»ÖÃ¸Ä¶¯Âß¼­Ïà·´ÁË
         } else {
-            Menu_Select_Item(LEFT);     //å‘å³æ—‹è½¬å› ä¸ºæ—‹é’®å› ä¸ºæ—‹é’®ä½ç½®æ”¹åŠ¨é€»è¾‘ç›¸åäº†
+            Menu_Select_Item(LEFT);     //ÏòÓÒĞı×ªÒòÎªĞıÅ¥ÒòÎªĞıÅ¥Î»ÖÃ¸Ä¶¯Âß¼­Ïà·´ÁË
         }
         BUZZER_OPEN(100);
         rotary_knob_value = 0;
@@ -337,11 +337,12 @@ void app_config_load(void)
     {
         STMFLASH_ReadBytes(APP_CONFIG_FLASH_ADDR + i, (uint8_t*)&app_config_save_config, sizeof(Application_SaveConfig));
         
-        if ((app_config_save_config.lock_buzzer != 0 && app_config_save_config.lock_buzzer != 1) || if_config_default)
+        if (app_config_save_config.tag != 0xC3A6 || if_config_default)
         {
             if (i == 0)
             {
                 uint32_t CpuID =  *(volatile uint32_t*)(0x1FFFF7E8);
+                app_config_save_config.tag = 0xC3A6;
                 app_config_save_config.SC8815_VBUS = 5000;
                 app_config_save_config.SC8815_IBUS_Limit = 1000;
 				app_config_save_config.DC_IBAT_Limit = 3000;
@@ -353,6 +354,7 @@ void app_config_load(void)
                 app_config_save_config.USE_HORIZONTAL = 3;
                 memcpy(app_config_save_config.device_name, "PDP-", 4);
                 snprintf(app_config_save_config.device_name + 4, 7, "%X", CpuID);
+                app_config_save_config.is_set_SC8815_IBUS_Limit = 0;
                 app_config_save();
                 break;
             }
@@ -360,8 +362,7 @@ void app_config_load(void)
             {
                 i -= sizeof(Application_SaveConfig);
                 STMFLASH_ReadBytes(APP_CONFIG_FLASH_ADDR + i, (uint8_t*)&app_config_save_config, sizeof(Application_SaveConfig));
-                // æ ¡éªŒæ˜¯å¦ä¸ºæ–°æ·»åŠ æ•°æ®
-                if (app_config_save_config.USE_HORIZONTAL != 2 && app_config_save_config.USE_HORIZONTAL != 3) {
+                if (app_config_save_config.tag != 0xC3A6) {
                     if_config_default = 1;
                     app_config_clear();
                     i = 0;
@@ -398,7 +399,7 @@ void app_config_save(void)
     {
         STMFLASH_ReadBytes(APP_CONFIG_FLASH_ADDR + i, (uint8_t*)&app_config_save_config_temp, sizeof(Application_SaveConfig));
         // if (app_config_save_config_temp.lock_buzzer == 0xFF)
-        if (app_config_save_config_temp.lock_buzzer != 0 && app_config_save_config_temp.lock_buzzer != 1)
+        if (app_config_save_config.tag != 0xC3A6)
         {
             STMFLASH_Write(APP_CONFIG_FLASH_ADDR + i, (uint16_t*)&app_config_save_config, sizeof(Application_SaveConfig) >> 1);
             break;
@@ -417,7 +418,7 @@ void app_config_save(void)
     }
 }
 
-//å‡çº§æ ‡å¿—ä½ï¼Œ0ä¸è¿›å…¥å‡çº§ 1è¿›å…¥å‡çº§ 2å‡çº§æˆåŠŸ 3å‡çº§å¤±è´¥
+//Éı¼¶±êÖ¾Î»£¬0²»½øÈëÉı¼¶ 1½øÈëÉı¼¶ 2Éı¼¶³É¹¦ 3Éı¼¶Ê§°Ü
 void set_app_upgrade_flag(uint16_t flag)
 {
     STMFLASH_Write(APP_UPGRADE_FLAG_ADDR, &flag, 1);
@@ -425,9 +426,9 @@ void set_app_upgrade_flag(uint16_t flag)
 
 uint32_t GetCPU_ID(void)
 {
-    uint32_t CpuID[3];							//å°ç«¯æ¨¡å¼
-    CpuID[0] = *(uint32_t*)(0x1ffff7e8); //é«˜32ä½åœ°å€
-    CpuID[1] = *(uint32_t*)(0x1ffff7ec); //ä¸­32ä½åœ°å€
-    CpuID[2] = *(uint32_t*)(0x1ffff7f0); //ä½32ä½åœ°å€
+    uint32_t CpuID[3];							//Ğ¡¶ËÄ£Ê½
+    CpuID[0] = *(uint32_t*)(0x1ffff7e8); //¸ß32Î»µØÖ·
+    CpuID[1] = *(uint32_t*)(0x1ffff7ec); //ÖĞ32Î»µØÖ·
+    CpuID[2] = *(uint32_t*)(0x1ffff7f0); //µÍ32Î»µØÖ·
     return CpuID[0] ^ CpuID[1] ^ CpuID[2];
 }

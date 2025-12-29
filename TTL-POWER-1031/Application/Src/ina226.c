@@ -1,5 +1,6 @@
 #include "ina226.h"
 #include "Application_SC8815.h"
+#include "fast_charge.h"
 
 static uint16_t INA226_Read2Byte(uint8_t reg_addr)
 {

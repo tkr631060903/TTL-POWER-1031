@@ -30,7 +30,7 @@
 
 SC8815_ConfigTypeDef SC8815_Config;
 SC8815_TIM_WorkTypeDef SC8815_TIM_Work[SC8815_TIM_WORK_SIZE] = { 0 };
-static uint8_t sc8815_power = 140; //SC8815输出功率值
+static uint8_t sc8815_power = 150; //SC8815输出功率值
 float SCHW_VBUS_RSHUNT = SCHW_VBUS_RSHUNT_DEFAULT;
 
 uint8_t get_sc8815_power(void)

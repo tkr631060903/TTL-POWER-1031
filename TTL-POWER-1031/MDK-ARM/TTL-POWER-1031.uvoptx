@@ -152,30 +152,46 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>915</LineNumber>
+          <LineNumber>379</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134282700</Address>
+          <Address>134260374</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
           <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\Application\Src\msg_cmd.c</Filename>
+          <Filename>..\Application\Src\lcd.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\TTL_POWER_1031\../Application/Src/msg_cmd.c\915</Expression>
+          <Expression>\\TTL_POWER_1031\../Application/Src/lcd.c\379</Expression>
+        </Bp>
+        <Bp>
+          <Number>1</Number>
+          <Type>0</Type>
+          <LineNumber>89</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>134283802</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>..\Application\Src\fast_charge.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\TTL_POWER_1031\../Application/Src/fast_charge.c\89</Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>
         <Ww>
           <count>0</count>
           <WinNumber>1</WinNumber>
-          <ItemText>ina226_voltage</ItemText>
+          <ItemText>app_config_save_config</ItemText>
         </Ww>
         <Ww>
           <count>1</count>
           <WinNumber>1</WinNumber>
-          <ItemText>voltage</ItemText>
+          <ItemText>fast_ic_type</ItemText>
         </Ww>
         <Ww>
           <count>2</count>

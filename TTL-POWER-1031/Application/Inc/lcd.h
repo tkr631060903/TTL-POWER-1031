@@ -38,8 +38,8 @@ void LCD_RowClear(uint8_t row, uint8_t font_size,uint16_t clear_color);
 #define GBLUE			       0X07FF
 // #define RED           	 0xF800
 #define RED           	 0x8802
-#define MAGENTA       	 0xF81F
-#define GREEN         	 0x07E0
+#define MAGENTA       	 0xE81D
+#define GREEN         	 0x07D3
 #define CYAN          	 0x7FFF
 #define YELLOW        	 0xFFE0
 #define WARNING_YELLOW        	 0xDD41
@@ -56,6 +56,7 @@ void LCD_RowClear(uint8_t row, uint8_t font_size,uint16_t clear_color);
 #define LGRAYBLUE        0XA651 //浅灰蓝色(中间层颜色)
 #define LBBLUE           0X2B12 //浅棕蓝色(选择条目的反色)
 #define ORANGE  0XFD20 //橙色
+#define PINK 0xF9B6
 #define MAIN_PAGE_COLOR 0x4208
 
 #endif

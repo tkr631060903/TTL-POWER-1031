@@ -551,11 +551,11 @@ void about_page_ui_process(void)
 #ifdef ENABLE_EN_FONT
     LCD_ShowString(0, 34, "Type", WHITE, RED, 32, 0);
     LCD_ShowString(0, 68, "Version", WHITE, RED, 32, 0);
-    LCD_ShowString(112, 68, ":1.1.3", WHITE, RED, 32, 0);
+    LCD_ShowString(112, 68, ":1.1.4", WHITE, RED, 32, 0);
 #else
     LCD_ShowChinese(0, 34, "ÐÍºÅ", WHITE, RED, 32, 0);
     LCD_ShowChinese(0, 68, "°æ±¾", WHITE, RED, 32, 0);
-    LCD_ShowString(64, 68, ":1.1.3", WHITE, RED, 32, 0);
+    LCD_ShowString(64, 68, ":1.1.4", WHITE, RED, 32, 0);
 #endif    
     LCD_ShowString(64, 34, ":PD POCKET", WHITE, RED, 32, 0);
 }

@@ -5,5 +5,6 @@
 
 void fast_charge_init(void);
 void HUSB238_Refresh_Voltage(void);
+uint8_t get_fast_ic_type(void);
 
 #endif

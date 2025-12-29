@@ -4,6 +4,7 @@
 #include <string.h>
 #include "menu.h"
 #include "math.h"
+#include "fast_charge.h"
 
 extern Application_Config APP_config;
 extern const unsigned char gImage_left1[512];
@@ -51,7 +52,11 @@ void APP_LCD_main_init(void)
     LCD_ShowString(25, 34, "Iset", WHITE, MAIN_PAGE_COLOR, 16, 0);
     LCD_ShowString(214, 16, "V", GREEN, MAIN_PAGE_COLOR, 32, 0);
     LCD_ShowString(214, 56, "A", MAGENTA, MAIN_PAGE_COLOR, 32, 0);
-    LCD_ShowString(214, 100, "W", ORANGE, MAIN_PAGE_COLOR, 32, 0);
+    if (get_fast_ic_type()) {
+        LCD_ShowString(214, 100, "W", ORANGE, MAIN_PAGE_COLOR, 32, 0);
+    } else {
+        LCD_ShowString(214, 100, "W", PINK, MAIN_PAGE_COLOR, 32, 0);
+    }
     LCD_show_vset();
     LCD_show_iset();
 
@@ -102,21 +107,27 @@ static void LCD_show_main_page_status(void)
     }
 
     memset(str, 0, sizeof(str));
+    uint16_t colour = 0;
+    if (get_fast_ic_type()) {
+        colour = ORANGE;
+    } else {
+        colour = PINK;
+    }
     float powr = vbus * ibus;
     if (powr >= 0 && powr < 9.990) {
         sprintf(str, "0%.2f", powr);
         if (strlen((char*)str) == 5 && (char*)str[5] == '\0') {
-            LCD_ShowString(92, 86, (const uint8_t*)str, ORANGE, MAIN_PAGE_COLOR, 48, 0);
+            LCD_ShowString(92, 86, (const uint8_t*)str, colour, MAIN_PAGE_COLOR, 48, 0);
         }
     } else if (powr >= 9.990 && powr < 99.90) {
         sprintf(str, "%.2f", powr);
         if (strlen((char*)str) == 5 && (char*)str[5] == '\0') {
-            LCD_ShowString(92, 86, (const uint8_t*)str, ORANGE, MAIN_PAGE_COLOR, 48, 0);
+            LCD_ShowString(92, 86, (const uint8_t*)str, colour, MAIN_PAGE_COLOR, 48, 0);
         }
     } else if (powr >= 99.90 && powr < get_sc8815_power()) {
         sprintf(str, "%.1f", powr);
         if (strlen((char*)str) == 5 && (char*)str[5] == '\0') {
-            LCD_ShowString(92, 86, (const uint8_t*)str, ORANGE, MAIN_PAGE_COLOR, 48, 0);
+            LCD_ShowString(92, 86, (const uint8_t*)str, colour, MAIN_PAGE_COLOR, 48, 0);
         }
     }
 
@@ -233,7 +244,11 @@ void APP_LCD_presset_running_init(void)
     LCD_ShowPicture(62, 84, 16, 16, gImage_smallright2);
     LCD_ShowString(214, 16, "V", GREEN, MAIN_PAGE_COLOR, 32, 0);
     LCD_ShowString(214, 56, "A", MAGENTA, MAIN_PAGE_COLOR, 32, 0);
-    LCD_ShowString(214, 100, "W", ORANGE, MAIN_PAGE_COLOR, 32, 0);
+    if (get_fast_ic_type()) {
+        LCD_ShowString(214, 100, "W", ORANGE, MAIN_PAGE_COLOR, 32, 0);
+    } else {
+        LCD_ShowString(214, 100, "W", PINK, MAIN_PAGE_COLOR, 32, 0);
+    }
     LCD_ShowString(15, 0, "Runing", WHITE, MAIN_PAGE_COLOR, 16, 0);
     LCD_ShowString(25, 34, "Loop", WHITE, MAIN_PAGE_COLOR, 16, 0);
     LCD_ShowString(28, 68, "Key", WHITE, MAIN_PAGE_COLOR, 16, 0);
