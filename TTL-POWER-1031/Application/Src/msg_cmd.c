@@ -664,11 +664,11 @@ int get_versions_handler(CmdStr param, short param_cnt, uint8_t cmd_source)
 {
     if (cmd_source)
     {
-        CDC_Transmit_FS("1.1.4\r\n", strlen("1.1.4\r\n"));
+        CDC_Transmit_FS("1.2.4\r\n", strlen("1.2.4\r\n"));
     }
     else
     {
-        printf("1.1.4\r\n");
+        printf("1.2.4\r\n");
     }
     return 1;
 }

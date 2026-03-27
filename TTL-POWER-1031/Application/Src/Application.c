@@ -72,7 +72,7 @@ void Application_main()
         }
         else if (SC8815_Config.sc8815_tim_work_lcd_flush == tim_work_lcd_cmd)
         {
-            presset_running_page_process(KEY4_SHORT);
+            presset_running_page_process(KEY3_SHORT);
             SC8815_Config.SC8815_Status = SC8815_TIM_WORK;
             SC8815_Config.sc8815_tim_work_lcd_flush = tim_work_lcd_running;
         }

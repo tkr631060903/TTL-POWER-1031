@@ -149,11 +149,11 @@ void main_menu_page_process(menu_u8 KeyValue)
         (sub_index.main_menu_current_index < MENU_PAGE_NUM - 1) ? (sub_index.main_menu_current_index++) : (sub_index.main_menu_current_index = MENU_PAGE_NUM - 1);
         main_menu_page_ui_process(sub_index.main_menu_current_index, KeyValue);
         break;
-    case KEY4_SHORT:
+    case KEY3_SHORT:
         // 在主菜单页面的时候，短按KEY4进入对应的子页面
         Enter_Page(sub_index.main_menu_current_index, KeyValue);
         break;
-    case KEY3_SHORT:
+    case KEY3_LONG:
         main_page_init();
         break;
     case KEY2_LONG:
@@ -187,8 +187,8 @@ void vout_page_process(menu_u8 KeyValue)
         set_vout(KeyValue);
         vout_page_ui_process(KeyValue);
         break;
+    case KEY3_LONG:
     case KEY3_SHORT:
-    case KEY4_SHORT:
     {
         //返回上一级
         set_vout(KeyValue);
@@ -196,7 +196,7 @@ void vout_page_process(menu_u8 KeyValue)
         LCD_show_vset();
         break;
     }
-    // case KEY4_SHORT:
+    // case KEY3_SHORT:
     //     set_vout(KeyValue);
     //     main_page_init();
     //     break;
@@ -228,8 +228,8 @@ void iout_page_process(menu_u8 KeyValue)
         set_iout(KeyValue);
         iout_page_ui_process(KeyValue);
         break;
+    case KEY3_LONG:
     case KEY3_SHORT:
-    case KEY4_SHORT:
     {
         //返回上一级
         set_iout(KeyValue);
@@ -237,7 +237,7 @@ void iout_page_process(menu_u8 KeyValue)
         LCD_show_iset();
         break;
     }
-    // case KEY4_SHORT:
+    // case KEY3_SHORT:
     //     set_iout(KeyValue);
     //     main_page_init();
     //     break;
@@ -267,11 +267,11 @@ void presset_page_process(menu_u8 KeyValue)
     case KEY2_LONG:
         main_page_init();
         break;
-    case KEY3_SHORT:
+    case KEY3_LONG:
         //返回上一级
         main_menu_Init();
         break;
-    case KEY4_SHORT:
+    case KEY3_SHORT:
         sub_index.presset_config_current_index = 0;
         LCD_Clear();
         LCD_Fill_DMA(0, 32, LCD_W, 34, GRAY2);
@@ -304,12 +304,12 @@ void presset_config_page_process(menu_u8 KeyValue)
     case KEY2_LONG:
         main_page_init();
         break;
-    case KEY3_SHORT:
+    case KEY3_LONG:
         //返回上一级
         current_menu_index = PRESSET_PAGE;
         presset_page_ui_process(sub_index.presset_current_index, KeyValue);
         break;
-    case KEY4_SHORT:
+    case KEY3_SHORT:
         memset(&presset_config_set, 0, sizeof(presset_config_set_typeDef));
         presset_config_set.set_flag = PRESSET_SET_VOUT;
         presset_config_set.set_setp = 1000;
@@ -361,7 +361,7 @@ void presset_config_set_page_process(menu_u8 KeyValue)
     case KEY2_LONG:
         main_page_init();
         break;
-    case KEY3_SHORT:
+    case KEY3_LONG:
         if (presset_config_set.set_flag == PRESSET_SET_CIRCULAR) {
             sub_index.presset_config_current_index = 0;
             LCD_Clear();
@@ -375,7 +375,7 @@ void presset_config_set_page_process(menu_u8 KeyValue)
         presset_config_set.set_setp = 1;
         presset_config_set_page_ui_process(KeyValue);
         break;
-    case KEY4_SHORT:
+    case KEY3_SHORT:
         if (presset_config_set.set_flag == PRESSET_SET_CIRCULAR)
         {
             set_presset_config(KeyValue);
@@ -436,11 +436,11 @@ void presset_start_page_process(menu_u8 KeyValue)
     case KEY2_LONG:
         main_page_init();
         break;
-    case KEY3_SHORT:
+    case KEY3_LONG:
         //返回上一级
         main_menu_page_ui_process(sub_index.main_menu_current_index, KeyValue);
         break;
-    case KEY4_SHORT:
+    case KEY3_SHORT:
         if (APP_config.fastCharge_InVoltage < 8.8) { //低于8.8V不允许启动预设
             protect_page_ui_process(PRESSET_PROTECT);
             break;
@@ -453,7 +453,7 @@ void presset_start_page_process(menu_u8 KeyValue)
         memcpy(&presset_config_set.set_ibus, &SC8815_TIM_Work[sub_index.presset_current_index].SC8815_IBUS_Limit, sizeof(float) * SC8815_TIM_WORK_STEP);
         memcpy(&presset_config_set.set_vbus, &SC8815_TIM_Work[sub_index.presset_current_index].SC8815_VBUS, sizeof(float) * SC8815_TIM_WORK_STEP);
         APP_config.lock_key = 1;
-        presset_running_page_process(KEY4_SHORT);
+        presset_running_page_process(KEY3_SHORT);
         SC8815_Config.SC8815_Status = SC8815_TIM_WORK;
         break;
     default:
@@ -474,7 +474,7 @@ void presset_running_page_process(menu_u8 KeyValue)
         current_menu_index = PRESSET_RUNNING_PAGE;
         APP_LCD_presset_running_show();
         break;
-    case KEY4_SHORT:
+    case KEY3_SHORT:
         current_menu_index = PRESSET_RUNNING_PAGE;
         LCD_Clear();
         APP_LCD_presset_running_init();
@@ -505,10 +505,10 @@ void buzzer_page_process(menu_u8 KeyValue)
         (sub_index.buzzer_current_index < 1) ? (sub_index.buzzer_current_index++) : (sub_index.buzzer_current_index = 1);
         buzzer_page_ui_process(sub_index.buzzer_current_index);
         break;
-    case KEY3_SHORT:
+    case KEY3_LONG:
         main_menu_page_ui_process(sub_index.main_menu_current_index, KeyValue);
         break;
-    case KEY4_SHORT:
+    case KEY3_SHORT:
         APP_config.lock_buzzer = sub_index.buzzer_current_index;
         app_config_save_config.lock_buzzer = APP_config.lock_buzzer;
         app_config_save();
@@ -561,12 +561,12 @@ void temperature_page_process(menu_u8 KeyValue)
         }
         temperature_page_ui_process(APP_config.temperature);
         break;
-    case KEY3_SHORT:
+    case KEY3_LONG:
         SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
         app_config_load();
         main_menu_page_ui_process(sub_index.main_menu_current_index, KeyValue);
         break;
-    case KEY4_SHORT:
+    case KEY3_SHORT:
         SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
         app_config_save_config.temperature = APP_config.temperature;
         app_config_save();
@@ -599,15 +599,15 @@ void VBUS_calibration_page_process(menu_u8 KeyValue)
         (sub_index.VBUS_calibration_current_index < 1) ? (sub_index.VBUS_calibration_current_index++) : (sub_index.VBUS_calibration_current_index = 1);
         VBUS_calibration_page_ui_process(sub_index.VBUS_calibration_current_index);
         break;
-    case KEY3_SHORT:
+    case KEY3_LONG:
         main_menu_page_ui_process(sub_index.main_menu_current_index, KeyValue);
         break;
-    case KEY4_SHORT:
+    case KEY3_SHORT:
         if (sub_index.VBUS_calibration_current_index == 0) {
             SC8815_output_calibration(1);
             main_page_init();
         } else {
-            main_menu_page_ui_process(sub_index.main_menu_current_index, KEY3_SHORT);
+            main_menu_page_ui_process(sub_index.main_menu_current_index, KEY3_LONG);
         }
         break;
     case KEY2_LONG:
@@ -627,7 +627,7 @@ void protect_page_process(menu_u8 KeyValue)
 {
     switch (KeyValue)
     {
-    case KEY3_SHORT:
+    case KEY3_LONG:
         main_page_init();
         break;
     case KEY2_LONG:
@@ -642,7 +642,7 @@ void about_page_process(menu_u8 KeyValue)
 {
     switch (KeyValue)
     {
-    case KEY3_SHORT:
+    case KEY3_LONG:
         main_menu_page_ui_process(sub_index.main_menu_current_index, KeyValue);
         break;
     case KEY2_LONG:
@@ -670,7 +670,7 @@ void DC_limit_page_process(menu_u8 KeyValue)
         set_dc_limit(KeyValue);
         DC_limit_page_ui_process(KeyValue);
         break;
-    case KEY4_SHORT:
+    case KEY3_SHORT:
     {
         set_dc_limit(KeyValue);
         current_menu_index = MAIN_PAGE;
@@ -728,12 +728,12 @@ void vbus_protect_page_process(menu_u8 KeyValue)
         }
         vbus_protect_page_ui_process(KeyValue);
         break;
-    case KEY3_SHORT:
+    case KEY3_LONG:
         SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
         app_config_load();
         main_menu_page_ui_process(sub_index.main_menu_current_index, KeyValue);
         break;
-    case KEY4_SHORT:
+    case KEY3_SHORT:
         SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
         if (SC8815_Config.SC8815_VBUS_protect < SC8815_Config.SC8815_VBUS) {
             SC8815_Config.SC8815_VBUS = SC8815_Config.SC8815_VBUS_protect;

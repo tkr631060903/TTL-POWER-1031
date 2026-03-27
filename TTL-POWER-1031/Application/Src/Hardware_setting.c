@@ -75,11 +75,11 @@ void set_vout(menu_u8 KeyValue)
             SC8815_Config.SC8815_VBUS_IBUS_Step = 10000;
         }
         break;
-    case KEY3_SHORT:
+    case KEY3_LONG:
         SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
         SC8815_Config.SC8815_VBUS = SC8815_Config.SC8815_VBUS_Old;
         break;
-    // case KEY4_SHORT:
+    // case KEY3_SHORT:
     //     SC8815_SetOutputVoltage(SC8815_Config.SC8815_VBUS);
     //     SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
     //     SC8815_Config.SC8815_VBUS_Old = SC8815_Config.SC8815_VBUS;
@@ -147,11 +147,11 @@ void set_iout(menu_u8 KeyValue)
     case KEY2_SHORT:
         SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
         break;
-    case KEY3_SHORT:
+    case KEY3_LONG:
         SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
         SC8815_Config.SC8815_IBUS_Limit = SC8815_Config.SC8815_IBUS_Limit_Old;
         break;
-    // case KEY4_SHORT:
+    // case KEY3_SHORT:
     //     App_SC8815_SetBusCurrentLimit(SC8815_Config.SC8815_IBUS_Limit);
     //     SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
     //     SC8815_Config.SC8815_IBUS_Limit_Old = SC8815_Config.SC8815_IBUS_Limit;
@@ -356,7 +356,7 @@ void set_presset_config(menu_u8 KeyValue)
                 presset_config_set.set_setp = 1000;
             break;
         }
-    case KEY4_SHORT:
+    case KEY3_SHORT:
         memcpy(&SC8815_TIM_Work[sub_index.presset_current_index].circular, &presset_config_set.set_circular, sizeof(uint16_t));
         memcpy(&SC8815_TIM_Work[sub_index.presset_current_index].SC8815_TIM_Work_second, &presset_config_set.set_time, sizeof(uint16_t) * SC8815_TIM_WORK_STEP);
         memcpy(&SC8815_TIM_Work[sub_index.presset_current_index].SC8815_IBUS_Limit, &presset_config_set.set_ibus, sizeof(float) * SC8815_TIM_WORK_STEP);
@@ -390,7 +390,7 @@ void set_dc_limit(menu_u8 KeyValue)
     case KEY2_SHORT:
         SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
         break;
-    case KEY4_SHORT:
+    case KEY3_SHORT:
         SC8815_Config.SC8815_VBUS_IBUS_Step = 1000;
         DC_IBAT_Limit_temp = app_config_save_config.DC_IBAT_Limit;
         SC8815_Config.SC8815_IBAT_Limit = app_config_save_config.DC_IBAT_Limit;

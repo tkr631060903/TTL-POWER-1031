@@ -136,10 +136,10 @@ void main_menu_page_ui_process(menu_u8 index, menu_u8 KeyValue)
         cursor_main_menu--;
     }
 
-    if (index_move_flag == 0 && KeyValue == KEY3_SHORT) {
+    if (index_move_flag == 0 && KeyValue == KEY3_LONG) {
         LCD_Clear();
     }
-    if (index_move_flag || KeyValue == KEY3_SHORT) {
+    if (index_move_flag || KeyValue == KEY3_LONG) {
         for (size_t i = 0; i < 4; i++) {
             if (i == cursor_main_menu) {
                 LCD_on_menu_line(i, (uint8_t*)menu_name[main_menu_index + i].icon, (uint8_t*)menu_name[main_menu_index + i].menu_name);
@@ -251,10 +251,10 @@ void presset_page_ui_process(menu_u8 index, menu_u8 KeyValue)
         cursor_secondary_menu--;
     }
     
-    if (index_move_flag == 0 && (KeyValue == KEY3_SHORT || KeyValue == KEY4_SHORT)) {
+    if (index_move_flag == 0 && (KeyValue == KEY3_LONG || KeyValue == KEY3_SHORT)) {
         LCD_Clear();
     }
-    if (index_move_flag || KeyValue == KEY3_SHORT || KeyValue == KEY4_SHORT) {
+    if (index_move_flag || KeyValue == KEY3_LONG || KeyValue == KEY3_SHORT) {
         for (size_t i = 0; i < 4; i++) {
 #ifdef ENABLE_EN_FONT
             sprintf(presset_str, "Preset:%d", secondary_menu_index + i);
@@ -307,10 +307,10 @@ void presset_start_page_ui_process(menu_u8 index, menu_u8 KeyValue)
         cursor_secondary_menu--;
     }
     
-    if (index_move_flag == 0 && (KeyValue == KEY3_SHORT || KeyValue == KEY4_SHORT)) {
+    if (index_move_flag == 0 && (KeyValue == KEY3_LONG || KeyValue == KEY3_SHORT)) {
         LCD_Clear();
     }
-    if (index_move_flag || KeyValue == KEY3_SHORT || KeyValue == KEY4_SHORT) {
+    if (index_move_flag || KeyValue == KEY3_LONG || KeyValue == KEY3_SHORT) {
         for (size_t i = 0; i < 4; i++) {
 #ifdef ENABLE_EN_FONT
             sprintf(presset_str, "Preset:%d", secondary_menu_index + i);
@@ -377,10 +377,10 @@ void presset_config_set_page_ui_process(menu_u8 KeyValue)
     case RIGHT:
     case KEY1_SHORT:
     case KEY2_SHORT:
-    case KEY3_SHORT:
+    case KEY3_LONG:
         presset_config_set_page_show();
         break;
-    case KEY4_SHORT:
+    case KEY3_SHORT:
         switch (presset_config_set.set_flag)
         {
         case PRESSET_SET_VOUT:
@@ -551,11 +551,11 @@ void about_page_ui_process(void)
 #ifdef ENABLE_EN_FONT
     LCD_ShowString(0, 34, "Type", WHITE, RED, 32, 0);
     LCD_ShowString(0, 68, "Version", WHITE, RED, 32, 0);
-    LCD_ShowString(112, 68, ":1.1.4", WHITE, RED, 32, 0);
+    LCD_ShowString(112, 68, ":1.2.4", WHITE, RED, 32, 0);
 #else
     LCD_ShowChinese(0, 34, "ÐÍºÅ", WHITE, RED, 32, 0);
     LCD_ShowChinese(0, 68, "°æ±¾", WHITE, RED, 32, 0);
-    LCD_ShowString(64, 68, ":1.1.4", WHITE, RED, 32, 0);
+    LCD_ShowString(64, 68, ":1.2.4", WHITE, RED, 32, 0);
 #endif    
     LCD_ShowString(64, 34, ":PD POCKET", WHITE, RED, 32, 0);
 }
