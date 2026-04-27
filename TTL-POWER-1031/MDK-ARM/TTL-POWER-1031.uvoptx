@@ -152,34 +152,50 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>379</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134260374</Address>
+          <LineNumber>32</LineNumber>
+          <EnabledFlag>0</EnabledFlag>
+          <Address>134257352</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
           <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\Application\Src\lcd.c</Filename>
+          <Filename>..\Application\Src\Application_Callback.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\TTL_POWER_1031\../Application/Src/lcd.c\379</Expression>
+          <Expression>\\TTL_POWER_1031\../Application/Src/Application_Callback.c\32</Expression>
         </Bp>
         <Bp>
           <Number>1</Number>
           <Type>0</Type>
-          <LineNumber>89</LineNumber>
+          <LineNumber>280</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134283802</Address>
+          <Address>0</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>0</BreakIfRCount>
+          <Filename>../Core/Src/stm32f1xx_it.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression></Expression>
+        </Bp>
+        <Bp>
+          <Number>2</Number>
+          <Type>0</Type>
+          <LineNumber>648</LineNumber>
+          <EnabledFlag>0</EnabledFlag>
+          <Address>134284772</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
           <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\Application\Src\fast_charge.c</Filename>
+          <Filename>..\Application\Src\msg_cmd.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\TTL_POWER_1031\../Application/Src/fast_charge.c\89</Expression>
+          <Expression>\\TTL_POWER_1031\../Application/Src/msg_cmd.c\648</Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>
@@ -191,7 +207,7 @@
         <Ww>
           <count>1</count>
           <WinNumber>1</WinNumber>
-          <ItemText>fast_ic_type</ItemText>
+          <ItemText>uart1_Cmd</ItemText>
         </Ww>
         <Ww>
           <count>2</count>
@@ -291,7 +307,7 @@
 
   <Group>
     <GroupName>Application/User/Core</GroupName>
-    <tvExp>0</tvExp>
+    <tvExp>1</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>

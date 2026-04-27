@@ -343,9 +343,9 @@ void app_config_load(void)
             {
                 uint32_t CpuID =  *(volatile uint32_t*)(0x1FFFF7E8);
                 app_config_save_config.tag = 0xC3A6;
-                app_config_save_config.SC8815_VBUS = 5000;
-                app_config_save_config.SC8815_IBUS_Limit = 1000;
-				app_config_save_config.DC_IBAT_Limit = 3000;
+                app_config_save_config.SC8815_VBUS = 12000;
+                app_config_save_config.SC8815_IBUS_Limit = 5000;
+				app_config_save_config.DC_IBAT_Limit = 5500;
                 app_config_save_config.temperature = 65;
                 app_config_save_config.lock_buzzer = 0;
                 app_config_save_config.SW_FREQ = SCHWI_FREQ_150KHz;
@@ -354,7 +354,7 @@ void app_config_load(void)
                 app_config_save_config.USE_HORIZONTAL = 3;
                 memcpy(app_config_save_config.device_name, "PDP-", 4);
                 snprintf(app_config_save_config.device_name + 4, 7, "%X", CpuID);
-                app_config_save_config.is_set_SC8815_IBUS_Limit = 0;
+                app_config_save_config.is_set_SC8815_IBUS_Limit = 1;
                 app_config_save();
                 break;
             }
